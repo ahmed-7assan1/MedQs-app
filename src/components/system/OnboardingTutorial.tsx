@@ -58,7 +58,7 @@ export function OnboardingTutorial() {
   if (!mounted || !open) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 p-6 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-max flex items-center justify-center bg-background/80 p-6 backdrop-blur-md animate-fade-in">
       <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/[0.02] bg-card shadow-2xl animate-slide-up">
         
         {/* Top Progress bar */}

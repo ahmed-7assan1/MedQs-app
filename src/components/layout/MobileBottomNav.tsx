@@ -169,7 +169,7 @@ export function MobileBottomNav() {
       {/* Tab bar — slides on scroll */}
       <div
         className={cn(
-          "md:hidden fixed bottom-0 left-0 right-0 z-[10002]",
+          "md:hidden fixed bottom-0 left-0 right-0 z-max",
           isComposerOpen
             ? "bg-background/80 backdrop-blur-xl pb-[env(safe-area-inset-bottom,0px)]"
             :           "bg-white/85 backdrop-blur-xl saturate-[1.5] dark:bg-black/85 dark:backdrop-blur-xl dark:saturate-[1.5] rounded-t-2xl border-t border-gray-200/50 dark:border-white/[0.05] shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)] pb-[env(safe-area-inset-bottom,0px)]",
@@ -306,7 +306,7 @@ export function MobileBottomNav() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed left-0 right-0 top-0 z-[10001] bg-black/70 backdrop-blur-sm"
+            className="fixed left-0 right-0 top-0 z-max bg-black/70 backdrop-blur-sm"
             style={{ bottom: "calc(62px + env(safe-area-inset-bottom, 0px))" }}
             onClick={() => setIsGridOpen(false)}
           />

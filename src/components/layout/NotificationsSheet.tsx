@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useBodyLock } from "@/hooks/useBodyLock";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotificationStore } from "@/lib/store";
 import { formatDistanceToNow, cn } from "@/lib/utils";
@@ -30,21 +31,17 @@ export function NotificationsSheet({ isOpen, onClose }: { isOpen: boolean; onClo
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      if (notifications.length === 0) {
-        setLoading(true);
-        fetch("/api/v1/notifications")
-          .then((r) => r.json())
-          .then((data) => setNotifications(Array.isArray(data) ? data : []))
-          .catch(() => {})
-          .finally(() => setLoading(false));
-      }
-    } else {
-      document.body.style.overflow = "";
+    if (isOpen && notifications.length === 0) {
+      setLoading(true);
+      fetch("/api/v1/notifications")
+        .then((r) => r.json())
+        .then((data) => setNotifications(Array.isArray(data) ? data : []))
+        .catch(() => {})
+        .finally(() => setLoading(false));
     }
-    return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
+
+  useBodyLock(isOpen);
 
   return (
     <AnimatePresence>

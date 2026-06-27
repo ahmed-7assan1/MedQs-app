@@ -553,7 +553,7 @@ export function MedOneXChat() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10020] flex items-center justify-center p-4"
+            className="fixed inset-0 z-max flex items-center justify-center p-4"
           >
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSuperExpertWarning(false)} />
             <motion.div
@@ -665,7 +665,7 @@ export function MedOneXChat() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-[10030] w-[min(600px,calc(100vw-32px))]"
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-max w-[min(600px,calc(100vw-32px))]"
           >
             <div className={cn(
               "rounded-2xl border shadow-2xl p-4 flex items-start gap-3 backdrop-blur-xl",
@@ -785,7 +785,7 @@ export function MedOneXChat() {
       />
 
       {/* ─── Desktop Sidebar — always rendered, collapsible (ChatGPT-style) ─── */}
-      <div className="hidden md:block fixed left-0 top-0 bottom-0 z-[10001]">
+      <div className="hidden md:block fixed left-0 top-0 bottom-0 z-max">
         <div className={cn(
           "h-full overflow-hidden flex flex-col",
           showSidebar ? "w-[260px]" : "w-[52px]",
@@ -898,7 +898,7 @@ export function MedOneXChat() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10030] flex items-end md:items-center justify-center"
+            className="fixed inset-0 z-max flex items-end md:items-center justify-center"
           >
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowThreads(false)} />
             <motion.div
@@ -993,7 +993,7 @@ export function MedOneXChat() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10030] flex items-end md:items-center justify-center"
+            className="fixed inset-0 z-max flex items-end md:items-center justify-center"
           >
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowModules(false)} />
             <motion.div
@@ -1354,7 +1354,7 @@ export function MedOneXChat() {
 
       {/* Desktop fixed input */}
       <div className={cn(
-        "hidden md:block fixed bottom-0 z-[10002] transition-colors duration-200 ease-out",
+        "hidden md:block fixed bottom-0 z-max transition-colors duration-200 ease-out",
         showSidebar ? "left-[260px] right-0" : "left-[52px] right-0"
       )}>
         <div className="flex justify-center relative">
@@ -1559,7 +1559,7 @@ export function MedOneXChat() {
 
       {/* Solid fill below mobile capsule */}
       <div className={cn(
-        "md:hidden fixed bottom-0 left-0 right-0 z-[10002] pointer-events-none transition-colors duration-200 ease-out",
+        "md:hidden fixed bottom-0 left-0 right-0 z-max pointer-events-none transition-colors duration-200 ease-out",
         isDark ? "bg-black" : "bg-white"
       )} style={{ height: "calc(16px + env(safe-area-inset-bottom, 0px))" }} />
 
@@ -2162,7 +2162,7 @@ function ProviderPickerSheet({ isOpen, onClose, settings, onUpdate, isDark }: {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-[10010] flex items-end md:items-center justify-center"
+          className="fixed inset-0 z-max flex items-end md:items-center justify-center"
           onClick={onClose}
         >
           <div className={cn(

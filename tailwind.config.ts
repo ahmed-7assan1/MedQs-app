@@ -120,6 +120,17 @@ const config: Config = {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+  		zIndex: {
+  			dropdown: '100',
+  			sticky: '200',
+  			navbar: '300',
+  			backdrop: '400',
+  			modal: '500',
+  			panel: '1000',
+  			toast: '2000',
+  			tooltip: '3000',
+  			max: '9999',
+  		},
   		keyframes: {
   			'accordion-down': {
   				from: {

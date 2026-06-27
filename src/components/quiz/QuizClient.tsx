@@ -618,7 +618,7 @@ export function QuizClient({
 
       {/* ── Mobile nav + drawer integrated (portaled, always in DOM) ── */}
       {typeof document !== "undefined" && createPortal(
-        <div className="md:hidden fixed bottom-0 inset-x-0 z-[10000] flex flex-col justify-end pointer-events-none">
+        <div className="md:hidden fixed bottom-0 inset-x-0 z-max flex flex-col justify-end pointer-events-none">
           {/* Backdrop (covers full screen, closes drawer on tap) */}
           <AnimatePresence>
             {navigatorOpen && (
@@ -795,7 +795,7 @@ export function QuizClient({
 
       {reportOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-sticky flex items-center justify-center bg-black/50 p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="report-dialog-title"
@@ -910,7 +910,7 @@ export function QuizClient({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-max flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={() => setExitModalOpen(false)}
         >
           <motion.div

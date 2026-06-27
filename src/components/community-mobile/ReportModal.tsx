@@ -51,14 +51,14 @@ export default function ReportModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 z-[80] bg-black/40"
+            className="fixed inset-0 z-dropdown bg-black/40"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.18 }}
-            className="fixed inset-x-4 bottom-6 z-[81] rounded-2xl border border-border/60 bg-background p-4 shadow-lg"
+            className="fixed inset-x-4 bottom-6 z-dropdown rounded-2xl border border-border/60 bg-background p-4 shadow-lg"
           >
             {isSubmitted ? (
               <div className="flex flex-col items-center gap-2 py-6">

@@ -430,7 +430,7 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
             </div>
 
             {suggestedUsers.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-1 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-[60] max-h-48 overflow-y-auto">
+              <div className="absolute left-0 right-0 top-full mt-1 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-dropdown max-h-48 overflow-y-auto">
                 {suggestedUsers.map((u, idx) => (
                   <button
                     key={u.id}
@@ -798,7 +798,7 @@ export function FloatingPostIsland({ user, onPost, circles, rooms }: Props) {
       <AnimatePresence>
         {isScrolled && !isExpanded && (
           <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
-            className="fixed left-0 right-0 flex justify-center z-[400] pointer-events-none max-md:bottom-[calc(var(--mobile-tabbar-reserve)+env(safe-area-inset-bottom,0px)+0.5rem)] md:bottom-8"
+            className="fixed left-0 right-0 flex justify-center z-navbar pointer-events-none max-md:bottom-[calc(var(--mobile-tabbar-reserve)+env(safe-area-inset-bottom,0px)+0.5rem)] md:bottom-8"
           >
             <div className="pointer-events-auto max-w-[min(540px,calc(100vw-48px))] w-full px-4 flex justify-center">
               <button onClick={() => setIsExpanded(true)}
@@ -817,7 +817,7 @@ export function FloatingPostIsland({ user, onPost, circles, rooms }: Props) {
       <AnimatePresence>
         {isExpanded && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[500] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-modal flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
             onClick={() => { setIsExpanded(false); }}
           >
             <motion.div initial={{ y: 100, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: 100, opacity: 0, scale: 0.95 }}

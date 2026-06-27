@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useBodyLock } from "@/hooks/useBodyLock";
 import { ReelItem } from "./ReelItem";
 import { ArrowLeft, CaretUp, CaretDown } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -63,14 +64,13 @@ export function ReelsContainer({ reels, initialIndex = 0 }: ReelsContainerProps)
     
     if (mobileHeader) mobileHeader.style.display = 'none';
     if (desktopNav) desktopNav.style.display = 'none';
-    document.body.style.overflow = 'hidden';
-    
     return () => {
       if (mobileHeader) mobileHeader.style.display = '';
       if (desktopNav) desktopNav.style.display = '';
-      document.body.style.overflow = 'auto';
     };
   }, []);
+
+  useBodyLock(true);
 
   return (
     <div className="fixed inset-0 z-[1000] bg-black flex items-center justify-center overflow-hidden">

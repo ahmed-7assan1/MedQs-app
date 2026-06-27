@@ -73,7 +73,7 @@ export function MedqsSelect({
         </SelectTrigger>
         <SelectContent
           className={cn(
-            "z-[9999] rounded-xl border border-white/[0.02] bg-popover shadow-xl shadow-black/20",
+            "z-max rounded-xl border border-white/[0.02] bg-popover shadow-xl shadow-black/20",
             "backdrop-blur-xl"
           )}
         >

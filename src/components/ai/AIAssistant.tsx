@@ -1088,7 +1088,7 @@ export function AIAssistantPanel({
         <button
           type="button"
           className={cn(
-            "fixed inset-x-0 top-14 z-[138] bg-black/45 backdrop-blur-[1px] md:hidden",
+            "fixed inset-x-0 top-14 z-dropdown bg-black/45 backdrop-blur-[1px] md:hidden",
             topicsBottomSafe
           )}
           aria-label="Close topics"
@@ -1096,7 +1096,7 @@ export function AIAssistantPanel({
         />
         <aside
           className={cn(
-            "fixed left-0 top-14 z-[139] flex w-[min(300px,90vw)] flex-col border-r border-border bg-card shadow-2xl md:hidden",
+            "fixed left-0 top-14 z-dropdown flex w-[min(300px,90vw)] flex-col border-r border-border bg-card shadow-2xl md:hidden",
             topicsBottomSafe
           )}
         >

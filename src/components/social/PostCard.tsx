@@ -796,8 +796,8 @@ const PostCardInner = ({
       <AnimatePresence>
         {showReactionDetail && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm" onClick={() => setShowReactionDetail(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-4 md:inset-x-auto md:top-1/4 md:bottom-auto md:left-1/2 md:-translate-x-1/2 z-[9999] max-w-[380px] w-full bg-card rounded-2xl border border-border overflow-hidden shadow-2xl max-h-[60vh] flex flex-col">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-max bg-black/60 backdrop-blur-sm" onClick={() => setShowReactionDetail(false)} />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-4 md:inset-x-auto md:top-1/4 md:bottom-auto md:left-1/2 md:-translate-x-1/2 z-max max-w-[380px] w-full bg-card rounded-2xl border border-border overflow-hidden shadow-2xl max-h-[60vh] flex flex-col">
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-white/[0.04]">
                 <span className="text-[13px] font-black text-slate-800 dark:text-white/90">Reactions ({reactions.length})</span>
                 <button onClick={() => setShowReactionDetail(false)} className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-all">
@@ -953,7 +953,7 @@ function ImageLightbox({ images, initialIndex, onClose }: { images: string[]; in
 
   return (
     <div
-      className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-2xl flex items-center justify-center"
+      className="fixed inset-0 z-max bg-black/95 backdrop-blur-2xl flex items-center justify-center"
       onClick={onClose}
     >
       <button

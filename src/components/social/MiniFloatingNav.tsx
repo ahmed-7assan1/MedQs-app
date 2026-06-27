@@ -30,7 +30,7 @@ export function MiniFloatingNav() {
   if (!mounted) return null;
 
   return createPortal(
-    <div ref={ref} style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999 }}>
+    <div ref={ref} style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999 /* z-max */ }}>
       {/* Menu */}
       {open && (
         <div style={{

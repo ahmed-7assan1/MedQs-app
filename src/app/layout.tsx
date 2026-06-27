@@ -4,6 +4,7 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ChunkLoadRecovery } from "@/components/system/ChunkLoadRecovery";
 import { DevServiceWorkerCleanup } from "@/components/system/DevServiceWorkerCleanup";
+import { ErrorBoundary } from "@/components/system/ErrorBoundary";
 import { prisma } from "@/lib/prisma";
 import { ourFileRouter } from "@/lib/uploadthing";
 import { appFontVariableClassName, fontEnglish } from "@/lib/app-fonts";
@@ -315,19 +316,25 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
         {/* Puter.js — free AI, storage, and cloud services (user-pays model) */}
         {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
-        <script src="https://js.puter.com/v2/" defer></script>
+        <script
+          src="https://js.puter.com/v2/"
+          defer
+          {...{ onerror: "console.warn('[Puter] Failed to load')", onload: "console.info('[Puter] Loaded')" } as React.ScriptHTMLAttributes<HTMLScriptElement>}
+        />
       </head>
       <body className={`${fontEnglish.className} font-sans antialiased`}>
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <DevServiceWorkerCleanup />
         <ChunkLoadRecovery />
-        <ConfirmProvider>
-          <SupabaseAuthProvider>
-            <SessionPersistence />
-            <ApplyLocale />
-            <LocaleProvider><main><MotionProvider>{children}</MotionProvider></main></LocaleProvider>
-          </SupabaseAuthProvider>
-        </ConfirmProvider>
+        <ErrorBoundary>
+          <ConfirmProvider>
+            <SupabaseAuthProvider>
+              <SessionPersistence />
+              <ApplyLocale />
+              <LocaleProvider><main><MotionProvider>{children}</MotionProvider></main></LocaleProvider>
+            </SupabaseAuthProvider>
+          </ConfirmProvider>
+        </ErrorBoundary>
         <Toaster
           position="top-center"
           containerStyle={{

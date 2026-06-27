@@ -5,7 +5,7 @@ import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 
 export function PremiumLoading() {
   return (
-    <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-background overflow-hidden">
+    <div className="fixed inset-0 z-modal flex flex-col items-center justify-center bg-background overflow-hidden">
       {/* Dynamic Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-50">
         <motion.div 

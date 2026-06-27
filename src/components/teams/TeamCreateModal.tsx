@@ -49,7 +49,7 @@ export function TeamCreateModal({ isOpen, onClose, onSuccess, universityId }: Te
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm"
       >
         <motion.div
           initial={{ scale: 0.95, opacity: 0, y: 20 }}

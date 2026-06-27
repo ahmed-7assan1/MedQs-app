@@ -183,7 +183,7 @@ export function LibraryPage({ isOpen, onClose, isDark, onOpenQuiz }: LibraryPage
     <AnimatePresence>
       {isOpen && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className={cn("fixed inset-0 z-[10030] overflow-y-auto", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
+          className={cn("fixed inset-0 z-max overflow-y-auto", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
           <div className="max-w-2xl mx-auto px-4 py-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">

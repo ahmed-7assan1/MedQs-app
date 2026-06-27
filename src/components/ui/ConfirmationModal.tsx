@@ -40,7 +40,7 @@ export function ConfirmationModal({
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-all duration-300",
+        "fixed inset-0 z-max flex items-center justify-center p-4 transition-all duration-300",
         isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       )}
     >

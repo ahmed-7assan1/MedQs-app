@@ -116,7 +116,7 @@ export function DrawMedLibrary({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 overflow-y-auto bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 z-max flex items-center justify-center p-4 overflow-y-auto bg-black/60 backdrop-blur-md"
           onClick={(e) => {
             if (e.target === e.currentTarget) onClose();
           }}

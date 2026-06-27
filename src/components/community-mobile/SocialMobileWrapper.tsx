@@ -65,7 +65,7 @@ function MobilePageLoading() {
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 9999,
+        zIndex: 9999, // z-max
         background: "var(--bg-primary, #0a0a0f)",
         display: "flex",
         alignItems: "center",

@@ -3,6 +3,7 @@
 import { X, Play, FileText, CheckCircle2, Globe, Clock, MessageSquare, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { useBodyLock } from "@/hooks/useBodyLock";
 
 interface PreviewResource {
   id: string;
@@ -27,9 +28,9 @@ export function ResourcePreviewModal({ resource, isOpen, onClose, onImport }: Re
 
   useEffect(() => {
     setMounted(true);
-    if (isOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "unset";
-  }, [isOpen]);
+  }, []);
+
+  useBodyLock(isOpen);
 
   if (!mounted || !isOpen || !resource) return null;
 

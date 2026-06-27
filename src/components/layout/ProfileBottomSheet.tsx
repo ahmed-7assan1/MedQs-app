@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useBodyLock } from "@/hooks/useBodyLock";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { createClient } from '@/lib/supabase/client';
@@ -26,15 +27,9 @@ export function ProfileBottomSheet({ isOpen, onClose, userImage, userName }: Pro
 
   useEffect(() => {
     setMounted(true);
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  }, []);
+
+  useBodyLock(isOpen);
 
   if (!mounted) return null;
 

@@ -60,7 +60,7 @@ export function MobileHeader({ userImage, userName, userId, isAdmin, isGuest }: 
     <>
       <header
         className={cn(
-          "fixed top-0 inset-x-0 z-[150] flex h-14 items-center md:hidden",
+          "fixed top-0 inset-x-0 z-sticky flex h-14 items-center md:hidden",
           "pt-[env(safe-area-inset-top,0px)]",
           "bg-[#0d0d14]/80 backdrop-blur-2xl",
           "border-b border-white/[0.05]"
@@ -108,7 +108,7 @@ export function MobileHeader({ userImage, userName, userId, isAdmin, isGuest }: 
 
       {/* Search Overlay */}
       {searchOpen && (
-        <div className="fixed inset-0 z-[200] md:hidden">
+        <div className="fixed inset-0 z-backdrop md:hidden">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSearchOpen(false)} />
           <div className="relative px-4 pt-20">
             <GlobalSearch isGuest={!userName} />

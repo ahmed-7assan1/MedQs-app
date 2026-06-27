@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
       const onboardingDone = user.user_metadata?.onboarding_completed === true;
       if (!onboardingDone) {
-        return NextResponse.redirect(`${requestUrl.origin}/complete-profile`);
+        return NextResponse.redirect(`${requestUrl.origin}/auth?mode=complete-profile`);
       }
       return NextResponse.redirect(`${requestUrl.origin}${next}`);
     }

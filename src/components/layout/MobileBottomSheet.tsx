@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useBodyLock } from "@/hooks/useBodyLock";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -83,14 +84,7 @@ export function MobileBottomSheet({
   const { theme, setTheme } = useThemeStore();
   const sheetRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [isOpen]);
+  useBodyLock(isOpen);
 
   const isActive = (href: string) =>
     href === "/dashboard-app" ? pathname === href || pathname === "/dashboard" : pathname?.startsWith(href);

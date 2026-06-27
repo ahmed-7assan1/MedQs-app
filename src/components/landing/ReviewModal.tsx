@@ -2,13 +2,41 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+
+const ease = [0.22, 1, 0.36, 1] as const;
+
+const spring = { type: "spring", stiffness: 400, damping: 25 } as const;
 
 interface ReviewModalProps {
   open: boolean;
   onClose: () => void;
   onSubmitted: () => void;
+}
+
+function StarIcon({ filled, size }: { filled: boolean; size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="starGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#F59E0B" />
+          <stop offset="100%" stopColor="#D97706" />
+        </linearGradient>
+        <filter id="starGlow">
+          <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#F59E0B" floodOpacity="0.5" />
+        </filter>
+      </defs>
+      <path
+        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+        fill={filled ? "url(#starGrad)" : "none"}
+        stroke={filled ? "url(#starGrad)" : "currentColor"}
+        strokeWidth={filled ? 0 : 1.5}
+        strokeOpacity={filled ? 0 : 0.25}
+        filter={filled ? "url(#starGlow)" : undefined}
+      />
+    </svg>
+  );
 }
 
 export function ReviewModal({ open, onClose, onSubmitted }: ReviewModalProps) {
@@ -34,7 +62,7 @@ export function ReviewModal({ open, onClose, onSubmitted }: ReviewModalProps) {
         setTimeout(() => { onSubmitted(); }, 1500);
       }
     } catch {
-      // silently fail
+      onClose();
     } finally {
       setSubmitting(false);
     }
@@ -47,80 +75,146 @@ export function ReviewModal({ open, onClose, onSubmitted }: ReviewModalProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          transition={{ duration: 0.25, ease }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           onClick={onClose}
         >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/40" />
+
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ duration: 0.2 }}
-            className="relative w-full max-w-md rounded-2xl border border-border bg-background p-6 shadow-xl"
+            exit={{ opacity: 0, scale: 0.92, y: 20 }}
+            transition={{ duration: 0.35, ease, delay: 0.05 }}
+            className="relative w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={onClose}
-              className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <div className="relative overflow-hidden rounded-2xl border border-border dark:border-white/[0.12] bg-white dark:bg-background/40 p-7 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8">
 
-            {done ? (
-              <div className="py-8 text-center">
-                <div className="text-4xl mb-4">🎉</div>
-                <h3 className="text-lg font-bold">{t("reviewModal.thankYou")}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{t("reviewModal.pendingMessage")}</p>
-              </div>
-            ) : (
-              <>
-                <h3 className="text-lg font-bold">{t("reviewModal.title")}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{t("reviewModal.subtitle")}</p>
+              {/* Subtle top glow */}
+              <div className="pointer-events-none absolute -inset-x-20 -top-20 h-40 bg-gradient-to-b from-primary/15 to-transparent" />
 
-                <div className="mt-6 flex justify-center gap-2">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <button
-                      key={s}
-                      onMouseEnter={() => setHovered(s)}
-                      onMouseLeave={() => setHovered(0)}
-                      onClick={() => setRating(s)}
-                      className="transition-transform hover:scale-110"
-                    >
-                      <Star
-                        className={`h-10 w-10 ${
-                          s <= (hovered || rating)
-                            ? "fill-yellow-500 text-yellow-500"
-                            : "fill-none text-muted-foreground/30"
-                        }`}
+              <button
+                onClick={onClose}
+                className="absolute right-4 top-4 z-10 rounded-full p-1.5 text-muted-foreground/60 transition-colors hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              {done ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col items-center py-6 text-center"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.1 }}
+                    className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 ring-1 ring-emerald-500/20"
+                  >
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                      <motion.path
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.4, delay: 0.2 }}
+                        d="M5 13l4 4L19 7"
+                        stroke="#10B981"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
+                    </svg>
+                  </motion.div>
+                  <h3 className="mt-5 text-lg font-bold">{t("reviewModal.thankYou")}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{t("reviewModal.pendingMessage")}</p>
+                </motion.div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Header */}
+                  <div>
+                    <h3 className="text-lg font-bold">{t("reviewModal.title")}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{t("reviewModal.subtitle")}</p>
+                  </div>
+
+                  {/* Stars */}
+                  <div className="flex items-center justify-center gap-1.5">
+                    {[1, 2, 3, 4, 5].map((s) => {
+                      const active = s <= (hovered || rating);
+                      return (
+                        <motion.button
+                          key={s}
+                          whileHover={{ scale: 1.15 }}
+                          whileTap={{ scale: 0.9 }}
+                          transition={spring}
+                          onMouseEnter={() => setHovered(s)}
+                          onMouseLeave={() => setHovered(0)}
+                          onClick={() => setRating(s)}
+                          className="relative p-1 outline-none"
+                        >
+                          {active && (
+                            <motion.div
+                              layoutId="starBg"
+                              className="absolute inset-0 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-600/10"
+                              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                            />
+                          )}
+                          <StarIcon filled={active} size={36} />
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Rating label */}
+                  {rating > 0 && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="-mt-2 text-center text-xs font-medium text-amber-500"
+                    >
+                      {rating === 1 && "Needs improvement"}
+                      {rating === 2 && "Fair"}
+                      {rating === 3 && "Good"}
+                      {rating === 4 && "Great"}
+                      {rating === 5 && "Excellent!"}
+                    </motion.p>
+                  )}
+
+                  {/* Textarea */}
+                  <textarea
+                    placeholder={t("reviewModal.placeholder")}
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    rows={4}
+                    className="w-full resize-none rounded-xl border border-border bg-black/[0.02] dark:bg-white/[0.03] p-3.5 text-sm outline-none transition-all placeholder:text-muted-foreground/40 focus:border-primary/50 focus:bg-black/[0.04] dark:focus:bg-white/[0.05] focus:ring-4 focus:ring-primary/5"
+                  />
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-end gap-3">
+                    <button
+                      onClick={onClose}
+                      className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {t("reviewModal.cancel")}
                     </button>
-                  ))}
+                    <motion.button
+                      whileHover={{ y: -1 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSubmit}
+                      disabled={rating === 0 || !content.trim() || submitting}
+                      className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground shadow-[0_4px_20px_-6px_hsl(var(--primary))] transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {submitting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        t("reviewModal.submit")
+                      )}
+                    </motion.button>
+                  </div>
                 </div>
-
-                <textarea
-                  placeholder={t("reviewModal.placeholder")}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={4}
-                  className="mt-6 w-full resize-none rounded-xl border border-border bg-secondary/50 p-3 text-sm outline-none transition-colors focus:border-primary"
-                />
-
-                <div className="mt-4 flex justify-end gap-3">
-                  <button
-                    onClick={onClose}
-                    className="rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    {t("reviewModal.cancel")}
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={rating === 0 || !content.trim() || submitting}
-                    className="rounded-full bg-primary px-6 py-2 text-sm font-medium text-primary-foreground transition-all hover:opacity-90 disabled:opacity-40"
-                  >
-                    {submitting ? t("reviewModal.submitting") : t("reviewModal.submit")}
-                  </button>
-                </div>
-              </>
-            )}
+              )}
+            </div>
           </motion.div>
         </motion.div>
       )}

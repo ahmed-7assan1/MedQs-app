@@ -82,7 +82,7 @@ export function CustomAgentChat({ agent, onClose, isDark }: { agent: AgentData; 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[10030] flex flex-col"
+      className="fixed inset-0 z-max flex flex-col"
     >
       {/* Header */}
       <div className={cn("flex items-center justify-between px-4 py-3 border-b", isDark ? "bg-[#121212] border-white/10" : "bg-white border-gray-200")}>

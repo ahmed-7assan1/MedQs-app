@@ -23,7 +23,7 @@ export default function SplashPage() {
       if (data?.user) {
         const onboardingDone = data.user.user_metadata?.onboarding_completed === true;
         if (!onboardingDone) {
-          setTimeout(() => router.replace("/complete-profile"), 2000);
+          setTimeout(() => router.replace("/auth?mode=complete-profile"), 2000);
           return;
         }
         if (!getRememberMe()) {

@@ -87,7 +87,7 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
     <>
       <header
         className={cn(
-          "fixed top-0 inset-x-0 z-[150] md:hidden pt-[env(safe-area-inset-top,0px)]",
+          "fixed top-0 inset-x-0 z-sticky md:hidden pt-[env(safe-area-inset-top,0px)]",
           "transition-transform duration-300 will-change-transform",
           (visible || searchOpen || isSocial) ? "translate-y-0" : "-translate-y-full"
         )}

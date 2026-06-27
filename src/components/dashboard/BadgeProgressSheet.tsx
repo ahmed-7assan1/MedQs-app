@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useBodyLock } from "@/hooks/useBodyLock";
 import { createPortal } from "react-dom";
 import {
   FireIcon, TrophyIcon, AcademicCapIcon, StarIcon,
@@ -128,11 +129,7 @@ export function BadgeProgressSheet({
     return () => window.removeEventListener("keydown", handler);
   }, [open, onClose]);
 
-  useEffect(() => {
-    if (open) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
+  useBodyLock(open);
 
   if (!open) return null;
 
@@ -141,9 +138,9 @@ export function BadgeProgressSheet({
 
   return createPortal(
     <>
-      <div className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[9998]" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/40 dark:bg-black/60 z-max" onClick={onClose} />
       <div
-        className="fixed bottom-0 left-0 right-0 z-[9999] rounded-t-2xl bg-background border-t border-border shadow-2xl max-h-[85vh] overflow-y-auto"
+        className="fixed bottom-0 left-0 right-0 z-max rounded-t-2xl bg-background border-t border-border shadow-2xl max-h-[85vh] overflow-y-auto"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)", animation: "bss-slide-up 0.35s cubic-bezier(0.32, 0.72, 0, 1)" }}
       >
         <div className="flex justify-center pt-2 pb-1 sticky top-0 bg-background z-10">

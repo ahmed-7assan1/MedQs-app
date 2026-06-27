@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useBodyLock } from "@/hooks/useBodyLock";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -60,15 +61,7 @@ export default function PostComposer({
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Lock body scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [isOpen]);
+  useBodyLock(isOpen);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -246,7 +239,7 @@ export default function PostComposer({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-backdrop bg-black/40 backdrop-blur-sm"
             onClick={handleClose}
           />
 
@@ -256,7 +249,7 @@ export default function PostComposer({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 260 }}
-            className="fixed inset-x-0 bottom-[calc(62px+env(safe-area-inset-bottom,0px))] z-[201] flex flex-col rounded-t-2xl bg-background/80 backdrop-blur-xl saturate-[1.8] border-t border-gray-200/50 dark:border-white/[0.05] shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)] min-h-[50vh] max-h-[85vh] overflow-hidden"
+            className="fixed inset-x-0 bottom-[calc(62px+env(safe-area-inset-bottom,0px))] z-backdrop flex flex-col rounded-t-2xl bg-background/80 backdrop-blur-xl saturate-[1.8] border-t border-gray-200/50 dark:border-white/[0.05] shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)] min-h-[50vh] max-h-[85vh] overflow-hidden"
           >
             {/* Handle */}
             <div className="w-full flex justify-center pt-3 pb-1 shrink-0" onClick={handleClose}>

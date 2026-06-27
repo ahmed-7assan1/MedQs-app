@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useBodyLock } from "@/hooks/useBodyLock";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,15 +22,9 @@ export function NavigationSheet({ isOpen, onClose }: { isOpen: boolean; onClose:
 
   useEffect(() => {
     setMounted(true);
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  }, []);
+
+  useBodyLock(isOpen);
 
   if (!mounted) return null;
 

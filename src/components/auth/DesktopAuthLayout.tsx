@@ -8,16 +8,16 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 export function DesktopAuthLayout({
   children,
-  showProgress = true,
+  progressStep = 0,
 }: {
   children: ReactNode;
-  showProgress?: boolean;
+  progressStep?: number;
 }) {
   return (
     <div className="relative flex min-h-dvh bg-background dark:bg-gradient-to-b dark:from-[#090909] dark:to-[#111111]">
       {/* Left Panel — 55vw — flush with top and left edges */}
       <div className="min-h-dvh w-[55vw]">
-        <LeftPanel showProgress={showProgress} />
+        <LeftPanel currentStep={progressStep} />
       </div>
 
       {/* Right Section — 45vw — fade-up behind left panel */}

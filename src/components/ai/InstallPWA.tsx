@@ -102,7 +102,7 @@ export function InstallPWA({ isDark }: { isDark: boolean }) {
 
       {showIOSGuide && (
         <div
-          className="fixed inset-0 z-[10020] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-max flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={() => setShowIOSGuide(false)}
         >
           <div

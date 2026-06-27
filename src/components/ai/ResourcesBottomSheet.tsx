@@ -26,7 +26,7 @@ export function ResourcesBottomSheet({ isOpen, onClose, resources, isDark }: Res
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-[10030] flex items-end md:items-center justify-center"
+          className="fixed inset-0 z-max flex items-end md:items-center justify-center"
           onClick={onClose}
         >
           <div className={cn("absolute inset-0", isDark ? "bg-black/60 backdrop-blur-sm" : "bg-black/40 backdrop-blur-sm")} />

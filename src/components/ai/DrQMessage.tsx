@@ -309,7 +309,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
             initial={{ opacity: 0, scale: 0.8, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed z-[100] px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-[0_8px_30px_rgba(79,70,229,0.4)] flex items-center gap-2 text-[14px] font-bold transition-colors border border-indigo-400/50"
+            className="fixed z-dropdown px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-[0_8px_30px_rgba(79,70,229,0.4)] flex items-center gap-2 text-[14px] font-bold transition-colors border border-indigo-400/50"
             style={{ top: selectionRange.top, left: selectionRange.left, transform: "translateX(-50%)" }}
             onClick={(e) => {
               e.preventDefault();
@@ -649,7 +649,7 @@ const DrQMessageInner: React.FC<MessageProps> = ({
                     <CaretDown size={10} weight="bold" />
                   </button>
                   {showVoicePicker && (
-                    <div className={cn("absolute bottom-full right-0 mb-2 w-64 max-h-64 overflow-y-auto rounded-xl shadow-lg border py-1 z-[99999]", isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200")}>
+                    <div className={cn("absolute bottom-full right-0 mb-2 w-64 max-h-64 overflow-y-auto rounded-xl shadow-lg border py-1 z-max", isDark ? "bg-[#1a1a1a] border-white/10" : "bg-white border-gray-200")}>
                       {EDGE_TTS_ARABIC_VOICES.map((v) => (
                         <button key={v.id} onClick={() => { setEdgeVoiceId(v.id); setShowVoicePicker(false); }} className={cn("w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center gap-2", edgeVoiceId === v.id ? (isDark ? "bg-white/10 text-white" : "bg-black/5 text-black") : (isDark ? "text-gray-300 hover:bg-white/5" : "text-gray-600 hover:bg-black/5"))}>
                           <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", edgeVoiceId === v.id ? "bg-indigo-500" : "bg-transparent")} />
@@ -880,7 +880,7 @@ function Lightbox({ images, activeIdx, isOpen, onClose, onPrev, onNext, onError 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-xl"
+          className="fixed inset-0 z-backdrop flex items-center justify-center bg-black/90 backdrop-blur-xl"
           onClick={onClose}
         >
           <button

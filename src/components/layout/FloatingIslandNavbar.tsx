@@ -105,7 +105,7 @@ export function FloatingIslandNavbar({
       initial={{ y: 0 }}
       animate={{ y: isVisible ? 0 : -120 }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="fixed inset-x-0 top-0 z-[200] hidden md:flex justify-center items-start px-3 pt-0 pointer-events-none"
+      className="fixed inset-x-0 top-0 z-navbar hidden md:flex justify-center items-start px-3 pt-0 pointer-events-none"
     >
       <div
         ref={islandRef}

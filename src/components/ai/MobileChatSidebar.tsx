@@ -243,7 +243,7 @@ function MobileSidebarInner({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[10010] bg-black/40 md:hidden"
+          className="fixed inset-0 z-max bg-black/40 md:hidden"
           onClick={onClose}
         >
           <motion.div

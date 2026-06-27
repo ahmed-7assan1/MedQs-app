@@ -84,7 +84,7 @@ function TelegramOptionalBanner({ onDismiss }: { onDismiss: () => void }) {
   }, []);
 
   return (
-    <div className="fixed bottom-6 right-6 z-[500] w-full max-w-[360px] animate-in slide-in-from-bottom-4 duration-500">
+    <div className="fixed bottom-6 right-6 z-modal w-full max-w-[360px] animate-in slide-in-from-bottom-4 duration-500">
       <div className="relative rounded-[24px] border border-white/[0.08] bg-[#131220]/95 backdrop-blur-2xl p-5 shadow-2xl shadow-black/40">
         <button 
           onClick={onDismiss}

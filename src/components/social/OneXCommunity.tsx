@@ -624,7 +624,7 @@ function PostCard({ post, onOpen, onReact, onLike, onSave, currentUserId, curren
       {/* Block Confirm */}
       {showBlockConfirm && (
         <Portal>
-          <div onClick={() => setShowBlockConfirm(false)} style={{ position: "fixed", inset: 0, zIndex: 99999, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
+          <div onClick={() => setShowBlockConfirm(false)} style={{ position: "fixed", inset: 0, zIndex: 99999 /* z-max */, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
             <div onClick={e => e.stopPropagation()} style={{ background: "var(--ox-glass-bg)", backdropFilter: "blur(32px) saturate(180%)", border: "1px solid var(--ox-glass-border)", borderRadius: 24, width: "100%", maxWidth: 380, overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.6)", animation: "modalIn .2s ease" }}>
               <div style={{ padding: "24px 22px", textAlign: "center" }}>
                 <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(232,64,64,.12)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px", color: T.red }}>
@@ -679,7 +679,7 @@ function NotificationPanel({ currentUserId }: { currentUserId?: string }) {
       {open && (
         <Portal>
         <div onClick={() => setOpen(false)}
-          style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
+          style={{ position: "fixed", inset: 0, zIndex: 9999 /* z-max */, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
           <div onClick={e => e.stopPropagation()}
             style={{ background: "var(--ox-glass-bg)", backdropFilter: "blur(32px) saturate(180%)", border: "1px solid var(--ox-glass-border)", borderRadius: 24, width: "100%", maxWidth: 480, maxHeight: "85vh", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 32px 80px rgba(0,0,0,0.6)", animation: "modalIn .2s ease" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 }}>
@@ -931,7 +931,7 @@ function PostComposerModal({ isOpen, onClose, currentCircle, circles, currentUse
       {isOpen && (
         <Portal>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}
-            style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(12px)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "60px 16px", overflowY: "auto" }}>
+            style={{ position: "fixed", inset: 0, zIndex: 9999 /* z-max */, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(12px)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "60px 16px", overflowY: "auto" }}>
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: "spring", damping: 28, stiffness: 300 }}
               onClick={e => e.stopPropagation()} style={{ background: "var(--ox-glass-bg)", backdropFilter: "blur(32px) saturate(180%)", border: "1px solid var(--ox-glass-border)", borderRadius: 24, width: "100%", maxWidth: 600, overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", maxHeight: "calc(100vh - 80px)" }}>
               {/* Header */}
@@ -1440,9 +1440,9 @@ function MobileReelsView({ currentUserId, currentUserName, circles, activeCircle
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setMobileSidebarOpen(false)}
-              style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.5)" }} />
+              style={{ position: "fixed", inset: 0, zIndex: 200 /* z-backdrop */, background: "rgba(0,0,0,0.5)" }} />
             <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: 280, zIndex: 201, background: T.surface, borderRight: `1px solid ${T.border}`, padding: 20, overflowY: "auto" }}>
+              style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: 280, zIndex: 201 /* z-panel */, background: T.surface, borderRight: `1px solid ${T.border}`, padding: 20, overflowY: "auto" }}>
               <button onClick={() => setMobileSidebarOpen(false)}
                 style={{ width: 32, height: 32, borderRadius: "50%", border: "none", background: T.hover, color: T.text3, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
                 {IC.close}
@@ -1557,7 +1557,7 @@ function ReelsCommentSheet({ post, currentUserId, onClose }: {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.5)" }} onClick={onClose}>
+      style={{ position: "fixed", inset: 0, zIndex: 9999 /* z-max */, background: "rgba(0,0,0,0.5)" }} onClick={onClose}>
       <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
         onClick={e => e.stopPropagation()}
@@ -1626,7 +1626,7 @@ function ReelsCreateSheet({ currentUserId, currentUserName, circles, activeCircl
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.5)" }} onClick={onClose}>
+      style={{ position: "fixed", inset: 0, zIndex: 9999 /* z-max */, background: "rgba(0,0,0,0.5)" }} onClick={onClose}>
       <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
         onClick={e => e.stopPropagation()}
@@ -1687,7 +1687,7 @@ function InlineCreateRoomModal({ isOpen, onClose, onSuccess }: { isOpen: boolean
     <AnimatePresence>
       {isOpen && (
         <Portal>
-        <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
+        <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9999 /* z-max */, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "var(--ox-glass-bg)", backdropFilter: "blur(32px) saturate(180%)", border: "1px solid var(--ox-glass-border)", borderRadius: 24, width: "100%", maxWidth: 440, overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.6)", animation: "modalIn .2s ease", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 22px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -1754,7 +1754,7 @@ function InlineJoinRoomModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
     <AnimatePresence>
       {isOpen && (
         <Portal>
-        <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
+        <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9999 /* z-max */, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "var(--ox-glass-bg)", backdropFilter: "blur(32px) saturate(180%)", border: "1px solid var(--ox-glass-border)", borderRadius: 24, width: "100%", maxWidth: 400, overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.6)", animation: "modalIn .2s ease" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 22px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -2110,7 +2110,7 @@ export default function OneXCommunity({
   }, [publicRooms, searchQuery]);
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: T.bg, fontFamily: FONT, color: T.text1, overflow: "hidden" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 9999 /* z-max */, background: T.bg, fontFamily: FONT, color: T.text1, overflow: "hidden" }}>
       {/* Prevent the underlying page from scrolling */}
       <style>{`html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden!important}`}</style>
       {/* Ambient moving light effect */}
@@ -2676,9 +2676,9 @@ export default function OneXCommunity({
         {mobileSidebarOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setMobileSidebarOpen(false)}
-              style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,.6)", backdropFilter: "blur(12px)" }} />
+              style={{ position: "fixed", inset: 0, zIndex: 200 /* z-backdrop */, background: "rgba(0,0,0,.6)", backdropFilter: "blur(12px)" }} />
             <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: "85%", maxWidth: 320, zIndex: 210, background: T.surface, borderRight: `1px solid ${T.border}`, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: "85%", maxWidth: 320, zIndex: 210 /* z-panel */, background: T.surface, borderRight: `1px solid ${T.border}`, display: "flex", flexDirection: "column", overflow: "hidden" }}>
               <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: 900, fontSize: 16, color: T.accent }}>OneX Community</span>
                 <button onClick={() => setMobileSidebarOpen(false)} style={{ width: 36, height: 36, borderRadius: "50%", background: T.hover, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.text3 }}>
@@ -2751,7 +2751,7 @@ export default function OneXCommunity({
       {/* Mobile FAB — new post */}
       <button onClick={() => setShowComposerModal(true)}
         className="ox-mobile-fab"
-        style={{ position: "fixed", bottom: 80, right: 24, zIndex: 9998, width: 52, height: 52, borderRadius: 20, border: "none", background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85))", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 8px 24px hsl(var(--primary) / 0.3)", transition: "transform .2s, box-shadow .2s" }}
+        style={{ position: "fixed", bottom: 80, right: 24, zIndex: 9998 /* z-max */, width: 52, height: 52, borderRadius: 20, border: "none", background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85))", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 8px 24px hsl(var(--primary) / 0.3)", transition: "transform .2s, box-shadow .2s" }}
         onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.05)"; e.currentTarget.style.boxShadow = "0 12px 32px hsl(var(--primary) / 0.4)"; }}
         onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 8px 24px hsl(var(--primary) / 0.3)"; }}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -2786,7 +2786,7 @@ function InlineGroupRequestsModal({ isOpen, groupId, requests, onClose, onHandle
 
   return (
     <Portal>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9999 /* z-max */, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
         <div onClick={e => e.stopPropagation()} style={{ background: "var(--ox-glass-bg)", backdropFilter: "blur(32px) saturate(180%)", border: "1px solid var(--ox-glass-border)", borderRadius: 24, width: "100%", maxWidth: 400, overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.6)", animation: "modalIn .2s ease" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: T.text1 }}>Join Requests</span>
@@ -2845,7 +2845,7 @@ function InlineCreateGroupModal({ isOpen, onClose, onSuccess }: {
 
   return (
     <Portal>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9999 /* z-max */, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(16px)" }}>
         <div onClick={e => e.stopPropagation()} style={{ background: "var(--ox-glass-bg)", backdropFilter: "blur(32px) saturate(180%)", border: "1px solid var(--ox-glass-border)", borderRadius: 24, width: "100%", maxWidth: 440, overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.6)", animation: "modalIn .2s ease", display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 22px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>

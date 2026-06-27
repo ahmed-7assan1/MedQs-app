@@ -172,7 +172,7 @@ export function CustomPage({ isOpen, onClose, isDark, onSelectAgent }: CustomPag
     <AnimatePresence>
       {isOpen && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className={cn("fixed inset-0 z-[10030] overflow-y-auto", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
+          className={cn("fixed inset-0 z-max overflow-y-auto", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
           <div className="max-w-2xl mx-auto px-4 py-6 pb-20">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
@@ -324,7 +324,7 @@ export function CustomPage({ isOpen, onClose, isDark, onSelectAgent }: CustomPag
           <AnimatePresence>
             {showCreate && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[10040] overflow-y-auto" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
+                className="fixed inset-0 z-max overflow-y-auto" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
                 <div className="min-h-screen flex items-end sm:items-center justify-center p-0 sm:p-4">
                   <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
                     transition={{ type: "spring", stiffness: 350, damping: 30 }}

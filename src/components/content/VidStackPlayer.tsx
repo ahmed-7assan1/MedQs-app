@@ -215,7 +215,7 @@ function MiniPlayer({ url, videoId, title, poster, muted, onExpand }: {
       initial={{ scale: 0.8, opacity: 0, y: 40 }}
       animate={{ scale: 1, opacity: 1, y: 0 }}
       exit={{ scale: 0.8, opacity: 0, y: 40 }}
-      className="fixed bottom-4 right-4 z-[999] w-80 aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black cursor-grab active:cursor-grabbing"
+      className="fixed bottom-4 right-4 z-modal w-80 aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black cursor-grab active:cursor-grabbing"
     >
       <div onMouseDown={onDragStart} className="absolute inset-0">
         {videoId ? (

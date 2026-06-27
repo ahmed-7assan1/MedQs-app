@@ -8,12 +8,13 @@ import toast from "react-hot-toast";
 import { NewAuthShell } from "@/components/auth/NewAuthShell";
 import { NewAuthForm, type AuthField } from "@/components/auth/NewAuthForm";
 import { DesktopAuthLayout } from "@/components/auth/DesktopAuthLayout";
+import { ProfileCompletionForm } from "@/components/auth/ProfileCompletionForm";
 
 function AuthContent() {
   const sp = useSearchParams();
   const supabase = createClient();
 
-  type AuthMode = "login" | "register" | "forgot-password";
+  type AuthMode = "login" | "register" | "forgot-password" | "complete-profile";
   const [mode, setMode] = useState<AuthMode>(["register", "onboarding"].includes(sp.get("mode") || "") ? "register" : "login");
   const [loading, setLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
@@ -61,6 +62,10 @@ function AuthContent() {
       setRememberMeCookie(rememberMe);
       await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard-app` } });
     } catch { toast.error(`${provider} login failed.`); setLoading(false); }
+  };
+
+  const handleProfileComplete = () => {
+    window.location.href = "/dashboard-app";
   };
 
   const handleForgot = async (e: React.FormEvent) => {
@@ -141,6 +146,32 @@ function AuthContent() {
     </span>
   );
 
+  // ── Complete-Profile mode ──────────────────────────────────
+
+  if (mode === "complete-profile") {
+    return (
+      <>
+        {/* Desktop */}
+        <div className="hidden min-[1440px]:block">
+          <DesktopAuthLayout progressStep={2}>
+            <ProfileCompletionForm onComplete={handleProfileComplete} />
+          </DesktopAuthLayout>
+        </div>
+        {/* Mobile */}
+        <div className="min-[1440px]:hidden">
+          <NewAuthShell
+            eyebrow="Setup"
+            title="Complete Your Profile"
+            subtitle="Set up your academic profile to get started."
+            footer={null}
+          >
+            <ProfileCompletionForm onComplete={handleProfileComplete} />
+          </NewAuthShell>
+        </div>
+      </>
+    );
+  }
+
   // ── Forgot-password mode ──────────────────────────────────
 
   if (mode === "forgot-password") {
@@ -202,7 +233,7 @@ function AuthContent() {
     <>
       {/* Desktop layout (≥1440px) */}
       <div className="hidden min-[1440px]:block">
-        <DesktopAuthLayout showProgress={mode === "register"}>
+        <DesktopAuthLayout progressStep={mode === "register" ? 1 : 0}>
           {tabs}
           {formContent}
           <p className="mt-6 text-center text-sm text-muted-foreground">{authFooter}</p>

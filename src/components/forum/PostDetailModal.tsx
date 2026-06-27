@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useBodyLock } from "@/hooks/useBodyLock";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "@/lib/utils";
 import { CommentThread } from "./CommentThread";
@@ -244,14 +245,7 @@ export function PostDetailModal({
     { type: "IDEA", icon: <Lightbulb size={18} weight="fill" />, label: "Idea", color: "#eab308" },
   ] as const;
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [isOpen]);
+  useBodyLock(isOpen);
 
   useEffect(() => {
     if (isOpen) {

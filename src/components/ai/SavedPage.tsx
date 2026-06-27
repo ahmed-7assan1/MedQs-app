@@ -133,7 +133,7 @@ export function SavedPage({ isOpen, onClose, isDark }: SavedPageProps) {
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className={cn("fixed inset-0 z-[10030] overflow-y-auto",
+          className={cn("fixed inset-0 z-max overflow-y-auto",
             isDark ? "bg-[#050505]" : "bg-[#FCFCFC]"
           )}
         >

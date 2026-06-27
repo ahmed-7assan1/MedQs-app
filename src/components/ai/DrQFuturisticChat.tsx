@@ -753,13 +753,13 @@ export function DrQFuturisticChat() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setMobileSidebarOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] md:hidden" />
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-dropdown md:hidden" />
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 bottom-0 w-full max-w-[320px] bg-[#0a0b14]/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl z-[101] flex flex-col md:hidden"
+              className="fixed top-0 left-0 bottom-0 w-full max-w-[320px] bg-[#0a0b14]/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl z-dropdown flex flex-col md:hidden"
             >
               <div className="p-5 flex items-center justify-between border-b border-white/[0.04]">
                 <span className="text-sm font-bold text-gradient-primary">MedOneX Expert</span>

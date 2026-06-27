@@ -17,12 +17,12 @@ const fadeUp: Variants = {
 };
 
 const progressSteps = [
-  { number: 1, title: "Create Account", active: true },
-  { number: 2, title: "Complete Profile", active: false },
-  { number: 3, title: "Start Learning", active: false },
+  { number: 1, title: "Create Account" },
+  { number: 2, title: "Complete Profile" },
+  { number: 3, title: "Start Learning" },
 ];
 
-export function LeftPanel({ showProgress = true }: { showProgress?: boolean }) {
+export function LeftPanel({ currentStep = 0 }: { currentStep?: number }) {
   return (
     <div className="relative h-full w-full overflow-hidden rounded-r-[32px]">
       {/* Top-left radial glow */}
@@ -85,34 +85,40 @@ export function LeftPanel({ showProgress = true }: { showProgress?: boolean }) {
           </motion.p>
 
           {/* Progress Cards */}
-          {showProgress && (
+          {currentStep > 0 && (
             <motion.div
               variants={fadeUp}
               className="mt-11 flex w-full max-w-[370px] flex-col gap-4"
             >
-              {progressSteps.map((step) => (
-                <div
-                  key={step.number}
-                  className={`flex h-[62px] items-center gap-4 rounded-[15px] px-5 ${
-                    step.active
-                      ? "bg-white text-[#1a1a2e] shadow-[0_4px_20px_-8px_rgba(0,0,0,0.3)]"
-                      : "bg-gray-100 text-gray-500 dark:bg-[#2A2A2A] dark:text-[#E0E0E0]"
-                  }`}
-                >
-                  <span
-                    className={`flex h-[23px] w-[23px] shrink-0 items-center justify-center rounded-full text-[13px] font-bold ${
-                      step.active
-                        ? "bg-[#1a1a2e] text-white"
-                        : "bg-gray-200 text-gray-500 dark:bg-[#3A3A3A] dark:text-[#CCC]"
+              {progressSteps.map((step) => {
+                const isCompleted = step.number < currentStep;
+                const isActive = step.number === currentStep;
+                return (
+                  <div
+                    key={step.number}
+                    className={`flex h-[62px] items-center gap-4 rounded-[15px] px-5 ${
+                      isActive
+                        ? "bg-white text-black dark:text-black shadow-[0_4px_20px_-8px_rgba(0,0,0,0.3)]"
+                        : "bg-gray-100 text-gray-500 dark:bg-[#2A2A2A] dark:text-[#E0E0E0]"
                     }`}
                   >
-                    {step.number}
-                  </span>
-                  <span className="text-[15px] font-medium">
-                    {step.title}
-                  </span>
-                </div>
-              ))}
+                    <span
+                      className={`flex h-[23px] w-[23px] shrink-0 items-center justify-center rounded-full text-[13px] font-bold ${
+                        isCompleted
+                          ? "bg-green-500 text-white"
+                          : isActive
+                            ? "bg-black text-white"
+                            : "bg-gray-200 text-gray-500 dark:bg-[#3A3A3A] dark:text-[#CCC]"
+                      }`}
+                    >
+                      {isCompleted ? "✓" : step.number}
+                    </span>
+                    <span className={`text-[15px] font-medium ${isActive ? "dark:text-black" : "dark:text-[#E0E0E0]"}`}>
+                      {step.title}
+                    </span>
+                  </div>
+                );
+              })}
             </motion.div>
           )}
         </motion.div>

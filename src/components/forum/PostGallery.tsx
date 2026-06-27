@@ -181,7 +181,7 @@ export function PostGallery({ attachments, layout = 'grid' }: Props) {
 
       {/* Lightbox / Overlay View */}
       {viewIndex !== null && (
-        <div className="fixed inset-0 z-[999] flex flex-col bg-black/95 backdrop-blur-2xl animate-in fade-in duration-500">
+        <div className="fixed inset-0 z-modal flex flex-col bg-black/95 backdrop-blur-2xl animate-in fade-in duration-500">
           <header className="flex items-center justify-between px-6 py-4 text-white border-b border-white/5 bg-black/20">
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">MedQs Intelligence</span>
