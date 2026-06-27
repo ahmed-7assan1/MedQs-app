@@ -7,7 +7,7 @@ import { useLocale } from "@/contexts/LocaleContext";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-const spring = { type: "spring", stiffness: 400, damping: 25 } as const;
+
 
 interface ReviewModalProps {
   open: boolean;
@@ -143,25 +143,18 @@ export function ReviewModal({ open, onClose, onSubmitted }: ReviewModalProps) {
                     {[1, 2, 3, 4, 5].map((s) => {
                       const active = s <= (hovered || rating);
                       return (
-                        <motion.button
+                        <button
                           key={s}
-                          whileHover={{ scale: 1.15 }}
-                          whileTap={{ scale: 0.9 }}
-                          transition={spring}
                           onMouseEnter={() => setHovered(s)}
                           onMouseLeave={() => setHovered(0)}
                           onClick={() => setRating(s)}
-                          className="relative p-1 outline-none"
+                          className="relative p-1 outline-none transition-transform duration-150 ease-out hover:scale-110 active:scale-90"
                         >
-                          {active && (
-                            <motion.div
-                              layoutId="starBg"
-                              className="absolute inset-0 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-600/10"
-                              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                            />
-                          )}
+                          <div
+                            className={`absolute inset-0 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-600/10 transition-opacity duration-150 ${active ? "opacity-100" : "opacity-0"}`}
+                          />
                           <StarIcon filled={active} size={36} />
-                        </motion.button>
+                        </button>
                       );
                     })}
                   </div>
