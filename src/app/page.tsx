@@ -30,7 +30,7 @@ export default async function HomePage() {
       <LandingPageWrapper>
         {/* Purple ambient glow — brand signature */}
         <div
-          className="pointer-events-none fixed inset-0 z-0 opacity-[0.15] dark:opacity-[0.25]"
+          className="pointer-events-none fixed inset-0 z-0 opacity-[0.15] dark:opacity-[0.25] max-md:opacity-[0.08] max-md:dark:opacity-[0.12]"
           style={{
             background:
               "radial-gradient(ellipse 80% 60% at 0% 0%, #E7D6FF 0%, #B36BFF 25%, #7C3AED 45%, transparent 70%)",
