@@ -15,7 +15,12 @@ function AuthContent() {
   const supabase = createClient();
 
   type AuthMode = "login" | "register" | "forgot-password" | "complete-profile";
-  const [mode, setMode] = useState<AuthMode>(["register", "onboarding"].includes(sp.get("mode") || "") ? "register" : "login");
+  const q = sp.get("mode");
+  const [mode, setMode] = useState<AuthMode>(
+    q === "complete-profile" ? "complete-profile"
+      : ["register", "onboarding"].includes(q || "") ? "register"
+      : "login"
+  );
   const [loading, setLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
   const [email, setEmail] = useState("");
