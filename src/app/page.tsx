@@ -50,8 +50,8 @@ export default async function HomePage() {
         <div className="relative z-10 min-h-screen overflow-x-hidden landing-dot-grid pt-[88px]">
           <Navbar />
           <Hero />
-          <StorySection />
           <LogosStrip />
+          <StorySection />
           <Features />
           <Showcase />
           <Testimonials />
