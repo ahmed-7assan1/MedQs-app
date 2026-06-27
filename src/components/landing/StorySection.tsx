@@ -186,7 +186,7 @@ export function StorySection() {
   const isRtl = locale === "ar";
 
   return (
-    <section dir={isRtl ? "rtl" : "ltr"} className={`bg-card/40 py-24 ${isRtl ? "font-arabic" : ""}`}>
+    <section dir={isRtl ? "rtl" : "ltr"} className={`py-24 ${isRtl ? "font-arabic" : ""}`}>
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <motion.div

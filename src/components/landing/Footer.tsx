@@ -11,7 +11,7 @@ export function Footer() {
   const { t, locale } = useLocale();
   const footerColumns = t("footer.columns") as { title: string; links: { label: string; href: string }[] }[];
   return (
-    <footer className="border-t border-border bg-card/40">
+    <footer>
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-5">
         <div className="md:col-span-2">
             <div className="flex items-center gap-3">

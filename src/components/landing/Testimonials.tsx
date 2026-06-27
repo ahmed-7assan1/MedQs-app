@@ -66,7 +66,7 @@ export function Testimonials() {
   const doubled = [...testimonials, ...testimonials];
 
   return (
-    <section ref={ref} id="testimonials" className="bg-card/40 py-24">
+    <section ref={ref} id="testimonials" className="py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader eyebrow={t("testimonials.eyebrow")} title={t("testimonials.title")} />
       </div>

@@ -18,7 +18,7 @@ export function LogosStrip() {
   if (!Array.isArray(universities) || universities.length === 0) return null;
 
   return (
-    <section ref={ref} className="border-y border-border/60 bg-card/40 py-10">
+    <section ref={ref} className="py-10">
       <div className="mx-auto max-w-6xl px-6">
         <motion.p
           initial={{ opacity: 0 }}

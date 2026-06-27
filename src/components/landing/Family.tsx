@@ -140,7 +140,7 @@ export function Family() {
   const members = Array.isArray(membersData) ? membersData : [];
 
   return (
-    <section ref={ref} id="family" className="bg-card/40 py-24">
+    <section ref={ref} id="family" className="py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
           eyebrow={t("family.eyebrow")}
