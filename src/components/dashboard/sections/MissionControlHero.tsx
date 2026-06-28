@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Flame, Trophy, ArrowRight, Quote, Sparkles } from "lucide-react";
+import { Flame, Trophy, ArrowRight, Quote, Sparkles, Search, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fadeUp } from "@/components/dashboard/shared/animations";
 import type { DashboardData } from "@/types/dashboard";
@@ -51,6 +51,13 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
               </p>
             </div>
             <div className="flex gap-2 shrink-0">
+              <button className="grid h-8 w-8 place-items-center rounded-full bg-muted/30 border border-border/40 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all" title="Search">
+                <Search className="h-3.5 w-3.5" />
+              </button>
+              <button className="relative grid h-8 w-8 place-items-center rounded-full bg-muted/30 border border-border/40 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all" title="Notifications">
+                <Bell className="h-3.5 w-3.5" />
+                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500 border border-background" />
+              </button>
               <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm", data.currentStreak > 0 ? "bg-orange-500/10 border-orange-500/20" : "bg-muted/30 border-border")}>
                 <Flame className={cn("h-3.5 w-3.5", data.currentStreak > 0 ? "text-orange-500" : "text-muted-foreground")} />
                 <span className="text-xs font-black text-foreground">{data.currentStreak}d</span>
