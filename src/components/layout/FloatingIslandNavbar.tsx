@@ -91,6 +91,13 @@ export function FloatingIslandNavbar({
     };
   }, [handleScroll]);
 
+  const hideSidebar = pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed") || pathname.startsWith("/social") || pathname.startsWith("/modules"));
+
+  useEffect(() => {
+    const offset = hideSidebar || (isCollapsed && !isExpanded) ? 0 : sidebarWidth;
+    document.documentElement.style.setProperty("--sidebar-offset", `${offset}px`);
+  }, [isCollapsed, isExpanded, isCompact, sidebarWidth, hideSidebar]);
+
   useEffect(() => {
     const handler = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handler);
