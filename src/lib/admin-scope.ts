@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { AuthSession as Session } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRetry } from "@/lib/prisma";
 import { getSessionScope, isAdminRole, isSuperAdmin, type SessionScope } from "@/lib/tenant";
 
 export type AdminWriteResult =
@@ -44,10 +44,12 @@ export async function assertAcademicYear(scope: SessionScope, academicYearId: st
 
 export async function assertSemester(scope: SessionScope, semesterId: string): Promise<NextResponse | null> {
   if (isSuperAdmin(scope.role)) return null;
-  const s = await prisma.semester.findFirst({
-    where: { id: semesterId, academicYear: { universityId: scope.universityId! } },
-    select: { id: true },
-  });
+  const s = await withRetry(() =>
+    prisma.semester.findFirst({
+      where: { id: semesterId, academicYear: { universityId: scope.universityId! } },
+      select: { id: true },
+    })
+  );
   if (!s) return forbidden();
   return null;
 }
@@ -77,13 +79,15 @@ export async function assertSubject(scope: SessionScope, subjectId: string): Pro
 
 export async function assertLecture(scope: SessionScope, lectureId: string): Promise<NextResponse | null> {
   if (isSuperAdmin(scope.role)) return null;
-  const l = await prisma.lecture.findFirst({
-    where: {
-      id: lectureId,
-      subject: { module: { semester: { academicYear: { universityId: scope.universityId! } } } },
-    },
-    select: { id: true },
-  });
+  const l = await withRetry(() =>
+    prisma.lecture.findFirst({
+      where: {
+        id: lectureId,
+        subject: { module: { semester: { academicYear: { universityId: scope.universityId! } } } },
+      },
+      select: { id: true },
+    })
+  );
   if (!l) return forbidden();
   return null;
 }
@@ -130,10 +134,12 @@ export async function assertFlashcard(scope: SessionScope, flashcardId: string):
 
 export async function assertForum(scope: SessionScope, forumId: string): Promise<NextResponse | null> {
   if (isSuperAdmin(scope.role)) return null;
-  const f = await prisma.forum.findFirst({
-    where: { id: forumId, universityId: scope.universityId! },
-    select: { id: true },
-  });
+  const f = await withRetry(() =>
+    prisma.forum.findFirst({
+      where: { id: forumId, universityId: scope.universityId! },
+      select: { id: true },
+    })
+  );
   if (!f) return forbidden();
   return null;
 }

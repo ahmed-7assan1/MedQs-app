@@ -23,7 +23,7 @@ export async function POST(
     await Promise.all([
       prisma.privateForumInvite.update({
         where: { id: params.inviteId },
-        data: { status: "accepted" },
+        data: { status: "ACCEPTED" },
       }),
       prisma.privateForumMember.upsert({
         where: { forumId_userId: { forumId: invite.forumId, userId: session.user.id } },
@@ -37,7 +37,7 @@ export async function POST(
   if (action === "decline") {
     await prisma.privateForumInvite.update({
       where: { id: params.inviteId },
-      data: { status: "declined" },
+      data: { status: "DECLINED" },
     });
     return NextResponse.json({ declined: true });
   }

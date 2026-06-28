@@ -71,9 +71,9 @@ export async function POST(req: NextRequest) {
         forumId:    forum.id,
         senderId:   session.user.id,
         receiverId: invitee.id,
-        status:     "pending",
+        status:     "PENDING",
       },
-      update: { status: "pending" },
+      update: { status: "PENDING" },
     });
 
     // Send notification

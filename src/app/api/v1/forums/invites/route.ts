@@ -9,7 +9,7 @@ export async function GET() {
   const invites = await prisma.privateForumInvite.findMany({
     where: {
       receiverId: session.user.id,
-      status: "pending",
+      status: "PENDING",
     },
     orderBy: { createdAt: "desc" },
     select: {

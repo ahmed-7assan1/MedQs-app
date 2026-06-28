@@ -1,4 +1,4 @@
-﻿-- DropForeignKey
+-- DropForeignKey
 ALTER TABLE "AIUsageLog" DROP CONSTRAINT "AIUsageLog_userId_fkey";
 
 -- DropForeignKey

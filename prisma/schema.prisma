@@ -1626,6 +1626,7 @@ enum QuestionTypeV2 {
   MULTI_SELECT
   TRUE_FALSE
   CASE_BASED
+  ESSAY
 }
 
 enum DifficultyLevel {
