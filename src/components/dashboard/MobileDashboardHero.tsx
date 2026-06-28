@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Flame, Trophy, GraduationCap, Star, ShieldCheck, Rocket, Sparkles, BookOpen } from "lucide-react";
+import { Flame, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BadgeProgressSheet } from "@/components/dashboard/BadgeProgressSheet";
+import { getEarnedBadge, type BadgeData } from "@/components/dashboard/shared/badges";
 
 function AnimatedFlame() {
   return (
@@ -26,97 +27,6 @@ function ShimmerOverlay({ delay = 1 }: { delay?: number }) {
       />
     </div>
   );
-}
-
-/* ── Achievement badges based on actual dashboard data ── */
-interface BadgeDef {
-  id: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  gradient: string;
-  glow: string;
-  check: (data: BadgeData) => boolean;
-}
-
-interface BadgeData {
-  currentStreak: number;
-  totalQuestions: number;
-  overallPct: number;
-  rankPoints: number;
-}
-
-const BADGES: BadgeDef[] = [
-  {
-    id: "legend",
-    label: "Legend",
-    icon: Rocket,
-    gradient: "from-rose-600 via-pink-500 to-orange-400",
-    glow: "shadow-[0_0_12px_rgba(225,29,72,0.4)]",
-    check: (d) => d.overallPct >= 90 && d.currentStreak >= 30,
-  },
-  {
-    id: "master",
-    label: "Master",
-    icon: Sparkles,
-    gradient: "from-rose-500 to-pink-600",
-    glow: "shadow-[0_0_12px_rgba(244,63,94,0.35)]",
-    check: (d) => d.overallPct >= 85 && d.currentStreak >= 14,
-  },
-  {
-    id: "expert",
-    label: "Expert",
-    icon: ShieldCheck,
-    gradient: "from-rose-400 to-red-500",
-    glow: "shadow-[0_0_12px_rgba(251,113,133,0.3)]",
-    check: (d) => d.overallPct >= 80,
-  },
-  {
-    id: "streak_30",
-    label: "Monthly Legend",
-    icon: Star,
-    gradient: "from-amber-500 to-orange-500",
-    glow: "shadow-[0_0_12px_rgba(245,158,11,0.3)]",
-    check: (d) => d.currentStreak >= 30,
-  },
-  {
-    id: "centurion",
-    label: "Centurion",
-    icon: Trophy,
-    gradient: "from-violet-500 to-purple-600",
-    glow: "shadow-[0_0_12px_rgba(139,92,246,0.3)]",
-    check: (d) => d.totalQuestions >= 500,
-  },
-  {
-    id: "streak_7",
-    label: "7-Day Streak",
-    icon: Star,
-    gradient: "from-emerald-500 to-teal-500",
-    glow: "shadow-[0_0_12px_rgba(52,211,153,0.3)]",
-    check: (d) => d.currentStreak >= 7,
-  },
-  {
-    id: "scholar",
-    label: "Scholar",
-    icon: GraduationCap,
-    gradient: "from-sky-500 to-cyan-500",
-    glow: "shadow-[0_0_12px_rgba(14,165,233,0.25)]",
-    check: (d) => d.totalQuestions >= 100,
-  },
-  {
-    id: "first_steps",
-    label: "First Steps",
-    icon: BookOpen,
-    gradient: "from-slate-500 to-slate-600",
-    glow: "shadow-[0_0_8px_rgba(100,116,139,0.2)]",
-    check: () => true,
-  },
-];
-
-function getEarnedBadge(data: BadgeData): BadgeDef {
-  for (const badge of BADGES) {
-    if (badge.check(data)) return badge;
-  }
-  return BADGES[BADGES.length - 1];
 }
 
 export function MobileDashboardHero({

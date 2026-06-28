@@ -2,9 +2,10 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Sparkles, BookOpen, Users, PenTool, MessagesSquare, ArrowRight } from "lucide-react";
+import { Sparkles, BookOpen, Users, PenTool, MessagesSquare, ArrowRight, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fadeUp } from "@/components/dashboard/shared/animations";
+import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 import { AskDrQFeatured } from "@/components/dashboard/RedesignedComponents";
 
 const CARDS = [
@@ -77,9 +78,7 @@ function EcosystemCard({ card }: { card: typeof CARDS[number] }) {
 export function EcosystemCards() {
   return (
     <motion.div variants={fadeUp}>
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">MedOneX Ecosystem</span>
-      </div>
+      <SectionHeader icon={Globe} title="MedOneX Ecosystem" />
 
       <div className="hidden sm:grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3">
         <AskDrQFeatured />

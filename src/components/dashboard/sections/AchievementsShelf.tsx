@@ -7,27 +7,10 @@ import { Flame, Trophy, Star, ChevronRight, Sparkles, Rocket, BookCheck, Target,
 import { cn } from "@/lib/utils";
 import { fadeUp, EASE } from "@/components/dashboard/shared/animations";
 import { AnimatedRing } from "@/components/dashboard/RedesignedComponents";
+import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
+import { createConfettiPieces, STREAK_MILESTONES, type ConfettiPiece } from "@/components/dashboard/shared/confetti";
+import { Q_MILESTONES } from "@/components/dashboard/shared/badges";
 import type { DashboardData } from "@/types/dashboard";
-
-const COLORS = ["#f43f5e", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#a855f7"];
-const SHAPES = ["square", "circle", "triangle"];
-
-interface ConfettiPiece {
-  id: number; x: number; color: string; shape: string; size: number; delay: number;
-}
-
-const createPieces = (count: number): ConfettiPiece[] =>
-  Array.from({ length: count }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
-    size: 6 + Math.random() * 8,
-    delay: Math.random() * 0.5,
-  }));
-
-const MILESTONES = [3, 7, 14, 21, 30, 60, 90, 180, 365];
-const Q_MILESTONES = [100, 500, 1000, 5000];
 
 function computeBadges(data: DashboardData) {
   const badges: { icon: typeof Sparkles; label: string; unlocked: boolean; color: string }[] = [];
@@ -74,7 +57,7 @@ export function AchievementsShelf({ data }: { data: DashboardData }) {
   }, []);
 
   const trigger = useCallback((streak: number) => {
-    setPieces(createPieces(8));
+    setPieces(createConfettiPieces(8));
     setShow(true);
     setTimeout(() => setShow(false), 2500);
     saveMilestones([...celebrated, streak]);
@@ -83,11 +66,11 @@ export function AchievementsShelf({ data }: { data: DashboardData }) {
   useEffect(() => {
     if (data.currentStreak < 1) return;
     if (celebrated.includes(data.currentStreak)) return;
-    const isMilestone = MILESTONES.includes(data.currentStreak);
+    const isMilestone = STREAK_MILESTONES.includes(data.currentStreak);
     if (isMilestone) trigger(data.currentStreak);
   }, [data.currentStreak, celebrated, trigger]);
 
-  const nextMilestone = MILESTONES.find((m) => m > data.currentStreak);
+  const nextMilestone = STREAK_MILESTONES.find((m) => m > data.currentStreak);
   const streakProgress = nextMilestone ? (data.currentStreak / nextMilestone) * 100 : 100;
 
   let emoji: { icon: typeof Flame; label: string; color: string };
@@ -130,10 +113,7 @@ export function AchievementsShelf({ data }: { data: DashboardData }) {
         )}
       </AnimatePresence>
 
-      <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="h-3.5 w-3.5 text-primary" />
-        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">Achievements</span>
-      </div>
+      <SectionHeader icon={Sparkles} title="Achievements" />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Streak Card */}

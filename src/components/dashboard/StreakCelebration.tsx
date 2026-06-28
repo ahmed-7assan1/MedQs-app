@@ -4,30 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flame, Trophy, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const COLORS = ["#f43f5e", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#a855f7"];
-const SHAPES = ["square", "circle", "triangle"];
-
-interface ConfettiPiece {
-  id: number;
-  x: number;
-  color: string;
-  shape: string;
-  size: number;
-  delay: number;
-}
-
-const createPieces = (count: number): ConfettiPiece[] =>
-  Array.from({ length: count }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
-    size: 6 + Math.random() * 8,
-    delay: Math.random() * 0.5,
-  }));
-
-const MILESTONES = [3, 7, 14, 21, 30, 60, 90, 180, 365];
+import { createConfettiPieces, STREAK_MILESTONES, type ConfettiPiece } from "@/components/dashboard/shared/confetti";
 
 export const StreakCelebration = ({ currentStreak }: { currentStreak: number }) => {
   const [celebrated, setCelebrated] = useState<number[]>(() => {
@@ -45,7 +22,7 @@ export const StreakCelebration = ({ currentStreak }: { currentStreak: number }) 
   }, []);
 
   const trigger = useCallback((streak: number) => {
-    setPieces(createPieces(8));
+    setPieces(createConfettiPieces(8));
     setShow(true);
     setTimeout(() => setShow(false), 2500);
     saveMilestones([...celebrated, streak]);
@@ -54,11 +31,11 @@ export const StreakCelebration = ({ currentStreak }: { currentStreak: number }) 
   useEffect(() => {
     if (currentStreak < 1) return;
     if (celebrated.includes(currentStreak)) return;
-    const isMilestone = MILESTONES.includes(currentStreak);
+    const isMilestone = STREAK_MILESTONES.includes(currentStreak);
     if (isMilestone) trigger(currentStreak);
   }, [currentStreak, celebrated, trigger]);
 
-  const nextMilestone = MILESTONES.find((m) => m > currentStreak);
+  const nextMilestone = STREAK_MILESTONES.find((m) => m > currentStreak);
   const progress = nextMilestone ? (currentStreak / nextMilestone) * 100 : 100;
 
   let emoji: { icon: typeof Flame; label: string; color: string };

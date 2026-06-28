@@ -5,27 +5,8 @@ import Link from "next/link";
 import { Flame, Trophy, ArrowRight, Quote, Sparkles, Search, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fadeUp } from "@/components/dashboard/shared/animations";
+import { getDailyQuote } from "@/components/dashboard/shared/quotes";
 import type { DashboardData } from "@/types/dashboard";
-
-const QUOTES = [
-  { text: "The art of medicine consists of amusing the patient while nature cures the disease.", author: "Voltaire" },
-  { text: "Wherever the art of medicine is loved, there is also a love of humanity.", author: "Hippocrates" },
-  { text: "Medicine is a science of uncertainty and an art of probability.", author: "William Osler" },
-  { text: "The good physician treats the disease; the great physician treats the patient who has the disease.", author: "William Osler" },
-  { text: "He who studies medicine without books sails an uncharted sea.", author: "William Osler" },
-  { text: "Let food be thy medicine and medicine be thy food.", author: "Hippocrates" },
-  { text: "Cure sometimes, treat often, comfort always.", author: "Hippocrates" },
-  { text: "The physician\'s highest calling is to find health and make it possible.", author: "Norman Cousins" },
-  { text: "The aim of medicine is to prevent disease and prolong life.", author: "William J. Mayo" },
-  { text: "It is more important to know what sort of person has a disease.", author: "Hippocrates" },
-  { text: "The practice of medicine is an art, not a trade.", author: "William Osler" },
-  { text: "Time is generally the best doctor.", author: "Ovid" },
-];
-
-function getDailyQuote() {
-  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-  return QUOTES[dayOfYear % QUOTES.length];
-}
 
 export function MissionControlHero({ data }: { data: DashboardData }) {
   const quote = getDailyQuote();

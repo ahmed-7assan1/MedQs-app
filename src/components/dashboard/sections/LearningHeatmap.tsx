@@ -3,20 +3,9 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { fadeUp, EASE } from "@/components/dashboard/shared/animations";
+import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
+import { last7DayKeys } from "@/lib/dashboard-stats";
 import type { DashboardData } from "@/types/dashboard";
-
-const last7DayKeys = () => {
-  const days = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    days.push({
-      key: d.toISOString().slice(0, 10),
-      shortLabel: d.toLocaleDateString("en", { weekday: "short" }).slice(0, 3),
-    });
-  }
-  return days;
-};
 
 function getLevel(count: number, max: number): number {
   if (count === 0) return 0;
@@ -51,12 +40,14 @@ export function LearningHeatmap({ data }: { data: DashboardData }) {
 
   return (
     <motion.div variants={fadeUp}>
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">Study Activity</span>
-        <span className="text-[10px] font-bold text-muted-foreground/50 ml-auto">
-          {activityArr.reduce((a: number, b: any) => a + b.count, 0)} units this week
-        </span>
-      </div>
+      <SectionHeader
+        title="Study Activity"
+        right={
+          <span className="text-[10px] font-bold text-muted-foreground/50">
+            {activityArr.reduce((a: number, b: any) => a + b.count, 0)} units this week
+          </span>
+        }
+      />
 
       <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-5 shadow-sm transition-all duration-300 hover:shadow-md">
         <div className="flex items-center gap-2">

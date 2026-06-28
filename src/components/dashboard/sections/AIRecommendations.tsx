@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Lightbulb, TrendingUp, Target, AlertCircle, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fadeUp, EASE } from "@/components/dashboard/shared/animations";
+import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 import type { DashboardData } from "@/types/dashboard";
 
 interface Recommendation {
@@ -87,10 +88,7 @@ export function AIRecommendations({ data }: { data: DashboardData }) {
 
   return (
     <motion.div variants={fadeUp}>
-      <div className="flex items-center gap-2 mb-4">
-        <Lightbulb className="h-3.5 w-3.5 text-primary" />
-        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">AI Insights</span>
-      </div>
+      <SectionHeader icon={Lightbulb} title="AI Insights" />
 
       <div className="grid gap-3">
         {recommendations.map((rec, i) => {

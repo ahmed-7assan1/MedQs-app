@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Home, BookOpen, Video, Mic, HelpCircle, MessageCircle,
   Clock, Users, Pen, Sparkles, Search, X,
-  Sun, Moon, Settings, Send, Folder
+  Sun, Moon, Settings, Send, Folder, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
@@ -40,6 +40,7 @@ export function FloatingIslandNavbar({
   const { siteName } = useSiteConfig();
   const { theme, setTheme } = useThemeStore();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isCompact, setIsCompact] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchData, setSearchData] = useState<{
     lectures: any[];
@@ -49,15 +50,27 @@ export function FloatingIslandNavbar({
   } | null>(null);
   const [searching, setSearching] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController>();
-  const spinnerTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  const sidebarWidth = 64;
+  const sidebarWidth = isCompact ? (isLargeScreen ? 64 : 56) : (isLargeScreen ? 220 : 180);
 
   useEffect(() => { setMounted(true); }, []);
 
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    setIsLargeScreen(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsLargeScreen(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   const handleExpand = useCallback(() => {
     setIsExpanded(true);
+  }, []);
+
+  const toggleCompact = useCallback(() => {
+    setIsCompact(prev => !prev);
   }, []);
 
   useEffect(() => {
@@ -70,25 +83,23 @@ export function FloatingIslandNavbar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const hideSidebar = pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed") || pathname.startsWith("/social") || pathname.startsWith("/modules"));
+  const hideSidebar = pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed"));
 
   useEffect(() => {
     const offset = hideSidebar ? 0 : sidebarWidth;
     document.documentElement.style.setProperty("--sidebar-offset", `${offset}px`);
-  }, [hideSidebar, sidebarWidth]);
+  }, [hideSidebar, sidebarWidth, isCompact]);
 
-  if (pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed") || pathname.startsWith("/social") || pathname.startsWith("/modules"))) return null;
+  if (pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed"))) return null;
 
   const handleSearchInput = (val: string) => {
     setSearchQuery(val);
-    clearTimeout(spinnerTimeoutRef.current);
     if (val.length < 3) { setSearchData(null); setSearching(false); return; }
 
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-
-    spinnerTimeoutRef.current = setTimeout(() => setSearching(true), 300);
+    setSearching(true);
 
     fetch(`/api/v1/search?q=${encodeURIComponent(val)}`, { signal: controller.signal })
       .then((r) => r.json())
@@ -102,7 +113,6 @@ export function FloatingIslandNavbar({
       })
       .catch(() => {})
       .finally(() => {
-        clearTimeout(spinnerTimeoutRef.current);
         setSearching(false);
       });
   };
@@ -137,20 +147,32 @@ export function FloatingIslandNavbar({
 
   return (
     <>
-      {/* Sidebar — always compact (icons only) */}
-      <div className="fixed left-0 top-0 h-full z-navbar hidden md:flex">
+      {/* Sidebar — compact (icons only) or expanded (icons + labels) */}
+      <div className="fixed left-0 top-0 h-full z-[calc(var(--z-navbar)+3)] hidden md:flex">
         <div
           ref={sidebarRef}
-          onClick={handleExpand}
-          className="flex flex-col h-full w-16 border-r border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-[4px_0_30px_rgba(0,0,0,0.08)] cursor-pointer"
+          style={{ width: sidebarWidth }}
+          className={cn(
+            "flex flex-col h-full border-r border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-[4px_0_30px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out",
+            isCompact && "cursor-pointer"
+          )}
         >
           {/* Logo */}
-          <div className="flex items-center justify-center pt-5 pb-4 border-b border-border/20">
+          <div className={cn(
+            "flex items-center border-b border-border/20",
+            isCompact ? "justify-center pt-5 pb-4" : "gap-3 px-5 pt-5 pb-4"
+          )}>
             <MedOneXLogoMark className="h-7 w-7 shrink-0 text-[#13171E] dark:text-white" interactiveColor />
+            {!isCompact && (
+              <span className="text-base font-bold tracking-tight text-[#13171E] dark:text-white truncate">{siteName}</span>
+            )}
           </div>
 
-          {/* Nav Items — icon only */}
-          <nav className="flex-1 overflow-y-auto py-3 space-y-0.5 px-1.5">
+          {/* Nav Items */}
+          <nav className={cn(
+            "flex-1 overflow-y-auto py-3 space-y-0.5",
+            isCompact ? "px-1.5" : "px-2.5"
+          )}>
             {NAV_ITEMS.map((item) => {
               const active = pathname.startsWith(item.href);
               const Icon = item.icon;
@@ -160,32 +182,32 @@ export function FloatingIslandNavbar({
                   href={item.href}
                   onClick={(e) => e.stopPropagation()}
                   className={cn(
-                    "flex items-center justify-center h-10 w-10 mx-auto rounded-xl transition-all duration-200 group",
+                    "flex items-center rounded-xl transition-all duration-200 group",
                     active
                       ? "bg-primary/10 text-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/40",
+                    isCompact
+                      ? "justify-center h-10 w-10 mx-auto"
+                      : "w-full gap-3.5 px-4 py-2.5"
                   )}
-                  title={item.label}
+                  title={isCompact ? item.label : undefined}
                 >
-                  <Icon className={cn("h-4 w-4 shrink-0", item.glow && !active && "text-primary")} />
+                  <Icon className={cn("shrink-0", item.glow && !active && "text-primary", isCompact ? "h-4 w-4" : "h-5 w-5")} />
+                  {!isCompact && (
+                    <span className="text-sm font-medium truncate">{item.label}</span>
+                  )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Bottom Section */}
+          {/* Bottom Section — reordered: Actions Icons → Avatar → Chevron */}
           <div className="border-t border-border/20 py-3 space-y-2">
-            {/* Avatar */}
-            <button
-              onClick={(e) => { e.stopPropagation(); handleExpand(); }}
-              className="flex items-center justify-center mx-auto p-1 rounded-xl hover:bg-muted/40 transition-all"
-              title="Open menu"
-            >
-              {avatarBlock("sm")}
-            </button>
-
-            {/* Action Icons */}
-            <div className="flex flex-col items-center gap-1 px-1">
+            {/* Action Icons (top) */}
+            <div className={cn(
+              "flex items-center gap-1",
+              isCompact ? "flex-col px-1" : "px-2"
+            )}>
               <button
                 onClick={(e) => { e.stopPropagation(); handleExpand(); }}
                 className="grid h-8 w-8 place-items-center text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/40 transition-all"
@@ -203,28 +225,54 @@ export function FloatingIslandNavbar({
                 </button>
               )}
             </div>
+
+            {/* Avatar + name (middle) */}
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleCompact(); }}
+              className={cn(
+                "flex items-center rounded-xl hover:bg-muted/40 transition-all",
+                isCompact ? "justify-center mx-auto p-1" : "gap-2.5 px-3 p-2 w-full"
+              )}
+              title={isCompact ? "Open menu" : undefined}
+            >
+              {avatarBlock("sm")}
+              {!isCompact && (
+                <>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-xs font-bold text-foreground truncate">{userName || "User"}</p>
+                  </div>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                </>
+              )}
+            </button>
+
+            {/* Expand/collapse Chevron (bottom) */}
+            <div className={cn(
+              "flex items-center",
+              isCompact ? "justify-center" : "justify-end px-2"
+            )}>
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleCompact(); }}
+                className="grid h-8 w-8 place-items-center text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/40 transition-all"
+                title={isCompact ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                {isCompact ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Expanded overlay panel */}
+      {/* Expanded overlay panel — no backdrop */}
       <AnimatePresence>
         {isExpanded && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[calc(var(--z-navbar)-1)] bg-black/20 backdrop-blur-sm hidden md:block"
-              onClick={() => setIsExpanded(false)}
-            />
-            <motion.div
-              initial={{ x: -300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -300, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              style={{ left: sidebarWidth }}
-              className="fixed top-0 h-full z-navbar hidden md:flex flex-col w-[400px] rounded-r-3xl border-r border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-[4px_0_30px_rgba(0,0,0,0.08)]"
+          <motion.div
+            initial={{ x: -300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -300, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            style={{ left: sidebarWidth }}
+            className="fixed top-0 h-full z-[calc(var(--z-navbar)+3)] hidden md:flex flex-col w-[400px] rounded-r-3xl border-r border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-[4px_0_30px_rgba(0,0,0,0.08)]"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-border/20">
@@ -313,7 +361,6 @@ export function FloatingIslandNavbar({
                 )}
               </div>
             </motion.div>
-          </>
         )}
       </AnimatePresence>
     </>

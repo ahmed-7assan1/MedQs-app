@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowRight } from "lucide-react";
 import type { DashboardData } from "@/types/dashboard";
 import { DashboardMobileView } from "./DashboardMobileView";
 import { DashboardDesktopView } from "./DashboardDesktopView";

@@ -2,9 +2,10 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Play, ArrowRight, GraduationCap } from "lucide-react";
+import { Play, GraduationCap, BookOpen, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fadeUp, EASE } from "@/components/dashboard/shared/animations";
+import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 import type { DashboardData } from "@/types/dashboard";
 
 const cardVariants = {
@@ -22,9 +23,7 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
   if (modules.length === 0) {
     return (
       <motion.div variants={fadeUp}>
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">Continue Learning</span>
-        </div>
+        <SectionHeader icon={BookOpen} title="Continue Learning" />
         <Link
           href="/modules"
           className="flex items-center justify-between p-5 rounded-2xl border border-dashed border-border bg-card/30 hover:bg-card/50 transition-all duration-300 group"
@@ -44,9 +43,7 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
 
   return (
     <motion.div variants={fadeUp}>
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">Continue Learning</span>
-      </div>
+      <SectionHeader icon={BookOpen} title="Continue Learning" />
 
       <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth [-webkit-scrollbar]:hidden">
         {modules.map((mod, i) => (

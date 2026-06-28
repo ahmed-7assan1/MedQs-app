@@ -1,7 +1,9 @@
 ﻿"use client";
 
 import { motion } from "framer-motion";
+import { Zap } from "lucide-react";
 import { fadeUp } from "@/components/dashboard/shared/animations";
+import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 import { QuickActionCard } from "@/components/dashboard/RedesignedComponents";
 
 const ACTIONS = [
@@ -18,9 +20,7 @@ const ACTIONS = [
 export function QuickActionsHub() {
   return (
     <motion.div variants={fadeUp}>
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">Quick Actions</span>
-      </div>
+      <SectionHeader icon={Zap} title="Quick Actions" />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {ACTIONS.map((action, i) => (
