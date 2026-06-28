@@ -287,7 +287,7 @@ model LectureVideo {
   id                String                @id @default(uuid())
   title             String
   url               String
-  sourceType        String                @default("external")
+  sourceType        MediaSource           @default(EXTERNAL)
   sharingEnabled    Boolean               @default(true)
   likesCount        Int                   @default(0)
   commentsCount     Int                   @default(0)
@@ -318,7 +318,7 @@ model LectureRecord {
   id                String   @id @default(uuid())
   title             String
   url               String
-  sourceType        String   @default("spotify")
+  sourceType        MediaSource @default(YOUTUBE)
   lectureId         String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -364,13 +364,13 @@ model Question {
   answer            String
   explanation       String?
   aiExplanation     String?
-  difficulty        Difficulty         @default(MEDIUM)
+  difficulty        DifficultyLevel    @default(MEDIUM)
   lectureId         String
   createdAt         DateTime           @default(now())
   imageUrl          String?
   stemLayout        QuestionStemLayout @default(STANDARD)
   essayReference    String?
-  questionType      String             @default("MCQ")
+  questionType      QuestionTypeV2     @default(MCQ)
   telegramMessageId String?
   telegramChatId    String?
   videoUrl          String?
@@ -752,9 +752,9 @@ model PrivateForumInvite {
   forumId    String
   senderId   String
   receiverId String
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
-  forum      Forum    @relation(fields: [forumId], references: [id], onDelete: Cascade)
+  status     InviteStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+  forum      Forum        @relation(fields: [forumId], references: [id], onDelete: Cascade)
   receiver   User     @relation("InviteReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
   sender     User     @relation("InviteSender", fields: [senderId], references: [id], onDelete: Cascade)
 
@@ -930,10 +930,10 @@ model GroupMember {
   id       String   @id @default(uuid())
   groupId  String
   userId   String
-  role     String   @default("MEMBER")
-  joinedAt DateTime @default(now())
-  group    Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role            GroupMemberRole @default(MEMBER)
+  joinedAt        DateTime        @default(now())
+  group           Group           @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, userId])
   @@index([userId])
@@ -1078,7 +1078,7 @@ model MedicalTeam {
   memberLimit      Int?
   telegramGroupId  String?
   telegramTemplate String?
-  summaryFrequency String         @default("NONE")
+  summaryFrequency SummaryFrequency @default(NONE)
   lastSummaryAt    DateTime?
   auditLogs        AuditLog[]
   lectures         Lecture[]
@@ -1370,7 +1370,7 @@ model StudySession {
   endedAt        DateTime?
   targetDuration Int       @default(25)
   breakDuration  Int?      @default(5)
-  status         String    @default("WAITING")
+  status         StudySessionStatus @default(WAITING)
   lectureId      String?
   lectureTitle   String?
   pausedAt       DateTime?
@@ -1429,8 +1429,8 @@ enum ReportStatus {
 
 model Report {
   id         String           @id @default(uuid())
-  type       String           @default("CONTENT")
-  subtype    String?          @default("QUESTION")
+  type       ReportType       @default(CONTENT)
+  subtype    ReportSubtype?   @default(QUESTION)
   targetType ReportTargetType
   targetId   String
   reason     String
@@ -1504,6 +1504,49 @@ enum LectureType {
   PRACTICAL
 }
 
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELED
+}
+
+enum GroupMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum StudySessionStatus {
+  WAITING
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum SummaryFrequency {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum ReportType {
+  CONTENT
+  USER
+  SPAM
+  OTHER
+}
+
+enum ReportSubtype {
+  QUESTION
+  POST
+  COMMENT
+  PROFILE
+  OTHER
+}
+
 enum MediaSource {
   YOUTUBE
   DRIVE
@@ -1547,12 +1590,6 @@ enum NotifChannel {
   BROADCAST
 }
 
-enum Difficulty {
-  EASY
-  MEDIUM
-  HARD
-}
-
 enum QuestionStemLayout {
   STANDARD
   IMAGE_OVERLAY
@@ -1576,13 +1613,6 @@ enum TeamRole {
   LEADER
   ADMIN
   MEMBER
-}
-
-enum PlatformRole {
-  SUPER_ADMIN
-  FACULTY_ADMIN
-  TEACHER
-  STUDENT
 }
 
 enum CourseVisibility {
