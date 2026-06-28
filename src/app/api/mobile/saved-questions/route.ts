@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 
 // GET /api/mobile/saved-questions
-export async function GET(req: NextRequest) {
+export const GET = withAuth(async ({ userId }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const saved = await prisma.savedQuestion.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -29,15 +25,11 @@ export async function GET(req: NextRequest) {
     console.error('[MOBILE_SAVED_QUESTIONS_GET]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});
 
 // POST /api/mobile/saved-questions — save or unsave
-export async function POST(req: NextRequest) {
+export const POST = withAuth(async ({ req, userId }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const { questionId } = await req.json();
     if (!questionId) return NextResponse.json({ error: 'questionId required' }, { status: 400 });
 
@@ -54,4 +46,4 @@ export async function POST(req: NextRequest) {
     console.error('[MOBILE_SAVED_QUESTIONS_POST]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

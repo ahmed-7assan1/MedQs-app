@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 
 // GET /api/mobile/quiz-attempts/[id]
-export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+export const GET = withAuth(async ({ userId, token, params: rawParams }) => {
   try {
-    const token = await getServerToken(req);
-    if (!token?.sub) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const params = await props.params;
+    const params = await rawParams;
     const attempt = await prisma.quizAttempt.findUnique({
       where: { id: params.id },
       include: {
@@ -30,9 +27,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
 
     if (!attempt) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    const userId = token.sub as string;
     const isOwner = attempt.userId === userId;
-    const role = (token as any).role;
+    const role = token?.role as string | undefined;
     const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
     if (!isOwner && !isAdmin)
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -42,4 +38,4 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     console.error('[MOBILE_QUIZ_ATTEMPT_GET]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

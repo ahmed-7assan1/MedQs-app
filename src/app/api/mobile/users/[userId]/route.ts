@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 
-export async function GET(req: NextRequest, props: { params: Promise<{ userId: string }> }) {
+export const GET = withAuth(async ({ req, userId: currentUserId, params: rawParams }) => {
   try {
-    const token = await getServerToken(req);
-    const currentUserId = (token?.sub || token?.id) as string | undefined;
-    if (!currentUserId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const params = await props.params;
+    const params = await rawParams;
     const targetId = params.userId;
 
     if (targetId === 'me') {
@@ -59,4 +55,4 @@ export async function GET(req: NextRequest, props: { params: Promise<{ userId: s
     console.error('[MOBILE_USERS_GET]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

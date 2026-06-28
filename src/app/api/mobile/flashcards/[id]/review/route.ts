@@ -1,18 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 import { parseQuality, calculateSM2 } from '@/lib/sm2';
 
 export const dynamic = 'force-dynamic';
 
 // POST /api/mobile/flashcards/[id]/review
-export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+export const POST = withAuth(async ({ req, userId, params: rawParams }) => {
   try {
-    const token = await getServerToken(req);
-    if (!token?.sub) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const params = await props.params;
+    const params = await rawParams;
     const flashcardId = params.id;
     const body = await req.json().catch(() => ({}));
     const rating = body.rating as string;
@@ -24,7 +21,6 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     const flashcard = await prisma.flashcard.findUnique({ where: { id: flashcardId } });
     if (!flashcard) return NextResponse.json({ error: 'Flashcard not found' }, { status: 404 });
 
-    const userId = token.sub as string;
     const quality = parseQuality(rating);
 
     const existing = await prisma.userFlashcardProgress.findUnique({
@@ -67,4 +63,4 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     console.error('[MOBILE_FLASHCARD_REVIEW]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 import { generateExplanationWithMeta } from '@/lib/gemini';
 import { cacheGet, cacheSet } from '@/lib/redis';
 
 // POST /api/mobile/questions/[id]/explain
-export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+export const POST = withAuth(async ({ params: rawParams }) => {
   try {
-    const token = await getServerToken(req);
-    if (!token?.sub) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const params = await props.params;
+    const params = await rawParams;
     const cacheKey = `explain:${params.id}`;
     const cached = await cacheGet(cacheKey);
     if (cached) return NextResponse.json({ explanation: cached, cached: true });
@@ -53,4 +50,4 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     console.error('[MOBILE_QUESTION_EXPLAIN]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 
-export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export const POST = withAuth(async ({ userId, params: rawParams }) => {
+  const params = await rawParams;
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const existing = await prisma.savedPost.findUnique({ where: { userId_postId: { userId, postId: params.id } } });
 
     if (existing) {
@@ -23,4 +19,4 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     console.error('[MOBILE_POST_SAVE_POST]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

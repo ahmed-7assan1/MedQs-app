@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 
 // GET /api/mobile/posts/[id]/comments
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -27,12 +27,9 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
 }
 
 // POST /api/mobile/posts/[id]/comments
-export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export const POST = withAuth(async ({ req, userId, params: rawParams }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const params = await rawParams;
 
     const { content, parentId } = await req.json();
     if (!content) return NextResponse.json({ error: 'content required' }, { status: 400 });
@@ -56,4 +53,4 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     console.error('[MOBILE_POST_COMMENTS_POST]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

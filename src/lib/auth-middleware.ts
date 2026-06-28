@@ -95,3 +95,22 @@ export function withTeacher(handler: AuthHandler) {
 export function withContentManager(handler: AuthHandler) {
   return withAuth(handler, { requireRole: ["TEACHER", "ADMIN", "SUPER_ADMIN", "LEADER"] });
 }
+
+export type OptionalAuthHandler<T = any> = (props: {
+  userId: string | null;
+  session: AuthSession | null;
+  token: Record<string, any> | null;
+  scope: SessionScope | null;
+  req: NextRequest;
+  params: any;
+}) => Promise<NextResponse<T>>;
+
+export function withOptionalAuth(handler: OptionalAuthHandler) {
+  return async (req: NextRequest, params: any) => {
+    const authPayload = await resolveAuth(req);
+    if (authPayload) {
+      return handler({ req, params, ...authPayload });
+    }
+    return handler({ req, params, userId: null, session: null, token: null, scope: null });
+  };
+}

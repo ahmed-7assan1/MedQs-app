@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+export const GET = withAuth(async ({ userId }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const rooms = await prisma.studyRoom.findMany({
       where: { members: { some: { userId } } },
@@ -24,4 +21,4 @@ export async function GET(req: NextRequest) {
     console.error('[MOBILE_ROOMS_ME_GET]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

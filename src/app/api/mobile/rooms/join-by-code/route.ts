@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 
-export async function POST(req: NextRequest) {
+export const POST = withAuth(async ({ req, userId }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const { code } = await req.json();
     if (!code) return NextResponse.json({ error: 'Code required' }, { status: 400 });
 
@@ -32,4 +28,4 @@ export async function POST(req: NextRequest) {
     console.error('[MOBILE_ROOMS_JOIN_BY_CODE]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

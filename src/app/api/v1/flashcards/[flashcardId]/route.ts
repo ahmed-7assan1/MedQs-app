@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
 import { assertFlashcard, requireAdminWriter } from "@/lib/admin-scope";
-
-const FlashcardSchema = z.object({
-  front: z.string().min(1).max(500).trim(),
-  back:  z.string().min(1).max(1000).trim(),
-});
+import { updateFlashcardSchema } from "@/lib/validation/flashcard";
+import { validateBody } from "@/lib/validation/validate";
+import { badRequest } from "@/lib/api-error";
 
 export async function PUT(
   req: NextRequest,
@@ -20,14 +17,12 @@ export async function PUT(
   const boundary = await assertFlashcard(w.scope, flashcardId);
   if (boundary) return boundary;
 
-  const body = await req.json();
-  const parsed = FlashcardSchema.safeParse(body);
-  if (!parsed.success)
-    return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
+  const validation = await validateBody(updateFlashcardSchema, req);
+  if (!validation.success) return validation.response;
 
   const flashcard = await prisma.flashcard.update({
     where: { id: flashcardId },
-    data: parsed.data,
+    data: validation.data,
   });
   return NextResponse.json(flashcard);
 }

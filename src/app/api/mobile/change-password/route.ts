@@ -2,25 +2,20 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
-import { z } from 'zod';
 import bcrypt from 'bcryptjs';
-
-const ChangePasswordSchema = z.object({
-  currentPassword: z.string().min(1),
-  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-});
+import { changePasswordSchema } from '@/lib/validation/auth';
+import { validateBody } from '@/lib/validation/validate';
+import { badRequest, serverError, unauthorized } from '@/lib/api-error';
 
 export async function POST(req: NextRequest) {
   try {
     const token = await getServerToken(req);
     const userId = (token?.sub || token?.id) as string | undefined;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!userId) return unauthorized();
 
-    const body = await req.json();
-    const parsed = ChangePasswordSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
-    }
+    const validation = await validateBody(changePasswordSchema, req);
+    if (!validation.success) return validation.response;
+    const { currentPassword, newPassword } = validation.data;
 
     const { createClient } = await import('@supabase/supabase-js');
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -44,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: user.email,
-      password: parsed.data.currentPassword,
+      password: currentPassword,
     });
     if (signInError) {
       return NextResponse.json({ error: 'Current password is incorrect' }, { status: 400 });
@@ -52,13 +47,13 @@ export async function POST(req: NextRequest) {
 
     const { error: updateError } = await supabase.auth.admin.updateUserById(
       userId,
-      { password: parsed.data.newPassword },
+      { password: newPassword },
     );
     if (updateError) {
       return NextResponse.json({ error: 'Failed to update password' }, { status: 500 });
     }
 
-    const hashed = await bcrypt.hash(parsed.data.newPassword, 10);
+    const hashed = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({
       where: { id: userId },
       data: { password: hashed },
@@ -67,6 +62,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('[MOBILE_CHANGE_PASSWORD_POST]', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return serverError();
   }
 }

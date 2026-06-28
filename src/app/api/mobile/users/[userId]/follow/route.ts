@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 
 // POST /api/mobile/users/[userId]/follow  — toggle follow
-export async function POST(req: NextRequest, props: { params: Promise<{ userId: string }> }) {
-  const params = await props.params;
+export const POST = withAuth(async ({ userId: currentUserId, params: rawParams }) => {
+  const params = await rawParams;
   try {
-    const token = await getServerToken(req);
-    const currentUserId = (token?.sub || token?.id) as string | undefined;
-    if (!currentUserId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     if (currentUserId === params.userId) {
       return NextResponse.json({ error: 'Cannot follow yourself' }, { status: 400 });
@@ -30,4 +27,4 @@ export async function POST(req: NextRequest, props: { params: Promise<{ userId: 
     console.error('[MOBILE_USERS_FOLLOW_POST]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

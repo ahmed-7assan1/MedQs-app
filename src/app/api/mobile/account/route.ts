@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 
-export async function DELETE(req: NextRequest) {
+export const DELETE = withAuth(async ({ userId, req }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const { searchParams } = new URL(req.url);
     const reason = searchParams.get('reason') || 'User requested';
 
@@ -33,4 +29,4 @@ export async function DELETE(req: NextRequest) {
     console.error('[MOBILE_ACCOUNT_DELETE]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

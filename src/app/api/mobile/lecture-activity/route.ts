@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 
 // POST /api/mobile/lecture-activity
 // Body: { lectureId, isCompleted, source? }
 // Called every 10s during playback AND on video completion
-export async function POST(req: NextRequest) {
+export const POST = withAuth(async ({ req, userId }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { lectureId, isCompleted, source } = await req.json();
     if (!lectureId) return NextResponse.json({ error: 'lectureId required' }, { status: 400 });
@@ -49,4 +46,4 @@ export async function POST(req: NextRequest) {
     console.error('[MOBILE_LECTURE_ACTIVITY_POST]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth } from '@/lib/auth-middleware';
 
-export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+export const POST = withAuth(async ({ userId, params: rawParams }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { id } = await props.params;
+    const { id } = await rawParams;
 
     const room = await prisma.studyRoom.findUnique({ where: { id } });
     if (!room) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -24,4 +21,4 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     console.error('[MOBILE_ROOM_JOIN]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});
