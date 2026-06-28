@@ -164,23 +164,13 @@ export function FloatingIslandNavbar({
             className="fixed top-3 right-6 z-navbar hidden md:flex items-center justify-center cursor-pointer"
             title="Expand navigation"
           >
-            {/* The curve outward effect — avatar with curved left edge like it peeled from the bar */}
+            {/* Floating avatar — circular, no curve outward */}
             <div className="relative">
-              {/* Glow behind avatar */}
               <div className={cn(
-                "absolute inset-0 opacity-20 blur-md transition-opacity",
+                "absolute inset-0 rounded-full opacity-20 blur-md transition-opacity",
                 "bg-gradient-to-br from-primary/40 to-accent/40"
               )} />
-              {/* Curve container: clip-path creates the "curved outward" left edge */}
-              <div className={cn(
-                "relative h-10 w-10 overflow-hidden border-2 border-border/80 shadow-lg ring-2 ring-background",
-                "transition-all duration-300 hover:border-primary/40 hover:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.3)]",
-                "bg-background"
-              )}
-                style={{
-                  clipPath: "path('M 10 0 L 40 0 Q 40 0 40 20 Q 40 40 40 40 L 10 40 Q 0 20 10 0 Z')",
-                }}
-              >
+              <div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-border/80 shadow-lg ring-2 ring-background transition-all duration-300 hover:border-primary/40 hover:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.3)]">
                 {userImage ? (
                   <img 
                     src={userImage} 
