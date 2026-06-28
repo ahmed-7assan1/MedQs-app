@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 
 const getSecret = () =>
   new TextEncoder().encode(
-    process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "fallback-secret-change-in-production"
+    process.env.MOBILE_AUTH_SECRET || process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "fallback-secret-change-in-production"
   );
 
 export async function createMobileToken(user: {

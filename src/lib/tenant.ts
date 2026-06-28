@@ -36,8 +36,16 @@ export function isAdminRole(role: unknown): boolean {
   return role === "ADMIN" || role === "SUPER_ADMIN" || role === "LEADER";
 }
 
+export function isTeacherRole(role: unknown): boolean {
+  return role === "TEACHER";
+}
+
 export function isSuperAdmin(role: unknown): boolean {
   return role === "SUPER_ADMIN";
+}
+
+export function canManageContent(role: unknown): boolean {
+  return isAdminRole(role) || isTeacherRole(role);
 }
 
 /** Returns true if this is a scoped ADMIN/LEADER (non-super) with a semester/faculty restriction */

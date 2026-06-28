@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
+import { withSuperAdmin } from "@/lib/auth-middleware";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export const GET = withSuperAdmin(async () => {
   try {
-    const session = await auth();
-    if (session?.user?.role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const dbStart = Date.now();
     await prisma.$queryRaw`SELECT 1`;
     const dbLatency = Date.now() - dbStart;
@@ -32,4 +27,4 @@ export async function GET() {
       },
     }, { status: 503 });
   }
-}
+});
