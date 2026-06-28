@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
   }
   
-  console.log("[spotify] Using Client ID:", clientId.substring(0, 5) + "...");
+  // console.log("[spotify] Using Client ID:", clientId.substring(0, 5) + "...");
 
   const { searchParams } = new URL(req.url);
   const url = searchParams.get("url");
