@@ -73,7 +73,7 @@ export const StatCard = ({
       initial={{ opacity: 0, y: 16 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.4, delay }}
-      className="group relative flex flex-col justify-between p-4 md:p-5 rounded-2xl border border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm hover:shadow-md transition-all"
+      className="group relative flex flex-col justify-between p-4 md:p-5 rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60 shadow-sm hover:shadow-md transition-all"
     >
       <div className="flex justify-between items-start">
         <div className={cn("p-2 rounded-xl bg-opacity-10", color)}>
@@ -148,7 +148,7 @@ export const QuickActionCard = ({ label, iconName, color, href }: any) => {
   return (
     <Link
       href={href}
-      className="group relative flex flex-col items-center gap-3 min-w-[90px] p-4 rounded-2xl border border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lg hover:border-primary/40"
+      className="group relative flex flex-col items-center gap-3 min-w-[90px] p-4 rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lg hover:border-primary/40"
     >
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
       <IconRenderer name={iconName} size={22} className={cn("transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_var(--tw-shadow-color)]", iconColor)} />
@@ -179,7 +179,7 @@ export const AskDrQFeatured = () => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group relative overflow-hidden rounded-2xl border border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 p-5 shadow-sm scanline"
+      className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60 p-5 shadow-sm scanline"
     >
       <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary/20 blur-[60px]" />
 

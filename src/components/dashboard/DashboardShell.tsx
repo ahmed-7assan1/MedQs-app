@@ -7,6 +7,7 @@ import { DashboardMobileView } from "./DashboardMobileView";
 import { DashboardDesktopView } from "./DashboardDesktopView";
 
 export function DashboardShell({ data }: { data: DashboardData }) {
+  const hasAds = !!data.ads?.length;
   return (
     <div className="min-h-screen text-foreground transition-colors duration-200 selection:bg-primary/30 relative">
       {data.isProfileIncomplete && (
@@ -24,7 +25,7 @@ export function DashboardShell({ data }: { data: DashboardData }) {
       )}
 
       <DashboardMobileView data={data} />
-      <DashboardDesktopView data={data} />
+      <DashboardDesktopView data={data} hasAds={hasAds} />
     </div>
   );
 }

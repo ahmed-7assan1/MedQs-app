@@ -10,11 +10,17 @@ import { EcosystemCards } from "@/components/dashboard/sections/EcosystemCards";
 import { AIRecommendations } from "@/components/dashboard/sections/AIRecommendations";
 import { LearningHeatmap } from "@/components/dashboard/sections/LearningHeatmap";
 import { AchievementsShelf } from "@/components/dashboard/sections/AchievementsShelf";
+import { BannerCarousel } from "@/components/ads/BannerCarousel";
 
-export function DashboardDesktopView({ data }: { data: DashboardData }) {
+export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; hasAds?: boolean }) {
   return (
     <div className="hidden md:block">
-      <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6 md:px-10 pb-32 pt-4 md:pt-10 lg:pt-32">
+      <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6 md:px-6 lg:px-10 pb-32 pt-4 md:pt-10 lg:pt-32">
+        {hasAds && data.ads && (
+          <div className="mb-8 md:mb-12">
+            <BannerCarousel ads={data.ads} />
+          </div>
+        )}
         <motion.div
           variants={containerVariants}
           initial="hidden"

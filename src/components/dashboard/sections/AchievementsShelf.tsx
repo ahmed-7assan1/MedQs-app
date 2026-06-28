@@ -137,7 +137,7 @@ export function AchievementsShelf({ data }: { data: DashboardData }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Streak Card */}
-        <div className="rounded-2xl border border-border/40 bg-background/80 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40">
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40">
           <div className="flex items-center gap-3">
             <StreakIcon size={22} className={cn(emoji.color)} />
             <div className="flex-1 min-w-0">
@@ -164,7 +164,7 @@ export function AchievementsShelf({ data }: { data: DashboardData }) {
         </div>
 
         {/* Rank / Prestige Card */}
-        <div className="rounded-2xl border border-border/40 bg-background/80 backdrop-blur-xl p-5 shadow-sm flex items-center gap-4 transition-all duration-300 hover:shadow-md hover:border-primary/40">
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-5 shadow-sm flex items-center gap-4 transition-all duration-300 hover:shadow-md hover:border-primary/40">
           <AnimatedRing progress={data.progressToNext} size={56} color="text-amber-500" />
           <div className="flex-1 min-w-0">
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-500/70">Rank</p>
@@ -174,7 +174,7 @@ export function AchievementsShelf({ data }: { data: DashboardData }) {
         </div>
 
         {/* Total Questions Card */}
-        <div className="rounded-2xl border border-border/40 bg-background/80 backdrop-blur-xl p-5 shadow-sm flex items-center gap-4 transition-all duration-300 hover:shadow-md hover:border-primary/40">
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-5 shadow-sm flex items-center gap-4 transition-all duration-300 hover:shadow-md hover:border-primary/40">
           <Rocket className="h-6 w-6 text-primary" />
           <div className="flex-1 min-w-0">
             <p className="text-lg font-black text-foreground tabular-nums">{(data.totalQuestions || 0).toLocaleString()}</p>
@@ -200,7 +200,7 @@ export function AchievementsShelf({ data }: { data: DashboardData }) {
               className={cn(
                 "rounded-xl border p-3 flex items-center gap-2.5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm",
                 badge.unlocked
-                  ? "border-border/40 bg-background/60 backdrop-blur-sm"
+                  ? "border-border/40 bg-card/60 backdrop-blur-sm"
                   : "border-border/20 bg-muted/20 opacity-50"
               )}
             >

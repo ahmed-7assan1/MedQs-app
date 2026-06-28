@@ -10,12 +10,20 @@ import { EcosystemCards } from "@/components/dashboard/sections/EcosystemCards";
 import { AIRecommendations } from "@/components/dashboard/sections/AIRecommendations";
 import { LearningHeatmap } from "@/components/dashboard/sections/LearningHeatmap";
 import { AchievementsShelf } from "@/components/dashboard/sections/AchievementsShelf";
+import { BannerCarousel } from "@/components/ads/BannerCarousel";
 
 export function DashboardMobileView({ data }: { data: DashboardData }) {
+  const hasAds = !!data.ads?.length;
+
   return (
     <div className="md:hidden scroll-smooth">
       <div className="pb-4 space-y-6">
         <div className="px-4 pt-6">
+          {hasAds && data.ads && (
+            <div className="mb-6">
+              <BannerCarousel ads={data.ads} />
+            </div>
+          )}
           <motion.div
             variants={containerVariants}
             initial="hidden"

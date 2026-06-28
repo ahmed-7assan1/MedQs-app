@@ -61,7 +61,7 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
           >
             <Link
               href={`/modules/${mod.id}`}
-              className="group relative block w-[220px] md:w-[240px] overflow-hidden rounded-2xl border border-border/40 bg-background/80 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg"
+              className="group relative block w-[220px] md:w-[280px] lg:w-[240px] overflow-hidden rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg"
             >
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
               <div className="relative">

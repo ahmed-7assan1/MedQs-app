@@ -853,6 +853,7 @@ html[data-theme="dark"] body {
   width: 100%;
   position: relative;
   isolation: isolate;
+  overflow-x: hidden;
 }
 
 @media (min-width: 768px) {
@@ -871,8 +872,9 @@ html[data-theme="dark"] body {
   display: flex;
   flex-direction: column;
   padding-top: 0;
-  margin-left: var(--sidebar-offset, 0px);
-  transition: margin-left 0.3s cubic-bezier(0.2, 0, 0, 1);
+  transform: translateX(var(--sidebar-offset, 0px));
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+  will-change: transform;
 }
 
 @media (min-width: 768px) {
@@ -1599,6 +1601,16 @@ html[data-theme="dark"] body {
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes loading-bar {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(300%); }
+}
+
+.animate-loading-bar {
+  animation: loading-bar 1.5s ease-in-out infinite;
 }
 
 @keyframes notif-pop {

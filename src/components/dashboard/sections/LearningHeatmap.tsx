@@ -58,7 +58,7 @@ export function LearningHeatmap({ data }: { data: DashboardData }) {
         </span>
       </div>
 
-      <div className="rounded-2xl border border-border/40 bg-background/80 backdrop-blur-xl p-4 md:p-5 shadow-sm transition-all duration-300 hover:shadow-md">
+      <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-5 shadow-sm transition-all duration-300 hover:shadow-md">
         <div className="flex items-center gap-2">
           {chartDays.map((d, i) => {
             const dayData = activityArr?.find((x: any) => x.day === d.key);

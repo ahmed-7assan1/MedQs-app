@@ -56,7 +56,7 @@ function EcosystemCard({ card }: { card: typeof CARDS[number] }) {
   return (
     <Link
       href={card.href}
-      className="group relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-background/90 to-background/60 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg"
+      className="group relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg"
     >
       <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500", card.gradient)} />
       <div className={cn("absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 ring-1", card.border)} />
@@ -81,7 +81,7 @@ export function EcosystemCards() {
         <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">MedOneX Ecosystem</span>
       </div>
 
-      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="hidden sm:grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3">
         <AskDrQFeatured />
         {CARDS.map((card) => (
           <EcosystemCard key={card.id} card={card} />

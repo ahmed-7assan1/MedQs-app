@@ -32,7 +32,7 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
   const missionModule = data.moduleProgress?.[0];
 
   return (
-    <motion.div variants={fadeUp} className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-background/90 to-background/60 backdrop-blur-xl p-6 md:p-8 shadow-[0_0_40px_-10px_hsl(var(--primary)/0.15)]">
+    <motion.div variants={fadeUp} className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl p-6 md:p-8 shadow-[0_0_40px_-10px_hsl(var(--primary)/0.15)]">
       <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
       <div className="absolute -left-8 -bottom-8 h-24 w-24 rounded-full bg-accent/10 blur-3xl" />
 

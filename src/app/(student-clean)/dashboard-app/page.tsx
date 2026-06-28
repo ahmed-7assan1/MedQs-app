@@ -102,6 +102,24 @@ export default async function DashboardPage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
+  let ads: { id: string; imageUrl: string; linkUrl: string | null }[] = [];
+  try {
+    const siteConfig = await prisma.siteConfig.findFirst({ select: { enableAds: true } });
+    if (siteConfig?.enableAds !== false) {
+      ads = await prisma.adBanner.findMany({
+        where: {
+          active: true,
+          OR: [
+            { semesterId: fullProfile?.semesterId ?? undefined },
+            { semesterId: null, universityId: null },
+          ],
+        },
+        select: { id: true, imageUrl: true, linkUrl: true },
+        orderBy: { createdAt: "desc" },
+      });
+    }
+  } catch (_) {}
+
   const dashboardData: DashboardData = {
     firstName,
     greeting,
@@ -117,6 +135,7 @@ export default async function DashboardPage() {
     activityArr: activityArr || [],
     progressToNext,
     isProfileIncomplete,
+    ads: ads.length ? ads : undefined,
   };
 
   return <DashboardShell data={dashboardData} />;

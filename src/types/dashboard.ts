@@ -9,6 +9,12 @@ export interface ActivityItem {
   count: number;
 }
 
+export interface DashboardAd {
+  id: string;
+  imageUrl: string;
+  linkUrl?: string | null;
+}
+
 export interface DashboardData {
   firstName: string;
   greeting: string;
@@ -24,4 +30,5 @@ export interface DashboardData {
   activityArr: ActivityItem[];
   progressToNext: number;
   isProfileIncomplete: boolean;
+  ads?: DashboardAd[];
 }

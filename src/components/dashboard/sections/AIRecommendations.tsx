@@ -102,7 +102,7 @@ export function AIRecommendations({ data }: { data: DashboardData }) {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: i * 0.1, ease: EASE }}
               viewport={{ once: true }}
-              className="group relative flex items-start gap-3 p-4 rounded-xl border border-border/40 bg-background/60 backdrop-blur-sm transition-all duration-300 hover:border-primary/20 hover:shadow-sm hover:-translate-y-0.5"
+              className="group relative flex items-start gap-3 p-4 rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-primary/20 hover:shadow-sm hover:-translate-y-0.5"
             >
               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
               <Icon className={cn("h-5 w-5 shrink-0 mt-0.5 transition-all duration-300 group-hover:scale-110", rec.textColor)} />
