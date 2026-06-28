@@ -93,6 +93,7 @@ model University {
   studyRooms     StudyRoom[]
   yearIdFormats  UniversityYearIdFormat[]
   users          User[]
+  originatedResources LibraryResource[]
 }
 
 /// Faculty (كليه) — optional sub-division of a University.
@@ -133,8 +134,8 @@ model AcademicYear {
   yearNumber   Int
   universityId String
   facultyId    String?
-  faculty      Faculty?   @relation(fields: [facultyId], references: [id])
-  university   University @relation(fields: [universityId], references: [id])
+  faculty      Faculty?   @relation(fields: [facultyId], references: [id], onDelete: SetNull)
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
   semesters    Semester[]
 
   @@unique([universityId, yearNumber, facultyId])
@@ -151,7 +152,7 @@ model Semester {
   modules        Module[]
   pastPapers     PastPaper[]
   playlistSyncs  PlaylistSyncTask[]
-  academicYear   AcademicYear       @relation(fields: [academicYearId], references: [id])
+  academicYear   AcademicYear       @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
   subjects       Subject[]
   users          User[]
 }
@@ -172,7 +173,7 @@ model Module {
   name       String
   icon       String?
   semesterId String
-  semester   Semester    @relation(fields: [semesterId], references: [id])
+  semester   Semester    @relation(fields: [semesterId], references: [id], onDelete: Cascade)
   pastPapers PastPaper[]
   subjects   Subject[]
 }
@@ -206,7 +207,7 @@ model Lecture {
   checklist     Checklist?
   flashcards    Flashcard[]
   subject       Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  team          MedicalTeam?          @relation(fields: [teamId], references: [id])
+  team          MedicalTeam?          @relation(fields: [teamId], references: [id], onDelete: SetNull)
   files         LectureFile[]
   records       LectureRecord[]
   videos        LectureVideo[]
@@ -214,6 +215,8 @@ model Lecture {
   PastPaper     PastPaper?
   questions     Question[]
   activities    UserLectureActivity[]
+
+  @@index([teamId])
 }
 
 model Checklist {
@@ -231,6 +234,8 @@ model ChecklistItem {
   isCritical  Boolean   @default(false)
   checklistId String
   checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+
+  @@index([checklistId])
 }
 
 model Flashcard {
@@ -240,6 +245,8 @@ model Flashcard {
   lectureId String
   lecture   Lecture                 @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   progress  UserFlashcardProgress[]
+
+  @@index([lectureId])
 }
 
 model UserFlashcardProgress {
@@ -272,6 +279,8 @@ model LectureFile {
   shouldBroadcast   Boolean @default(true)
   isBroadcasted     Boolean @default(false)
   lecture           Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+
+  @@index([lectureId])
 }
 
 model LectureVideo {
@@ -334,6 +343,7 @@ model LectureVideoComment {
 
   @@index([videoId, createdAt])
   @@index([userId])
+  @@index([parentId])
 }
 
 model LectureVideoLike {
@@ -372,6 +382,8 @@ model Question {
   attemptItems      QuizAttemptItem[]
   savedBy           SavedQuestion[]
   studyRoomPosts    StudyRoomPost[]
+
+  @@index([lectureId])
 }
 
 model PastPaper {
@@ -393,11 +405,14 @@ model PastPaper {
   googleSheetsSyncEnabled Boolean          @default(false)
   isPrivate               Boolean          @default(false)
   randomizeQuestions      Boolean          @default(false)
-  module                  Module           @relation(fields: [moduleId], references: [id])
-  quizLecture             Lecture?         @relation(fields: [quizLectureId], references: [id])
-  semester                Semester         @relation(fields: [semesterId], references: [id])
+  module                  Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  quizLecture             Lecture?         @relation(fields: [quizLectureId], references: [id], onDelete: SetNull)
+  semester                Semester         @relation(fields: [semesterId], references: [id], onDelete: Cascade)
   questionReports         QuestionReport[]
   attempts                QuizAttempt[]
+
+  @@index([moduleId])
+  @@index([semesterId])
 }
 
 model QuestionReport {
@@ -408,12 +423,13 @@ model QuestionReport {
   images      String[]
   pastPaperId String?
   createdAt   DateTime   @default(now())
-  pastPaper   PastPaper? @relation(fields: [pastPaperId], references: [id])
+  pastPaper   PastPaper? @relation(fields: [pastPaperId], references: [id], onDelete: SetNull)
   question    Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([questionId])
   @@index([userId, createdAt])
+  @@index([pastPaperId])
 }
 
 model SavedQuestion {
@@ -426,6 +442,7 @@ model SavedQuestion {
 
   @@unique([userId, questionId])
   @@index([userId, createdAt])
+  @@index([questionId])
 }
 
 model GuestQuizUser {
@@ -437,9 +454,9 @@ model GuestQuizUser {
   facultyId         String?
   semesterId        String?
   universityId      String?
-  faculty           Faculty?      @relation(fields: [facultyId], references: [id])
-  semester          Semester?     @relation(fields: [semesterId], references: [id])
-  university        University?   @relation(fields: [universityId], references: [id])
+  faculty           Faculty?      @relation(fields: [facultyId], references: [id], onDelete: SetNull)
+  semester          Semester?     @relation(fields: [semesterId], references: [id], onDelete: SetNull)
+  university        University?   @relation(fields: [universityId], references: [id], onDelete: SetNull)
   quizAttempts      QuizAttempt[]
 
   @@index([createdAt])
@@ -489,6 +506,9 @@ model QuizAttemptItem {
   essayGrade Json?
   attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId])
+  @@index([questionId])
 }
 
 model User {
@@ -515,6 +535,7 @@ model User {
   telegramPhone            String?                   @unique
   isLeader                 Boolean                   @default(false)
   leaderId                 String?
+  leader                   User?                     @relation("UserLeader", fields: [leaderId], references: [id])
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
   facebookUrl              String?
@@ -610,6 +631,9 @@ model User {
   blocks                   BlockedUser[]             @relation("UserBlocks")
   blockedBy                BlockedUser[]             @relation("UserBlocked")
   testimonials             Testimonial[]
+  reviewedTestimonials     Testimonial[]             @relation("TestimonialReviewer")
+  createdForums            Forum[]
+  sharedResources          LibraryResource[]
   sharedQuizAttempts       SharedQuizAttempt[]
   lastLoginAt              DateTime?
   lastActivityAt           DateTime?
@@ -627,6 +651,9 @@ model User {
   sessionLogs              UserSessionLog[]
   pageViews                PageView[]
   videoViews               VideoViewTracking[]
+  ledTeam                  User[]                    @relation("UserLeader")
+
+  @@index([leaderId])
 }
 
 model TelegramConfig {
@@ -658,6 +685,8 @@ model Note {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lectureId])
+  @@index([lectureId])
+  @@index([userId])
 }
 
 model UserLectureActivity {
@@ -696,10 +725,11 @@ model Forum {
   status       ForumStatus          @default(OPEN)
   semesterId   String?
   createdBy    String?
+  creator      User?                @relation(fields: [createdBy], references: [id])
   createdAt    DateTime             @default(now())
   universityId String
-  semester     Semester?            @relation(fields: [semesterId], references: [id])
-  university   University           @relation(fields: [universityId], references: [id])
+  semester     Semester?            @relation(fields: [semesterId], references: [id], onDelete: SetNull)
+  university   University           @relation(fields: [universityId], references: [id], onDelete: Cascade)
   posts        Post[]
   invites      PrivateForumInvite[]
   members      PrivateForumMember[]
@@ -725,10 +755,12 @@ model PrivateForumInvite {
   status     String   @default("pending")
   createdAt  DateTime @default(now())
   forum      Forum    @relation(fields: [forumId], references: [id], onDelete: Cascade)
-  receiver   User     @relation("InviteReceiver", fields: [receiverId], references: [id])
-  sender     User     @relation("InviteSender", fields: [senderId], references: [id])
+  receiver   User     @relation("InviteReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender     User     @relation("InviteSender", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@unique([forumId, receiverId])
+  @@index([senderId])
+  @@index([receiverId])
 }
 
 model Post {
@@ -762,18 +794,20 @@ model Post {
   comments             Comment[]
   likes                Like[]
   reactions            PostReaction[]
-  author               User           @relation(fields: [authorId], references: [id])
-  forum                Forum          @relation(fields: [forumId], references: [id])
-  poll                 Poll?          @relation(fields: [pollId], references: [id])
-  sharedQuestion       Question?      @relation(fields: [sharedQuestionId], references: [id])
-  team                 MedicalTeam?   @relation(fields: [teamId], references: [id])
-  university           University     @relation(fields: [universityId], references: [id])
+  author               User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  forum                Forum          @relation(fields: [forumId], references: [id], onDelete: Cascade)
+  poll                 Poll?          @relation(fields: [pollId], references: [id], onDelete: SetNull)
+  sharedQuestion       Question?      @relation(fields: [sharedQuestionId], references: [id], onDelete: SetNull)
+  team                 MedicalTeam?   @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  university           University     @relation(fields: [universityId], references: [id], onDelete: Cascade)
   hashtags             PostHashtag[]
   savedBy              SavedPost[]
 
   @@index([universityId, createdAt])
   @@index([forumId, createdAt])
   @@index([audience, createdAt])
+  @@index([sharedQuestionId])
+  @@index([teamId])
 }
 
 model Comment {
@@ -785,14 +819,15 @@ model Comment {
   parentId     String?
   createdAt    DateTime      @default(now())
   universityId String
-  author       User          @relation(fields: [authorId], references: [id])
-  parent       Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent       Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies      Comment[]     @relation("CommentReplies")
   post         Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
-  university   University    @relation(fields: [universityId], references: [id])
+  university   University    @relation(fields: [universityId], references: [id], onDelete: Cascade)
   likes        CommentLike[]
 
   @@index([universityId, createdAt])
+  @@index([parentId])
 }
 
 model UserFollow {
@@ -813,7 +848,7 @@ model Like {
   userId String
   postId String
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
 }
@@ -823,7 +858,7 @@ model CommentLike {
   userId    String
   commentId String
   comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, commentId])
 }
@@ -848,6 +883,7 @@ model PostReaction {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
+  @@index([userId])
 }
 
 model Notification {
@@ -858,7 +894,7 @@ model Notification {
   read      Boolean      @default(false)
   userId    String
   createdAt DateTime     @default(now())
-  user      User         @relation(fields: [userId], references: [id])
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, read])
   @@index([userId, createdAt])
@@ -870,7 +906,7 @@ model NotificationMute {
   muteForum  Boolean @default(false)
   mutePostId String?
   userId     String  @unique
-  user       User    @relation(fields: [userId], references: [id])
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Group {
@@ -883,7 +919,7 @@ model Group {
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   ownerId        String            @unique
-  owner          User              @relation("GroupOwner", fields: [ownerId], references: [id])
+  owner          User              @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members        GroupMember[]
   joinRequests   GroupJoinRequest[]
 
@@ -931,7 +967,9 @@ model EngagementLog {
   points    Int
   userId    String
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model AIUsageLog {
@@ -940,9 +978,10 @@ model AIUsageLog {
   userId String
   date   String
   count  Int    @default(1)
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, type, date])
+  @@index([userId])
 }
 
 model AdBanner {
@@ -953,8 +992,11 @@ model AdBanner {
   universityId String?
   semesterId   String?
   createdAt    DateTime    @default(now())
-  semester     Semester?   @relation(fields: [semesterId], references: [id])
-  university   University? @relation(fields: [universityId], references: [id])
+  semester     Semester?   @relation(fields: [semesterId], references: [id], onDelete: SetNull)
+  university   University? @relation(fields: [universityId], references: [id], onDelete: SetNull)
+
+  @@index([semesterId])
+  @@index([universityId])
 }
 
 model Account {
@@ -973,6 +1015,7 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model DocumentTemplate {
@@ -983,7 +1026,9 @@ model DocumentTemplate {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Session {
@@ -995,6 +1040,7 @@ model Session {
 }
 
 model VerificationToken {
+  id         String   @id @default(uuid())
   identifier String
   token      String   @unique
   expires    DateTime
@@ -1036,8 +1082,8 @@ model MedicalTeam {
   lastSummaryAt    DateTime?
   auditLogs        AuditLog[]
   lectures         Lecture[]
-  faculty          Faculty        @relation(fields: [facultyId], references: [id])
-  university       University     @relation(fields: [universityId], references: [id])
+  faculty          Faculty        @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  university       University     @relation(fields: [universityId], references: [id], onDelete: Cascade)
   posts            Post[]
   followers        TeamFollower[]
   members          TeamMember[]
@@ -1089,7 +1135,7 @@ model PlatformMember {
 }
 
 model BotUser {
-  id                    String   @id @default(cuid())
+  id                    String   @id @default(uuid())
   telegramId            String   @unique
   phoneNumber           String?  @unique
   preferredProvider     String?  @default("gemini")
@@ -1128,6 +1174,8 @@ model PollOption {
   pollId String
   poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
   votes  PollVote[]
+
+  @@index([pollId])
 }
 
 model PollVote {
@@ -1139,6 +1187,8 @@ model PollVote {
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([pollOptionId, userId])
+  @@index([pollOptionId])
+  @@index([userId])
 }
 
 model TeamTask {
@@ -1170,8 +1220,8 @@ model StudyRoom {
   customAiConfig  Json?
   isChatOpen      Boolean            @default(true)
   lastChatCleanup DateTime?
-  owner           User               @relation("RoomOwner", fields: [ownerId], references: [id])
-  university      University         @relation(fields: [universityId], references: [id])
+  owner           User               @relation("RoomOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  university      University         @relation(fields: [universityId], references: [id], onDelete: Cascade)
   members         StudyRoomMember[]
   posts           StudyRoomPost[]
   schedule        StudyRoomSchedule?
@@ -1208,14 +1258,15 @@ model StudyRoomPost {
   sharedQuestionData Json?
   pollId             String?             @unique
   comments           StudyRoomComment[]
-  author             User                @relation(fields: [authorId], references: [id])
-  poll               Poll?               @relation(fields: [pollId], references: [id])
+  author             User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  poll               Poll?               @relation(fields: [pollId], references: [id], onDelete: SetNull)
   room               StudyRoom           @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  sharedQuestion     Question?           @relation(fields: [sharedQuestionId], references: [id])
+  sharedQuestion     Question?           @relation(fields: [sharedQuestionId], references: [id], onDelete: SetNull)
   likes              StudyRoomPostLike[]
 
   @@index([roomId, createdAt])
   @@index([authorId])
+  @@index([sharedQuestionId])
 }
 
 model StudyRoomTask {
@@ -1241,6 +1292,8 @@ model StudyRoomTaskCompletion {
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([taskId, userId])
+  @@index([taskId])
+  @@index([userId])
 }
 
 model SavedPost {
@@ -1252,6 +1305,7 @@ model SavedPost {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
+  @@index([postId])
 }
 
 model Hashtag {
@@ -1280,13 +1334,14 @@ model StudyRoomComment {
   postId      String
   parentId    String?
   createdAt   DateTime           @default(now())
-  author      User               @relation(fields: [authorId], references: [id])
+  author      User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
   parent      StudyRoomComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies     StudyRoomComment[] @relation("CommentReplies")
   post        StudyRoomPost      @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId, createdAt])
   @@index([authorId])
+  @@index([parentId])
 }
 
 model StudyRoomSchedule {
@@ -1302,7 +1357,7 @@ model StudyRoomPostLike {
   postId String
   userId String
   post   StudyRoomPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user   User          @relation(fields: [userId], references: [id])
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
 }
@@ -1322,7 +1377,7 @@ model StudySession {
   totalPauseMs   BigInt    @default(0)
 
   room         StudyRoom                 @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  startedBy    User                      @relation("SessionStarter", fields: [startedById], references: [id])
+  startedBy    User                      @relation("SessionStarter", fields: [startedById], references: [id], onDelete: Cascade)
   participants StudySessionParticipant[]
 
   @@index([roomId, status])
@@ -1339,9 +1394,11 @@ model StudySessionParticipant {
   lastFocusAt       DateTime?
 
   session StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user    User         @relation(fields: [userId], references: [id])
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, userId])
+  @@index([sessionId])
+  @@index([userId])
 }
 
 model UserPointsTransaction {
@@ -1353,7 +1410,7 @@ model UserPointsTransaction {
   reference String?
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
 }
@@ -1383,7 +1440,7 @@ model Report {
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
 
-  reporter User            @relation(fields: [reporterId], references: [id])
+  reporter User            @relation(fields: [reporterId], references: [id], onDelete: Cascade)
   actions  ReportAction[]
 
   @@index([status, createdAt])
@@ -1407,7 +1464,7 @@ model ReportAction {
   createdAt DateTime         @default(now())
 
   report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  admin  User   @relation(fields: [adminId], references: [id])
+  admin  User   @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([reportId])
 }
@@ -1435,8 +1492,8 @@ model AuditLog {
   userId    String
   teamId    String?
   createdAt DateTime     @default(now())
-  team      MedicalTeam? @relation(fields: [teamId], references: [id])
-  user      User         @relation(fields: [userId], references: [id])
+  team      MedicalTeam? @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
   @@index([teamId, createdAt])
@@ -2053,6 +2110,7 @@ model QuizAttemptAnswer {
   earnedPoints Float?
 
   @@unique([attemptId, questionId])
+  @@index([attemptId])
 }
 
 model QuizAnalyticsSnapshot {
@@ -2132,6 +2190,9 @@ model V2Post {
   comments     V2Comment[]
   reactions    V2Reaction[]
   createdAt    DateTime     @default(now())
+
+  @@index([communityId])
+  @@index([authorUserId])
 }
 
 model V2Comment {
@@ -2142,6 +2203,9 @@ model V2Comment {
   body         String
   parentId     String?
   createdAt    DateTime @default(now())
+
+  @@index([postId])
+  @@index([parentId])
 }
 
 model V2Reaction {
@@ -2152,6 +2216,7 @@ model V2Reaction {
   type   String
 
   @@unique([postId, userId, type])
+  @@index([userId])
 }
 
 model V2Group {
@@ -2172,6 +2237,8 @@ model V2GroupMembership {
   createdAt DateTime @default(now())
 
   @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
 }
 
 model V2Message {
@@ -2181,6 +2248,8 @@ model V2Message {
   senderUserId String
   body         String
   createdAt    DateTime @default(now())
+
+  @@index([groupId])
 }
 
 model Workspace {
@@ -2202,6 +2271,8 @@ model WidgetInstance {
   type        String
   configJson  Json?
   layout      WidgetLayout?
+
+  @@index([workspaceId])
 }
 
 model WidgetLayout {
@@ -2222,6 +2293,8 @@ model PomodoroSession {
   durationMin Int
   startedAt   DateTime  @default(now())
   endedAt     DateTime?
+
+  @@index([workspaceId])
 }
 
 model WhiteboardDocument {
@@ -2232,6 +2305,8 @@ model WhiteboardDocument {
   title       String
   contentJson Json
   updatedAt   DateTime  @updatedAt
+
+  @@index([workspaceId])
 }
 
 // --- Atlas Models ---
@@ -2452,6 +2527,7 @@ model Testimonial {
   user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   status     TestimonialStatus @default(PENDING)
   reviewedBy String?
+  reviewer   User?     @relation("TestimonialReviewer", fields: [reviewedBy], references: [id])
   reviewedAt DateTime?
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
@@ -2477,8 +2553,8 @@ model Warning {
   updatedAt    DateTime        @updatedAt
 
   user       User  @relation("UserWarnings", fields: [userId], references: [id], onDelete: Cascade)
-  issuedBy   User  @relation("IssuedWarnings", fields: [issuedById], references: [id])
-  revokedBy  User? @relation("RevokedWarnings", fields: [revokedById], references: [id])
+  issuedBy   User  @relation("IssuedWarnings", fields: [issuedById], references: [id], onDelete: Cascade)
+  revokedBy  User? @relation("RevokedWarnings", fields: [revokedById], references: [id], onDelete: SetNull)
 
   @@index([userId, status])
   @@index([issuedById])
@@ -2528,7 +2604,7 @@ model SecurityEvent {
   createdAt      DateTime             @default(now())
 
   user       User? @relation(fields: [userId], references: [id], onDelete: SetNull)
-  resolvedBy User? @relation("SecurityResolution", fields: [resolvedById], references: [id])
+  resolvedBy User? @relation("SecurityResolution", fields: [resolvedById], references: [id], onDelete: SetNull)
 
   @@index([type, status])
   @@index([severity])
@@ -2610,7 +2686,9 @@ model LibraryResource {
   category     String
   sourceBookId String?
   originUniId  String?
+  originUniversity University? @relation(fields: [originUniId], references: [id])
   sharedBy     String?
+  sharedByUser User?     @relation(fields: [sharedBy], references: [id])
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
