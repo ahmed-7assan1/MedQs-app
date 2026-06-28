@@ -16,6 +16,7 @@ import { ApplyLocale } from "@/components/system/ApplyLocale";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import { MotionProvider } from "@/components/providers/MotionProvider";
 import "../styles/globals.css";
+import "../styles/themes.css";
 
 import { unstable_cache } from "next/cache";
 
@@ -313,13 +314,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               ],
             }),
           }}
-        />
-        {/* Puter.js — free AI, storage, and cloud services (user-pays model) */}
-        {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
-        <script
-          src="https://js.puter.com/v2/"
-          defer
-          {...{ onerror: "console.warn('[Puter] Failed to load')", onload: "console.info('[Puter] Loaded')" } as React.ScriptHTMLAttributes<HTMLScriptElement>}
         />
       </head>
       <body className={`${fontEnglish.className} font-sans antialiased`}>

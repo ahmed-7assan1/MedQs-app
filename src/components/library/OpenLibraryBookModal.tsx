@@ -31,7 +31,7 @@ export function OpenLibraryBookModal({ book, open, onOpenChange }: Props) {
   const img = coverUrl(book.cover_i);
   const openLibraryUrl = `https://openlibrary.org${book.key}`;
   const hasEbook = book.has_fulltext || book.ebook_access === "public" || book.ebook_access === "borrowable";
-  const canReadDirectly = book.ia?.length > 0;
+  const canReadDirectly = book.ia != null && book.ia.length > 0;
   const readerUrl = `/medical-books/read/${readerSlug(book.key)}?ia=${book.ia?.[0]}&title=${encodeURIComponent(book.title)}`;
 
   return (
@@ -77,7 +77,7 @@ export function OpenLibraryBookModal({ book, open, onOpenChange }: Props) {
               <span><span className="font-medium text-foreground">{book.edition_count}</span> editions</span>
             </div>
 
-            {book.ia?.length > 0 && (
+            {book.ia != null && book.ia.length > 0 && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <BookMarked size={14} />
                 <span className="text-green-600 dark:text-green-400 font-medium">Digitized version available</span>

@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
         lectures: sub.lectures.map(lec => {
           const tgVideo = lec.videos?.find(v => v.telegramFileId);
           if (tgVideo) {
-            const fileIdParam = `?fileId=${encodeURIComponent(tgVideo.telegramFileId)}`;
+            const fileIdParam = `?fileId=${encodeURIComponent(tgVideo.telegramFileId ?? '')}`;
             return {
               ...lec,
               videoUrl: `/api/v1/telegram/video/${tgVideo.telegramChatId}/${tgVideo.telegramMessageId}${fileIdParam}`,

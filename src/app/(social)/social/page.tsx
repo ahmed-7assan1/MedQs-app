@@ -70,7 +70,7 @@ export default async function SocialPage() {
 
   const { universityId, semesterId, userId, role } = scope;
   const userName = session.user.name ?? "Student";
-  const userImage = session.user.image ?? null;
+  const userImage = session.user.image ?? undefined;
 
   const headersList = await headers();
   const ua = headersList.get("user-agent") || "";
@@ -81,7 +81,7 @@ export default async function SocialPage() {
       <SocialMobileWrapper
         currentUserId={userId}
         currentUserName={userName}
-        currentUserImage={userImage}
+        currentUserImage={userImage ?? null}
         isAdmin={isAdminRole(role)}
       >
         <OneXCommunity
@@ -89,7 +89,7 @@ export default async function SocialPage() {
           rooms={[]}
           currentUserId={userId}
           currentUserName={userName}
-          currentUserImage={userImage}
+          currentUserImage={userImage ?? undefined}
           currentUserRole={role}
           currentUserUniversityId={universityId}
         />
@@ -112,7 +112,7 @@ export default async function SocialPage() {
     <SocialMobileWrapper
       currentUserId={userId}
       currentUserName={userName}
-      currentUserImage={userImage}
+      currentUserImage={userImage ?? null}
       isAdmin={isAdminRole(role)}
     >
       <OneXCommunity
@@ -120,8 +120,7 @@ export default async function SocialPage() {
         rooms={roomsWithMeta as any}
         currentUserId={userId}
         currentUserName={userName}
-        currentUserImage={userImage}
-        currentUserRole={role}
+        currentUserImage={userImage ?? undefined}
         currentUserUniversityId={universityId}
       />
     </SocialMobileWrapper>

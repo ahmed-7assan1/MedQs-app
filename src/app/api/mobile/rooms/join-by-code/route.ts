@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     if (!room) return NextResponse.json({ error: 'Room not found' }, { status: 404 });
 
     const existing = await prisma.studyRoomMember.findUnique({
-      where: { userId_roomId: { userId, roomId: room.id } },
+      where: { roomId_userId: { roomId: room.id, userId } },
     });
     if (!existing) {
       await prisma.studyRoomMember.create({ data: { userId, roomId: room.id } });

@@ -63,7 +63,7 @@ export function OpenLibraryBookCard({ book, index, onSelect }: Props) {
         </p>
         <div className="flex items-center gap-3 mt-2">
           <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{year}</span>
-          {book.ia?.length > 0 && (
+          {book.ia != null && book.ia.length > 0 && (
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-sky-500/10 text-sky-500 text-[9px] font-bold uppercase tracking-wider">
               read
             </span>

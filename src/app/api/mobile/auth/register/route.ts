@@ -64,6 +64,7 @@ export async function POST(req: Request) {
       const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
         type: "signup",
         email,
+        password: crypto.randomUUID(),
         options: { redirectTo: `https://medonex.app/auth/callback?next=/dashboard-app` }
       });
 

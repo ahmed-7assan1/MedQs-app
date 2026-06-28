@@ -27,7 +27,7 @@ export async function POST(
       return NextResponse.json({ error: "Invalid question for essay grading" }, { status: 400 });
     }
 
-    const keys = await getGeminiApiKeys(session.user.personalGeminiKey);
+    const keys = await getGeminiApiKeys((session.user as any).personalGeminiKey);
     if (keys.length === 0) {
       return NextResponse.json({ error: "AI not configured" }, { status: 500 });
     }
@@ -59,7 +59,7 @@ export async function POST(
       const genAI = new GoogleGenerativeAI(key);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       return await model.generateContent(prompt);
-    }, session.user.personalGeminiKey);
+    }, (session.user as any).personalGeminiKey);
     const text = result.response.text();
     
     const jsonStr = text.match(/\{[\s\S]*\}/)?.[0] || text;

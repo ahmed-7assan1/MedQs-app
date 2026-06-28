@@ -5,7 +5,7 @@ import { NextRequest } from 'next/server';
 
 export async function PUT(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET, salt: "authjs.session-token" });
+    const token = await getServerToken(req);
     
     if (!token?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -7,6 +7,7 @@ const FirebaseProvider = dynamic(() => import("@/components/providers/FirebasePr
 import { MobileChromeController } from "@/components/layout/MobileChromeController";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { TelegramBlocker } from "@/components/system/TelegramBlocker";
+import { PuterScript } from "@/components/system/PuterScript";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { GlobalTopBar } from "@/components/layout/GlobalTopBar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
@@ -42,6 +43,7 @@ export default async function SocialLayout({ children }: { children: React.React
   return (
     <div className="app-shell app-shell--tabbar min-h-screen flex flex-col bg-background/80">
       <MobileChromeController />
+      <PuterScript />
       <TelegramBlocker>
         <SiteConfigProvider
           initial={{

@@ -8,6 +8,7 @@ import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 import { AdminMobileNav } from "../../components/admin/AdminMobileNav";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
 import { LayoutDashboard, ArrowLeft } from "lucide-react";
+import { PuterScript } from "@/components/system/PuterScript";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
@@ -36,6 +37,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <>
+      <PuterScript />
       <SiteConfigProvider initial={{ siteName, logoUrl: siteConfig?.logoUrl ?? null }}>
         <div className="flex min-h-screen bg-background">
 

@@ -40,7 +40,6 @@
 .text-note-foreground { color: hsl(35, 20%, 25%); }
 
 /* 🎨 MedOneX Theme Variants — 16 themes via data-theme-variant attribute */
-@import "./themes.css";
 
 @layer base {
 

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
-import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw";
+type ExcalidrawImperativeAPI = any;
 import { TiptapEditor } from "./TiptapEditor";
 import { cn } from "@/lib/utils";
 import {
@@ -11,8 +11,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 
-const Excalidraw = dynamic(
-  () => import("@/vendor/excalidraw/vendor").then((m) => m.Excalidraw),
+const Excalidraw = dynamic<any>(
+  () => import("@/vendor/excalidraw/vendor").then((m: any) => m.Excalidraw),
   { ssr: false, loading: () => (
     <div className="flex items-center justify-center h-64 bg-white/[0.02] rounded-2xl border border-white/[0.06]">
       <Loader2 className="h-6 w-6 animate-spin text-white/30" />
@@ -179,8 +179,8 @@ export function StudyDocEditor({ lectureId }: StudyDocEditorProps) {
               </button>
             </div>
             <div className="h-[400px] md:h-[500px]">
-              <Excalidraw
-                excalidrawAPI={(api: ExcalidrawImperativeAPI) => { apiRef.current = api; }}
+                <Excalidraw
+                  excalidrawAPI={(api: ExcalidrawImperativeAPI) => { apiRef.current = api; }}
                 initialData={initialDrawingData}
                 onChange={(elements: any[], appState: any) => {
                   if (elements.length > 0) {

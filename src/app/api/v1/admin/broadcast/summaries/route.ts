@@ -21,15 +21,15 @@ export async function GET() {
       const lectures = await prisma.lecture.findMany({
         where: { 
           teamId: team.id,
-          OR: [
+          OR: ([
             { videos: { some: { createdAt: { gte: startDate } } } },
             { files: { some: { createdAt: { gte: startDate } } } }
-          ]
+          ] as any)
         },
         include: {
           subject: true,
-          videos: { where: { createdAt: { gte: startDate } } },
-          files: { where: { createdAt: { gte: startDate } } }
+          videos: { where: { createdAt: { gte: startDate } } as any },
+          files: { where: { createdAt: { gte: startDate } } as any }
         }
       });
 
@@ -38,7 +38,7 @@ export async function GET() {
       // Group by Subject
       const subjectsMap: Record<string, any[]> = {};
       lectures.forEach(l => {
-        if (!subjectsMap[l.subject.name]) subjectsMap[l.subject.name] = [];
+        if (!subjectsMap[(l as any).subject.name]) subjectsMap[(l as any).subject.name] = [];
         subjectsMap[l.subject.name].push(l);
       });
 

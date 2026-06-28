@@ -3,6 +3,7 @@ const FirebaseProvider = dynamic(() => import("@/components/providers/FirebasePr
 import { MobileChromeController } from "@/components/layout/MobileChromeController";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { TelegramBlocker } from "@/components/system/TelegramBlocker";
+import { PuterScript } from "@/components/system/PuterScript";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { prisma } from "@/lib/prisma";
 import { unstable_cache } from "next/cache";
@@ -23,6 +24,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   return (
     <div className="app-shell app-shell--immersive min-h-screen flex flex-col">
       <MobileChromeController />
+      <PuterScript />
       <TelegramBlocker>
         <SiteConfigProvider
           initial={{

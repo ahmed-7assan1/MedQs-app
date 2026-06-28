@@ -338,7 +338,7 @@ export function PostDetailModal({
         body: JSON.stringify({ content: text }),
       });
       if (res.ok) {
-        setCommentCount(c => c + 1);
+        setCommentCount((c: number) => c + 1);
         setRefreshKey(k => k + 1);
         setActiveTab("comments");
         setTimeout(() => commentRef.current?.scrollTo({ top: 9999, behavior: "smooth" }), 200);
@@ -404,8 +404,8 @@ export function PostDetailModal({
     const img = sanitizeUrl(post.imageUrl);
     if (img && !list.some((a: any) => a.url === img)) {
       const t = detectType(img);
-      if (t === "image") list.unshift({ url: img, type: "image" });
-      else list.push({ url: img, type: t || "file" });
+      if (t === "image") list.unshift({ url: img, type: "image", fileId: undefined, name: undefined, size: undefined });
+      else list.push({ url: img, type: t || "file", fileId: undefined, name: undefined, size: undefined });
     }
     return list;
   }, [post.attachments, post.imageUrl]);

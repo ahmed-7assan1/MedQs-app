@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
       take: 50,
     });
 
-    const polledJobs = jobs.filter(j => j.colabLastPoll);
+    const polledJobs = jobs.filter((j: any) => j.colabLastPoll);
     const latestPoll = polledJobs.length > 0 ? polledJobs[0].colabLastPoll : null;
     const workerAlive = latestPoll ? Date.now() - new Date(latestPoll).getTime() < 5 * 60 * 1000 : false;
 

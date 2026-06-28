@@ -16,7 +16,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
     const testimonial = await (prisma as any).testimonial.update({
       where: { id: params.id },
-      data: { status, reviewedBy: session.user.id, reviewedAt: new Date() },
+      data: { status, reviewedBy: session!.user.id, reviewedAt: new Date() },
     });
     return NextResponse.json(testimonial);
   } catch (error) {

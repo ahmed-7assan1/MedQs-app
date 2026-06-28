@@ -41,7 +41,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       question.body,
       question.choices as any,
       question.answer,
-      { preferredProvider: aiOpts },
+      aiOpts,
     );
     const explanation = out.data;
 

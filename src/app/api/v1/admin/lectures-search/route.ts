@@ -18,8 +18,8 @@ export async function GET(req: Request) {
       select: {
         id: true,
         title: true,
-        module: {
-          select: { title: true, subject: { select: { title: true } } }
+        subject: {
+          select: { name: true }
         }
       }
     });

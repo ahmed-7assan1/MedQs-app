@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
         reportId,
         action,
         note: note || null,
-        adminId: session.user.id,
+        adminId: session!.user.id,
       },
     }),
     prisma.report.update({

@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const { uploadToCloudinary } = await import('@/lib/cloudinary');
-    const imageUrl = await uploadToCloudinary(buffer, `avatars/${userId}`);
+    const uploadResult = await uploadToCloudinary(buffer, `avatars/${userId}`);
+    const imageUrl = typeof uploadResult === 'string' ? uploadResult : (uploadResult as any).secure_url ?? (uploadResult as any).url ?? String(uploadResult);
 
     const user = await prisma.user.update({
       where: { id: userId },

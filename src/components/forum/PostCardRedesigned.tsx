@@ -136,8 +136,8 @@ export function PostCardRedesigned({
     const img = sanitizeUrl(post.imageUrl);
     if (img && !list.some((a: any) => a.url === img)) {
       const t = detectType(img);
-      if (t === "image") list.unshift({ url: img, type: "image" });
-      else list.push({ url: img, type: t || "file" });
+      if (t === "image") list.unshift({ url: img, type: "image", fileId: undefined, name: undefined, size: undefined });
+      else list.push({ url: img, type: t || "file", fileId: undefined, name: undefined, size: undefined });
     }
     return list;
   })();

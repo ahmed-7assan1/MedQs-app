@@ -1,14 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useLocale } from "@/contexts/LocaleContext";
 import { SectionHeader } from "./SectionHeader";
 import { ReviewModal } from "./ReviewModal";
-import { ReviewPromptModal } from "./ReviewPromptModal";
 import { createClient } from "@/lib/supabase/client";
 import { useLazyFetch } from "@/hooks/useLazyFetch";
+
+const ReviewPromptModal = dynamic(
+  () => import("./ReviewPromptModal").then(m => ({ default: m.ReviewPromptModal })),
+  { ssr: false }
+);
 
 interface TestimonialData {
   id: string;
@@ -46,7 +51,13 @@ export function Testimonials() {
   const { t } = useLocale();
   const [testimonials, setTestimonials] = useState<TestimonialData[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [showReview, setShowReview] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowReview(true), 5000);
+    return () => clearTimeout(t);
+  }, []);
 
   const { ref } = useLazyFetch<TestimonialData[]>("/api/v1/testimonials", {
     rootMargin: "100px",
@@ -95,7 +106,7 @@ export function Testimonials() {
         </button>
       </div>
       <ReviewModal open={showModal} onClose={() => setShowModal(false)} onSubmitted={() => setShowModal(false)} />
-      <ReviewPromptModal />
+      {showReview && <ReviewPromptModal />}
     </section>
   );
 }

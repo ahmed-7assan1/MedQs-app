@@ -52,7 +52,7 @@ export default async function LeaderboardPage() {
   );
 
   function findCurrentUser(players: typeof allPlayers) {
-    return players.find((p) => p.id === authUser.id) || null;
+    return players.find((p) => p.id === authUser!.id) || null;
   }
 
   const currentUserInAll = findCurrentUser(allPlayers);

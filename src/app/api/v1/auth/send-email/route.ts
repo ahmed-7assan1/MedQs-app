@@ -63,7 +63,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 400 });
       }
 
-      await sendPasswordResetEmail(email, data.properties?.action_link || data.action_link);
+      const link = (data as any).action_link || (data.properties as any)?.action_link;
+      await sendPasswordResetEmail(email, link);
       return NextResponse.json({ success: true, type: "reset_sent" });
     }
 

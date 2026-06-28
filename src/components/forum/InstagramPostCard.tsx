@@ -31,7 +31,7 @@ export function InstagramPostCard({ post, currentUserId }: Props) {
   const handleLike = async () => {
     const newState = !liked;
     setLiked(newState);
-    setLikeCount(prev => newState ? prev + 1 : prev - 1);
+    setLikeCount((prev: number) => newState ? prev + 1 : prev - 1);
     
     try {
       await fetch(`/api/v1/posts/${post.id}/like`, { 
@@ -42,7 +42,7 @@ export function InstagramPostCard({ post, currentUserId }: Props) {
     } catch (err) {
       // Revert on error
       setLiked(!newState);
-      setLikeCount(prev => newState ? prev - 1 : prev + 1);
+      setLikeCount((prev: number) => newState ? prev - 1 : prev + 1);
     }
   };
 

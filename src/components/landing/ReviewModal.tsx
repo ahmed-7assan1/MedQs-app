@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -16,24 +16,25 @@ interface ReviewModalProps {
 }
 
 function StarIcon({ filled, size }: { filled: boolean; size: number }) {
+  const uid = useId();
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="starGrad" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={`${uid}-grad`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#F59E0B" />
           <stop offset="100%" stopColor="#D97706" />
         </linearGradient>
-        <filter id="starGlow">
+        <filter id={`${uid}-glow`}>
           <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#F59E0B" floodOpacity="0.5" />
         </filter>
       </defs>
       <path
         d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-        fill={filled ? "url(#starGrad)" : "none"}
-        stroke={filled ? "url(#starGrad)" : "currentColor"}
+        fill={filled ? `url(#${uid}-grad)` : "none"}
+        stroke={filled ? `url(#${uid}-grad)` : "currentColor"}
         strokeWidth={filled ? 0 : 1.5}
         strokeOpacity={filled ? 0 : 0.25}
-        filter={filled ? "url(#starGlow)" : undefined}
+        filter={filled ? `url(#${uid}-glow)` : undefined}
       />
     </svg>
   );
@@ -46,6 +47,13 @@ export function ReviewModal({ open, onClose, onSubmitted }: ReviewModalProps) {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   const handleSubmit = async () => {
     if (rating === 0 || !content.trim()) return;
@@ -59,9 +67,10 @@ export function ReviewModal({ open, onClose, onSubmitted }: ReviewModalProps) {
       if (res.ok) {
         localStorage.setItem("medqs-reviewed", "true");
         setDone(true);
-        setTimeout(() => { onSubmitted(); }, 1500);
+        timeoutRef.current = setTimeout(() => { onSubmitted(); }, 1500);
       }
     } catch {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       onClose();
     } finally {
       setSubmitting(false);

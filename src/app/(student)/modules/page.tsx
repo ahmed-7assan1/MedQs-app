@@ -255,8 +255,8 @@ export default async function ModulesPage() {
               lectureId={lastActivity.lecture.id}
               lectureTitle={lastActivity.lecture.title}
               subjectName={lastActivity.lecture.subject.name}
-              moduleId={lastActivity.lecture.subject.module.id}
-              moduleName={lastActivity.lecture.subject.module.name}
+              moduleId={lastActivity.lecture.subject.module?.id ?? ''}
+              moduleName={lastActivity.lecture.subject.module?.name ?? ''}
               lastViewedAt={lastActivity.lastViewedAt}
               source={lastActivity.source}
             />

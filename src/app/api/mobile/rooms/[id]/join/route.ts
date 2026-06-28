@@ -14,7 +14,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     if (!room) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     await prisma.studyRoomMember.upsert({
-      where: { userId_roomId: { userId, roomId: id } },
+      where: { roomId_userId: { roomId: id, userId } },
       create: { userId, roomId: id },
       update: {},
     });

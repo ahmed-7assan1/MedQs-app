@@ -42,8 +42,10 @@ export async function POST(req: NextRequest) {
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { universityId: true } });
+    const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     const room = await prisma.studyRoom.create({
-      data: { name: body.name, description: body.description || '', ownerId: userId },
+      data: { name: body.name, description: body.description || '', ownerId: userId, inviteCode, universityId: user?.universityId ?? '' },
       include: { owner: { select: { id: true, name: true, image: true } } },
     });
 

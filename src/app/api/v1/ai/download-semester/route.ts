@@ -147,7 +147,7 @@ export async function GET(req: NextRequest) {
     const doc = new Document({ sections });
     const buffer = await Packer.toBuffer(doc);
 
-    return new Response(buffer, {
+    return new Response(buffer as unknown as Blob, {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "Content-Disposition": `attachment; filename="MedOneX_${semester.name.replace(/\s+/g, "_")}.docx"`,

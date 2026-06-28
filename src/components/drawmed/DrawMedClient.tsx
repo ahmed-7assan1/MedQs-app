@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
-import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw";
+type ExcalidrawImperativeAPI = any;
 import { useThemeStore } from "@/lib/store";
 import { DrawMedHeader } from "./DrawMedHeader";
 import { DrawMedLibrary } from "./DrawMedLibrary";
@@ -31,8 +31,8 @@ import {
 import "./excalidraw-styles.css";
 import "./drawmed.css";
 
-const Excalidraw = dynamic(
-  () => import("@/vendor/excalidraw/vendor").then((m) => m.Excalidraw),
+const Excalidraw = dynamic<any>(
+  () => import("@/vendor/excalidraw/vendor").then((m: any) => m.Excalidraw),
   { ssr: false, loading: () => <div className="drawmed-loading"><LoadingContent /></div> }
 );
 
@@ -100,7 +100,7 @@ export function DrawMedClient() {
     const findToolbar = (): HTMLElement | null =>
       document.querySelector(".excalidraw .App-toolbar-container");
 
-    let cleanup: (() => void) | null = null;
+    let cleanup: (() => void) | undefined;
 
     const setupToolbar = (toolbar: HTMLElement) => {
       // Force toolbar visible — Excalidraw hides it on mobile

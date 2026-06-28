@@ -36,7 +36,7 @@ Clinical Correlations: ${struct.clinical || ""}]`;
       }
     }
 
-    const keys = await getGeminiApiKeys(session.user.personalGeminiKey);
+    const keys = await getGeminiApiKeys((session.user as any).personalGeminiKey);
     if (keys.length === 0) {
       return NextResponse.json({
         reply: "Hello! I am your AI Anatomy Tutor. Please configure your Gemini API key in Settings, or ask the admin to enable the platform key to get started!"
@@ -63,7 +63,7 @@ Use high-yield memory aids (mnemonics) where helpful. Always stay medically accu
           { role: "user", parts: [{ text: fullMessage }] }
         ]
       });
-    }, session.user.personalGeminiKey);
+    }, (session.user as any).personalGeminiKey);
 
     const reply = result.response.text();
     return NextResponse.json({ reply });

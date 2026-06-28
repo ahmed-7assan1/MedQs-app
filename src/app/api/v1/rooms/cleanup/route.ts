@@ -10,7 +10,6 @@ export async function POST() {
     const deleted = await prisma.post.deleteMany({
       where: {
         createdAt: { lt: sevenDaysAgo },
-        roomId: { not: null }, // Only room-specific discussions
       },
     });
 

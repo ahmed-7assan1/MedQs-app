@@ -13,7 +13,7 @@ export async function DELETE(req: NextRequest) {
     const reason = searchParams.get('reason') || 'User requested';
 
     await prisma.engagementLog.create({
-      data: { userId, action: 'ACCOUNT_DELETED', metadata: { reason } },
+      data: { userId, action: 'ACCOUNT_DELETED', points: 0 },
     });
 
     await prisma.user.delete({ where: { id: userId } });

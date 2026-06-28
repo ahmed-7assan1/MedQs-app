@@ -483,7 +483,7 @@ async function streamGemini(
     for (const f of files) {
       if (f.mimeType.startsWith("image/") || f.mimeType === "application/pdf" || f.mimeType.includes("presentation")) {
         const base64 = f.data.split(",")[1];
-        lastParts.push({ inlineData: { mimeType: f.mimeType, data: base64 } });
+        lastParts.push({ inlineData: { mimeType: f.mimeType, data: base64 } } as any);
       } else {
         const textContent = atob(f.data.split(",")[1] || f.data);
         lastParts.push({ text: `\n\n[File: ${f.name}]\n${textContent}` });

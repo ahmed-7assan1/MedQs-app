@@ -9,7 +9,6 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     const tasks = await prisma.studyRoomTask.findMany({
       where: { roomId: id },
       orderBy: { createdAt: 'desc' },
-      include: { assignedTo: { select: { id: true, name: true, image: true } } },
     });
     return NextResponse.json(tasks);
   } catch (error) {
@@ -27,8 +26,8 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     const body = await req.json();
 
     const task = await prisma.studyRoomTask.create({
-      data: { title: body.title, roomId: id, createdById: userId, assignedToId: body.assignedToId || null },
-      include: { assignedTo: { select: { id: true, name: true, image: true } } },
+      data: { title: body.title, roomId: id },
+      // assignedTo + createdById removed — not in current schema
     });
 
     return NextResponse.json(task, { status: 201 });

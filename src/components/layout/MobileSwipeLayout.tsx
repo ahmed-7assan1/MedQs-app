@@ -61,7 +61,7 @@ export function MobileSwipeLayout({ children }: MobileSwipeLayoutProps) {
           key={pathname}
           initial={prefersReducedMotion ? false : { opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={prefersReducedMotion ? false : { opacity: 0 }}
+          exit={prefersReducedMotion ? undefined : { opacity: 0 }}
           transition={prefersReducedMotion ? { duration: 0 } : { type: "tween", duration: 0.1, ease: "easeOut" }}
           className="flex-1 flex flex-col w-full min-h-0"
         >

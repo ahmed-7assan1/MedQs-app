@@ -17,6 +17,7 @@ import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
 import { GlobalTopBar } from "@/components/layout/GlobalTopBar";
 import { MobileSwipeLayout } from "@/components/layout/MobileSwipeLayout";
 import { MobileChromeController } from "@/components/layout/MobileChromeController";
+import { PuterScript } from "@/components/system/PuterScript";
 import { PremiumNotificationPrompt } from "@/components/notifications/PremiumNotificationPrompt";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
@@ -79,6 +80,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <>
+      <PuterScript />
       <FirebaseProvider>
       <TelegramBlocker>
         <SiteConfigProvider

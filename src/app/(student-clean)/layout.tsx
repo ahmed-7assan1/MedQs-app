@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import { TelegramBlocker } from "@/components/system/TelegramBlocker";
+import { PuterScript } from "@/components/system/PuterScript";
 import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
 import { unstable_cache } from "next/cache";
 
@@ -102,6 +103,8 @@ export default async function CleanStudentLayout({ children }: { children: React
   }
 
   return (
+    <>
+    <PuterScript />
     <FirebaseProvider>
     <TelegramBlocker>
       <SiteConfigProvider
@@ -148,5 +151,6 @@ export default async function CleanStudentLayout({ children }: { children: React
       </SiteConfigProvider>
     </TelegramBlocker>
     </FirebaseProvider>
+    </>
   );
 }

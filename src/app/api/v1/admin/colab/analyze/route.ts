@@ -83,7 +83,7 @@ export async function POST(req: Request) {
         const urlRegex = /(https?:\/\/[^\s]+)/g;
         const matches = textToAnalyze.match(urlRegex);
         if (matches) {
-            matches.forEach(m => {
+            matches.forEach((m: any) => {
                 foundUrls.push(m);
                 extractedLinks.push({ text: "Text Link", url: m });
             });

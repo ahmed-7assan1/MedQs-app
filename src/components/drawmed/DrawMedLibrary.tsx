@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, Loader2, BookMarked, Package, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw";
+type ExcalidrawImperativeAPI = any;
 
 const LIBRARIES_JSON =
   "https://raw.githubusercontent.com/excalidraw/excalidraw-libraries/main/libraries.json";

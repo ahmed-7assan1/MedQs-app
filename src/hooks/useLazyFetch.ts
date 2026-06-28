@@ -38,15 +38,36 @@ export function useLazyFetch<T = any>(
     return () => observer.disconnect();
   }, [threshold, rootMargin, triggerOnce]);
 
+  const onDataRef = useRef(onData);
+  onDataRef.current = onData;
+  const abortRef = useRef<AbortController | null>(null);
+
   useEffect(() => {
     if (!shouldFetch || !url) return;
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
-    fetch(url)
+    fetch(url, { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject("Failed to fetch")))
-      .then((d) => { setData(d); onData?.(d); })
-      .catch((err) => setError(err?.message || String(err)))
-      .finally(() => setLoading(false));
+      .then((d) => {
+        if (!controller.signal.aborted) {
+          setData(d);
+          onDataRef.current?.(d);
+        }
+      })
+      .catch((err) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setError(err?.message || String(err));
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, [shouldFetch, url]);
 
   return { ref, data, loading, error };

@@ -11,12 +11,10 @@ export async function GET(req: Request) {
     const structureId = searchParams.get("structureId");
     if (!structureId) return NextResponse.json({ error: "Missing structureId" }, { status: 400 });
 
-    const note = await prisma.atlasNote.findUnique({
+    const note = await (prisma as any).atlasNote.findFirst({
       where: {
-        userId_structureId: {
-          userId: session.user.id,
-          structureId
-        }
+        userId: session.user.id,
+        structureId
       }
     });
 
@@ -46,13 +44,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, message: "Note cleared" });
     }
 
-    const note = await prisma.atlasNote.upsert({
+    const note = await (prisma as any).atlasNote.upsert({
       where: {
         userId_structureId: {
           userId: session.user.id,
           structureId
         }
-      },
+      } as any,
       update: {
         content: content.trim()
       },
