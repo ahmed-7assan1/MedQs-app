@@ -4,25 +4,25 @@ import React, { useEffect } from "react";
 import { motion, useSpring, useTransform, useInView } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
-  AcademicCapIcon, ShieldCheckIcon, FireIcon, PlayCircleIcon,
-  BoltIcon, UsersIcon, MicrophoneIcon, MagnifyingGlassIcon,
-  BookOpenIcon, LightBulbIcon, ChartBarSquareIcon,
-  SparklesIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, QuestionMarkCircleIcon,
-} from "@heroicons/react/24/solid";
+  GraduationCap, ShieldCheck, Flame, Play,
+  Zap, Users, Mic, Search,
+  BookOpen, BrainCircuit, Target,
+  Sparkles, TrendingUp, TrendingDown, HelpCircle,
+} from "lucide-react";
 import Link from "next/link";
 
 const iconRegistry: Record<string, React.ComponentType<{ className?: string }>> = {
-  Target: ChartBarSquareIcon,
-  Brain: LightBulbIcon,
-  ShieldCheck: ShieldCheckIcon,
-  GraduationCap: AcademicCapIcon,
-  Flame: FireIcon,
-  PlayCircle: PlayCircleIcon,
-  Zap: BoltIcon,
-  Users: UsersIcon,
-  Mic: MicrophoneIcon,
-  Search: MagnifyingGlassIcon,
-  BookOpen: BookOpenIcon,
+  Target,
+  Brain: BrainCircuit,
+  ShieldCheck,
+  GraduationCap,
+  Flame,
+  PlayCircle: Play,
+  Zap,
+  Users,
+  Mic,
+  Search,
+  BookOpen,
 };
 
 const sizeMap: Record<number, string> = {
@@ -37,7 +37,7 @@ const sizeMap: Record<number, string> = {
 };
 
 const IconRenderer = ({ name, className, size = 20 }: { name: string, className?: string, size?: number }) => {
-  const IconComponent = iconRegistry[name] || QuestionMarkCircleIcon;
+  const IconComponent = iconRegistry[name] || HelpCircle;
   const sizeClass = sizeMap[size] || "";
   return <IconComponent className={cn(sizeClass, className)} />;
 };
@@ -73,7 +73,7 @@ export const StatCard = ({
       initial={{ opacity: 0, y: 16 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.4, delay }}
-      className="group relative flex flex-col justify-between p-4 md:p-5 rounded-2xl border border-border bg-card hover:shadow-lg transition-all"
+      className="group relative flex flex-col justify-between p-4 md:p-5 rounded-2xl border border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm hover:shadow-md transition-all"
     >
       <div className="flex justify-between items-start">
         <div className={cn("p-2 rounded-xl bg-opacity-10", color)}>
@@ -81,7 +81,7 @@ export const StatCard = ({
         </div>
         {trend && (
           <div className={cn("flex items-center gap-1 text-[10px] font-bold", trend === "up" ? "text-emerald-500" : "text-rose-500")}>
-            {trend === "up" ? <ArrowTrendingUpIcon className="h-3 w-3" /> : <ArrowTrendingDownIcon className="h-3 w-3" />}
+            {trend === "up" ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
             {trend === "up" ? "+12%" : "-4%"}
           </div>
         )}
@@ -144,15 +144,15 @@ export const EmptyState = ({ label, iconName, href }: any) => {
 };
 
 export const QuickActionCard = ({ label, iconName, color, href }: any) => {
+  const iconColor = color?.replace("bg-", "text-").replace(" text-white", "");
   return (
     <Link
       href={href}
-      className="group relative flex flex-col items-center gap-3 min-w-[90px] p-4 rounded-2xl border border-border bg-card transition-all hover:-translate-y-1 hover:shadow-md hover:border-primary/40"
+      className="group relative flex flex-col items-center gap-3 min-w-[90px] p-4 rounded-2xl border border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lg hover:border-primary/40"
     >
-      <div className={cn("p-2.5 rounded-xl transition-all group-hover:scale-110 shadow", color)}>
-        <IconRenderer name={iconName} size={18} className="text-white" />
-      </div>
-      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">{label}</span>
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
+      <IconRenderer name={iconName} size={22} className={cn("transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_var(--tw-shadow-color)]", iconColor)} />
+      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors duration-300">{label}</span>
     </Link>
   );
 };
@@ -179,7 +179,7 @@ export const AskDrQFeatured = () => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.08] to-accent/[0.04] p-5 shadow-md scanline"
+      className="group relative overflow-hidden rounded-2xl border border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 p-5 shadow-sm scanline"
     >
       <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary/20 blur-[60px]" />
 
@@ -188,7 +188,7 @@ export const AskDrQFeatured = () => {
           <div className="relative">
             <div className="absolute inset-0 bg-primary/30 rounded-xl blur-lg animate-glow-pulse" />
             <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow">
-              <SparklesIcon className="h-5 w-5" />
+              <Sparkles className="h-5 w-5" />
             </div>
           </div>
           <div>

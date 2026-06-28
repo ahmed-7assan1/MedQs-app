@@ -4,10 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, animate } from "framer-motion";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import {
-  ArrowPathIcon, XMarkIcon, BookmarkIcon,
-  CheckCircleIcon, XCircleIcon,
-} from "@heroicons/react/24/solid";
+import { RefreshCw, X, Bookmark, CheckCircle, XCircle } from "lucide-react";
 
 interface ReviewedCard {
   id: string;
@@ -163,7 +160,7 @@ export function SpacedRepetitionCards() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <ArrowPathIcon className="h-4 w-4 text-indigo-500" />
+            <RefreshCw className="h-4 w-4 text-indigo-500" />
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
               Spaced Repetition
             </span>
@@ -213,7 +210,7 @@ export function SpacedRepetitionCards() {
               : "bg-background border border-border text-muted-foreground/60 hover:text-indigo-500 hover:border-indigo-300"
           )}
         >
-          <BookmarkIcon className={cn("h-4 w-4", saved.has(currentId) ? "fill-current" : "")} />
+          <Bookmark className={cn("h-4 w-4", saved.has(currentId) ? "fill-current" : "")} />
         </button>
 
         {/* Swipeable card */}
@@ -244,7 +241,7 @@ export function SpacedRepetitionCards() {
               >
                 <div className="flex items-center justify-between px-4 pt-3 pb-1">
                   <div className="flex items-center gap-1.5">
-                    {current.wrong && <XCircleIcon className="h-3.5 w-3.5 text-rose-500" />}
+                    {current.wrong && <XCircle className="h-3.5 w-3.5 text-rose-500" />}
                     <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
                       {current.from === "random" ? "Explore" : current.subjectName}
                     </span>
@@ -271,7 +268,7 @@ export function SpacedRepetitionCards() {
               >
                 <div className="flex items-center justify-between px-4 pt-3 pb-1">
                   <div className="flex items-center gap-1.5">
-                    <CheckCircleIcon className="h-3.5 w-3.5 text-emerald-500" />
+                    <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
                     <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Answer</span>
                   </div>
                   <span className="text-[9px] font-bold text-muted-foreground/40 tabular-nums">
@@ -308,7 +305,7 @@ export function SpacedRepetitionCards() {
                   : "bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/20"
               )}
             >
-              <XCircleIcon className="h-4 w-4" />
+              <XCircle className="h-4 w-4" />
               Got It Wrong
             </button>
             <button
@@ -320,7 +317,7 @@ export function SpacedRepetitionCards() {
                   : "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-500/20"
               )}
             >
-              <CheckCircleIcon className="h-4 w-4" />
+              <CheckCircle className="h-4 w-4" />
               Got It
             </button>
           </motion.div>
@@ -335,7 +332,7 @@ export function SpacedRepetitionCards() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <ArrowPathIcon className="h-4 w-4 text-indigo-500" />
+            <RefreshCw className="h-4 w-4 text-indigo-500" />
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
               Spaced Repetition
             </span>
@@ -345,7 +342,7 @@ export function SpacedRepetitionCards() {
               Refresh
             </button>
             <button onClick={dismissAll} className="h-6 w-6 rounded-full hover:bg-muted/40 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-              <XMarkIcon className="h-3.5 w-3.5" />
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
@@ -405,7 +402,7 @@ export function SpacedRepetitionCards() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <ArrowPathIcon className="h-4 w-4 text-indigo-500" />
+          <RefreshCw className="h-4 w-4 text-indigo-500" />
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
             {isRandomCards ? "Explore Flashcards" : "Spaced Repetition"}
           </span>
@@ -420,7 +417,7 @@ export function SpacedRepetitionCards() {
             Refresh
           </button>
           <button onClick={dismissAll} className="h-6 w-6 rounded-full hover:bg-muted/40 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground transition-colors" title="Dismiss">
-            <XMarkIcon className="h-3.5 w-3.5" />
+            <X className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>

@@ -1,12 +1,11 @@
 "use client";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Wand2, Sparkles, Cpu } from "lucide-react";
+import { Wand2, Sparkles } from "lucide-react";
 import { AIToolsTab } from "@/components/admin/ai-studio/AIToolsTab";
 import { CreativeStudioTab } from "@/components/admin/ai-studio/CreativeStudioTab";
-import { ColabTransferTab } from "@/components/admin/ai-studio/ColabTransferTab";
 
-type StudioTab = "tools" | "creative" | "colab";
+type StudioTab = "tools" | "creative";
 
 export default function AIStudioPage() {
   const [activeTab, setActiveTab] = useState<StudioTab>("tools");
@@ -14,7 +13,6 @@ export default function AIStudioPage() {
   const TABS: { id: StudioTab; label: string; icon: any }[] = [
     { id: "tools", label: "Diagnostic Suite & Extraction", icon: Wand2 },
     { id: "creative", label: "Creative Studio", icon: Sparkles },
-    { id: "colab", label: "Colab Transfer & Queue", icon: Cpu },
   ];
 
   return (
@@ -53,7 +51,6 @@ export default function AIStudioPage() {
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
         {activeTab === "tools" && <AIToolsTab />}
         {activeTab === "creative" && <CreativeStudioTab />}
-        {activeTab === "colab" && <ColabTransferTab />}
       </div>
     </div>
   );

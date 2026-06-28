@@ -10,22 +10,11 @@ import { cn } from "@/lib/utils";
 import { SharedQuestionBlock } from "@/components/quiz/SharedQuestionBlock";
 import { VidStackPlayer } from "@/components/content/VidStackPlayer";
 import {
-  ArrowRightIcon,
-  PaperClipIcon,
-  ArrowsPointingOutIcon,
-  HeartIcon,
-  ChatBubbleLeftIcon,
-  XMarkIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  PlayIcon,
-  UserGroupIcon,
-} from "@heroicons/react/24/solid";
-import {
-  HeartIcon as HeartOutlineIcon,
-  ShareIcon,
-  BookmarkIcon,
-} from "@heroicons/react/24/outline";
+  ArrowRight, Paperclip, Expand,
+  Heart, MessageSquare, X,
+  ChevronLeft, ChevronRight, Play, Users,
+  Share2, Bookmark,
+} from "lucide-react";
 
 /* ─────────────────────────────────────────────
    Types
@@ -170,7 +159,7 @@ function Lightbox({
           onClick={onClose}
           className="absolute top-4 right-4 z-10 h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-all"
         >
-          <XMarkIcon className="h-5 w-5" />
+          <X className="h-5 w-5" />
         </button>
 
         {/* Counter */}
@@ -186,7 +175,7 @@ function Lightbox({
             onClick={(e) => { e.stopPropagation(); setIdx((i) => i - 1); }}
             className="absolute left-4 h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-all"
           >
-            <ChevronLeftIcon className="h-5 w-5" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
         )}
 
@@ -208,7 +197,7 @@ function Lightbox({
             onClick={(e) => { e.stopPropagation(); setIdx((i) => i + 1); }}
             className="absolute right-4 h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-all"
           >
-            <ChevronRightIcon className="h-5 w-5" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         )}
 
@@ -283,7 +272,7 @@ function ImageGrid({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
           <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-            <ArrowsPointingOutIcon className="h-5 w-5 text-white" />
+            <Expand className="h-5 w-5 text-white" />
           </div>
         </div>
       </div>
@@ -653,7 +642,7 @@ function PostCard({
                 : "bg-muted/20 text-muted-foreground/50 hover:text-amber-500 hover:bg-amber-500/10"
             )}
           >
-            <BookmarkIcon className="h-4 w-4" />
+            <Bookmark className="h-4 w-4" />
           </button>
         </div>
 
@@ -675,7 +664,7 @@ function PostCard({
                 ytPlaying ? (
                   <div className="shrink-0 rounded-xl overflow-hidden border border-indigo-500/20 bg-gradient-to-br from-indigo-500/[0.04] to-violet-500/[0.04]">
                     <div className="flex items-center gap-2 px-3 py-2 border-b border-indigo-500/10">
-                      <PlayIcon className="h-3 w-3 text-indigo-500" />
+                      <Play className="h-3 w-3 text-indigo-500" />
                       <span className="text-[9px] font-black text-indigo-500 uppercase tracking-[0.15em]">Playing</span>
                     </div>
                     <div className="aspect-video bg-black">
@@ -696,7 +685,7 @@ function PostCard({
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="h-14 w-14 rounded-full bg-white/90 shadow-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <PlayIcon className="h-6 w-6 text-foreground ml-0.5" />
+                        <Play className="h-6 w-6 text-foreground ml-0.5" />
                       </div>
                     </div>
                     <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/50 backdrop-blur-sm text-[9px] font-bold text-white/80">
@@ -763,11 +752,11 @@ function PostCard({
                         rel="noopener noreferrer"
                         className="flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-500/8 border border-amber-500/15 hover:bg-amber-500/15 transition-all group"
                       >
-                        <PaperClipIcon className="h-4 w-4 text-amber-500 shrink-0" />
+                        <Paperclip className="h-4 w-4 text-amber-500 shrink-0" />
                         <span className="text-[11px] font-medium text-foreground/70 truncate flex-1">
                           {fileName}
                         </span>
-                        <ArrowRightIcon className="h-3 w-3 text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 rotate-[-45deg]" />
+                        <ArrowRight className="h-3 w-3 text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 rotate-[-45deg]" />
                       </a>
                     );
                   })}
@@ -796,11 +785,7 @@ function PostCard({
                   : "text-muted-foreground/50 hover:text-rose-500 hover:bg-rose-500/8"
               )}
             >
-              {liked ? (
-                <HeartIcon className="h-4 w-4" />
-              ) : (
-                <HeartOutlineIcon className="h-4 w-4" />
-              )}
+              <Heart className={cn("h-4 w-4", liked && "fill-current")} />
               <span>{likeCount > 0 ? likeCount.toLocaleString() : ""}</span>
             </button>
 
@@ -809,13 +794,13 @@ function PostCard({
               href="/social"
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-muted-foreground/50 hover:text-indigo-500 hover:bg-indigo-500/8 transition-all"
             >
-              <ChatBubbleLeftIcon className="h-4 w-4" />
+              <MessageSquare className="h-4 w-4" />
               <span>{post._count?.comments ? post._count.comments.toLocaleString() : ""}</span>
             </Link>
 
             {/* Share */}
             <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-muted-foreground/50 hover:text-sky-500 hover:bg-sky-500/8 transition-all active:scale-90">
-              <ShareIcon className="h-4 w-4" />
+              <Share2 className="h-4 w-4" />
             </button>
 
             {/* Spacer */}
@@ -827,7 +812,7 @@ function PostCard({
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-wider hover:bg-indigo-500/20 active:scale-95 transition-all"
             >
               Read more
-              <ArrowRightIcon className="h-3 w-3" />
+              <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
         </div>
@@ -906,7 +891,7 @@ export function CommunityPostsCarousel() {
     >
       {/* Social heading */}
       <div className="flex items-center gap-2 mb-3">
-        <UserGroupIcon className="h-4 w-4 text-indigo-500" />
+        <Users className="h-4 w-4 text-indigo-500" />
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
           Social
         </span>

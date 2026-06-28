@@ -254,7 +254,6 @@ Accuracy is CRITICAL. Extract ALL lectures and links.`;
                   const exists = await tx.lectureVideo.findFirst({ where: { lectureId: lecture.id, url: v.url } });
                   if (!exists) {
                     const nv = await tx.lectureVideo.create({ data: { lectureId: lecture.id, title: v.title, url: v.url } });
-                    await tx.youtubeUploadTask.create({ data: { sourceUrl: v.url, title: lecture.title, lectureVideoId: nv.id, status: "PENDING" } });
                   }
                 }
                 for (const fUrl of (lecData.fileUrls || [])) {

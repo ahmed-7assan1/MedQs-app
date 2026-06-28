@@ -83,7 +83,7 @@ export function Navbar() {
               l.href.startsWith("/") ? (
                 <Link key={l.label} href={l.href} className="transition-colors hover:text-foreground">{l.label}</Link>
               ) : (
-                <a key={l.label} href={l.href} className="transition-colors hover:text-foreground">{l.label}</a>
+                <Link key={l.label} href={pathname === "/" ? l.href : `/${l.href}`} className="transition-colors hover:text-foreground">{l.label}</Link>
               )
             )}
           </nav>
@@ -151,14 +151,14 @@ export function Navbar() {
                       {l.label}
                     </Link>
                   ) : (
-                    <a
+                    <Link
                       key={l.label}
-                      href={l.href}
+                      href={pathname === "/" ? l.href : `/${l.href}`}
                       onClick={() => setMobileMenuOpen(false)}
                       className="block rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
                       {l.label}
-                    </a>
+                    </Link>
                   )
                 )}
                 <hr className="border-border/40 my-2" />

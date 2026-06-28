@@ -3,11 +3,7 @@
 import { useEffect } from "react";
 import { useBodyLock } from "@/hooks/useBodyLock";
 import { createPortal } from "react-dom";
-import {
-  FireIcon, TrophyIcon, AcademicCapIcon, StarIcon,
-  ShieldCheckIcon, RocketLaunchIcon, SparklesIcon,
-  BookOpenIcon, XMarkIcon,
-} from "@heroicons/react/24/solid";
+import { Flame, Trophy, GraduationCap, Star, ShieldCheck, Rocket, Sparkles, BookOpen, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BadgeDef {
@@ -25,14 +21,14 @@ interface BadgeData {
 }
 
 const BADGES: BadgeDef[] = [
-  { id: "legend", label: "Legend", desc: "90% mastery + 30-day streak", icon: RocketLaunchIcon, gradient: "from-rose-600 via-pink-500 to-orange-400", glow: "shadow-[0_0_12px_rgba(225,29,72,0.4)]", check: (d) => d.overallPct >= 90 && d.currentStreak >= 30, anim: "bss-rocket", cardStyle: "border-2 border-rose-500/30 dark:border-rose-500/20 shadow-[0_0_16px_rgba(225,29,72,0.12)]" },
-  { id: "master", label: "Master", desc: "85% mastery + 14-day streak", icon: SparklesIcon, gradient: "from-rose-500 to-pink-600", glow: "shadow-[0_0_12px_rgba(244,63,94,0.35)]", check: (d) => d.overallPct >= 85 && d.currentStreak >= 14, anim: "bss-sparkle", cardStyle: "border border-pink-300/40 dark:border-pink-500/20 bg-gradient-to-br from-pink-50/30 to-transparent dark:from-pink-950/10" },
-  { id: "expert", label: "Expert", desc: "80% overall mastery", icon: ShieldCheckIcon, gradient: "from-rose-400 to-red-500", glow: "shadow-[0_0_12px_rgba(251,113,133,0.3)]", check: (d) => d.overallPct >= 80, anim: "bss-shield", cardStyle: "border border-rose-300/40 dark:border-red-500/20 border-l-4 border-l-rose-400 dark:border-l-red-500/50" },
-  { id: "streak_30", label: "Monthly Legend", desc: "30 consecutive study days", icon: StarIcon, gradient: "from-amber-500 to-orange-500", glow: "shadow-[0_0_12px_rgba(245,158,11,0.3)]", check: (d) => d.currentStreak >= 30, anim: "bss-star", cardStyle: "border border-amber-300/40 dark:border-amber-500/20 border-dashed" },
-  { id: "centurion", label: "Centurion", desc: "Answer 500+ questions", icon: TrophyIcon, gradient: "from-violet-500 to-purple-600", glow: "shadow-[0_0_12px_rgba(139,92,246,0.3)]", check: (d) => d.totalQuestions >= 500, anim: "bss-trophy", cardStyle: "border-2 border-violet-300/40 dark:border-violet-500/20 rounded-t-lg rounded-b-xl rounded-tr-xl" },
-  { id: "streak_7", label: "Week Warrior", desc: "7 consecutive study days", icon: FireIcon, gradient: "from-emerald-500 to-teal-500", glow: "shadow-[0_0_12px_rgba(52,211,153,0.3)]", check: (d) => d.currentStreak >= 7, anim: "bss-fire", cardStyle: "border border-emerald-300/40 dark:border-emerald-500/20 border-b-4 border-b-emerald-400 dark:border-b-emerald-500/50" },
-  { id: "scholar", label: "Scholar", desc: "Answer 100+ questions", icon: AcademicCapIcon, gradient: "from-sky-500 to-cyan-500", glow: "shadow-[0_0_12px_rgba(14,165,233,0.25)]", check: (d) => d.totalQuestions >= 100, anim: "bss-scholar", cardStyle: "border border-sky-300/40 dark:border-sky-500/20 rounded-[18px]" },
-  { id: "first_steps", label: "First Steps", desc: "Complete your first quiz", icon: BookOpenIcon, gradient: "from-slate-500 to-slate-600", glow: "shadow-[0_0_8px_rgba(100,116,139,0.2)]", check: () => true, anim: "bss-book", cardStyle: "border border-slate-300/40 dark:border-slate-600/30 rounded-lg" },
+  { id: "legend", label: "Legend", desc: "90% mastery + 30-day streak", icon: Rocket, gradient: "from-rose-600 via-pink-500 to-orange-400", glow: "shadow-[0_0_12px_rgba(225,29,72,0.4)]", check: (d) => d.overallPct >= 90 && d.currentStreak >= 30, anim: "bss-rocket", cardStyle: "border-2 border-rose-500/30 dark:border-rose-500/20 shadow-[0_0_16px_rgba(225,29,72,0.12)]" },
+  { id: "master", label: "Master", desc: "85% mastery + 14-day streak", icon: Sparkles, gradient: "from-rose-500 to-pink-600", glow: "shadow-[0_0_12px_rgba(244,63,94,0.35)]", check: (d) => d.overallPct >= 85 && d.currentStreak >= 14, anim: "bss-sparkle", cardStyle: "border border-pink-300/40 dark:border-pink-500/20 bg-gradient-to-br from-pink-50/30 to-transparent dark:from-pink-950/10" },
+  { id: "expert", label: "Expert", desc: "80% overall mastery", icon: ShieldCheck, gradient: "from-rose-400 to-red-500", glow: "shadow-[0_0_12px_rgba(251,113,133,0.3)]", check: (d) => d.overallPct >= 80, anim: "bss-shield", cardStyle: "border border-rose-300/40 dark:border-red-500/20 border-l-4 border-l-rose-400 dark:border-l-red-500/50" },
+  { id: "streak_30", label: "Monthly Legend", desc: "30 consecutive study days", icon: Star, gradient: "from-amber-500 to-orange-500", glow: "shadow-[0_0_12px_rgba(245,158,11,0.3)]", check: (d) => d.currentStreak >= 30, anim: "bss-star", cardStyle: "border border-amber-300/40 dark:border-amber-500/20 border-dashed" },
+  { id: "centurion", label: "Centurion", desc: "Answer 500+ questions", icon: Trophy, gradient: "from-violet-500 to-purple-600", glow: "shadow-[0_0_12px_rgba(139,92,246,0.3)]", check: (d) => d.totalQuestions >= 500, anim: "bss-trophy", cardStyle: "border-2 border-violet-300/40 dark:border-violet-500/20 rounded-t-lg rounded-b-xl rounded-tr-xl" },
+  { id: "streak_7", label: "Week Warrior", desc: "7 consecutive study days", icon: Flame, gradient: "from-emerald-500 to-teal-500", glow: "shadow-[0_0_12px_rgba(52,211,153,0.3)]", check: (d) => d.currentStreak >= 7, anim: "bss-fire", cardStyle: "border border-emerald-300/40 dark:border-emerald-500/20 border-b-4 border-b-emerald-400 dark:border-b-emerald-500/50" },
+  { id: "scholar", label: "Scholar", desc: "Answer 100+ questions", icon: GraduationCap, gradient: "from-sky-500 to-cyan-500", glow: "shadow-[0_0_12px_rgba(14,165,233,0.25)]", check: (d) => d.totalQuestions >= 100, anim: "bss-scholar", cardStyle: "border border-sky-300/40 dark:border-sky-500/20 rounded-[18px]" },
+  { id: "first_steps", label: "First Steps", desc: "Complete your first quiz", icon: BookOpen, gradient: "from-slate-500 to-slate-600", glow: "shadow-[0_0_8px_rgba(100,116,139,0.2)]", check: () => true, anim: "bss-book", cardStyle: "border border-slate-300/40 dark:border-slate-600/30 rounded-lg" },
 ];
 
 function getProgress(id: string, data: BadgeData): number {
@@ -151,7 +147,7 @@ export function BadgeProgressSheet({
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-sm font-black text-foreground uppercase tracking-widest">Achievements</h2>
             <button onClick={onClose} aria-label="Close achievements" className="p-1.5 rounded-full hover:bg-muted/20 transition-colors text-muted-foreground">
-              <XMarkIcon className="h-4 w-4" />
+              <X className="h-4 w-4" />
             </button>
           </div>
 

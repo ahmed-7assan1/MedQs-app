@@ -6,11 +6,12 @@ import { getUserRankInfo } from "@/lib/engagement";
 import { getCachedDashboardData } from "@/lib/dashboard-queries";
 import { last7DayKeys } from "@/lib/dashboard-stats";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import type { DashboardData } from "@/types/dashboard";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Your personalized medical study dashboard. Track progress, continue lectures, review past papers, and monitor your learning statistics.",
+  description: "Your personalized medical study dashboard.",
 };
 
 export default async function DashboardPage() {
@@ -18,13 +19,11 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth?mode=login");
 
-  // Fetch full user profile to check for missing academic info
   let fullProfile = user ? await prisma.user.findUnique({
     where: { id: user.id },
     select: { id: true, universityId: true, facultyId: true, semesterId: true }
   }) : null;
 
-  // Sync logic: If Prisma is missing data but metadata has it, sync now
   try {
     if (user && (!fullProfile || !fullProfile.universityId || !fullProfile.semesterId)) {
       const meta = user.user_metadata;
@@ -55,10 +54,10 @@ export default async function DashboardPage() {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#05070f] text-white p-6">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-6">
         <h1 className="text-2xl font-bold mb-4">Access Restricted</h1>
-        <p className="text-slate-400 mb-8 text-center">Please sign in to access your personalized medical dashboard.</p>
-        <Link href="/auth?mode=login" className="px-8 py-3 bg-blue-600 rounded-2xl font-bold hover:bg-blue-700 transition-all">Sign In</Link>
+        <p className="text-muted-foreground mb-8 text-center">Please sign in to access your personalized medical dashboard.</p>
+        <Link href="/auth?mode=login" className="px-8 py-3 bg-primary rounded-2xl font-bold hover:bg-primary/90 transition-all text-primary-foreground">Sign In</Link>
       </div>
     );
   }
@@ -79,10 +78,9 @@ export default async function DashboardPage() {
     console.warn("[dashboard-app] DB error:", err instanceof Error ? err.message : err);
   }
 
-  const { stats, moduleProgress, lastLectureActivity, activity: activityArr } = dashData || {
+  const { stats, moduleProgress, activity: activityArr } = dashData || {
     stats: { totalQuestions: 0, totalCorrect: 0, todayItemCount: 0, currentStreak: 0 },
     moduleProgress: [],
-    lastLectureActivity: null,
     activity: [],
   };
 
@@ -104,23 +102,22 @@ export default async function DashboardPage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
-  return (
-    <DashboardShell
-      firstName={firstName}
-      greeting={greeting}
-      currentStreak={currentStreak}
-      rankPoints={rankPoints}
-      rankLabel={rankLabel}
-      dailyPct={dailyPct}
-      overallPct={overallPct}
-      todayItemCount={todayItemCount}
-      dailyTarget={dailyTarget}
-      totalQuestions={totalQuestions}
-      lastLectureActivity={lastLectureActivity}
-      moduleProgress={moduleProgress}
-      activityArr={activityArr || []}
-      progressToNext={progressToNext}
-      isProfileIncomplete={isProfileIncomplete}
-    />
-  );
+  const dashboardData: DashboardData = {
+    firstName,
+    greeting,
+    currentStreak,
+    rankPoints,
+    rankLabel,
+    dailyPct,
+    overallPct,
+    todayItemCount,
+    dailyTarget,
+    totalQuestions,
+    moduleProgress: moduleProgress || [],
+    activityArr: activityArr || [],
+    progressToNext,
+    isProfileIncomplete,
+  };
+
+  return <DashboardShell data={dashboardData} />;
 }

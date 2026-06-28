@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  FireIcon, TrophyIcon, AcademicCapIcon, StarIcon,
-  ShieldCheckIcon, RocketLaunchIcon, SparklesIcon,
-  BookOpenIcon,
-} from "@heroicons/react/24/solid";
+import { Flame, Trophy, GraduationCap, Star, ShieldCheck, Rocket, Sparkles, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BadgeProgressSheet } from "@/components/dashboard/BadgeProgressSheet";
 
@@ -15,7 +11,7 @@ function AnimatedFlame() {
       <span className="absolute inset-0 rounded-full bg-orange-500/30 blur-md animate-flame-glow" />
       <span className="absolute inset-0 rounded-full bg-amber-400/20 blur-sm animate-flame-pulse" />
       <span className="relative animate-fire">
-        <FireIcon className="h-5 w-5 text-orange-500 drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" />
+        <Flame className="h-5 w-5 text-orange-500 drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" />
       </span>
     </span>
   );
@@ -53,7 +49,7 @@ const BADGES: BadgeDef[] = [
   {
     id: "legend",
     label: "Legend",
-    icon: RocketLaunchIcon,
+    icon: Rocket,
     gradient: "from-rose-600 via-pink-500 to-orange-400",
     glow: "shadow-[0_0_12px_rgba(225,29,72,0.4)]",
     check: (d) => d.overallPct >= 90 && d.currentStreak >= 30,
@@ -61,7 +57,7 @@ const BADGES: BadgeDef[] = [
   {
     id: "master",
     label: "Master",
-    icon: SparklesIcon,
+    icon: Sparkles,
     gradient: "from-rose-500 to-pink-600",
     glow: "shadow-[0_0_12px_rgba(244,63,94,0.35)]",
     check: (d) => d.overallPct >= 85 && d.currentStreak >= 14,
@@ -69,7 +65,7 @@ const BADGES: BadgeDef[] = [
   {
     id: "expert",
     label: "Expert",
-    icon: ShieldCheckIcon,
+    icon: ShieldCheck,
     gradient: "from-rose-400 to-red-500",
     glow: "shadow-[0_0_12px_rgba(251,113,133,0.3)]",
     check: (d) => d.overallPct >= 80,
@@ -77,7 +73,7 @@ const BADGES: BadgeDef[] = [
   {
     id: "streak_30",
     label: "Monthly Legend",
-    icon: StarIcon,
+    icon: Star,
     gradient: "from-amber-500 to-orange-500",
     glow: "shadow-[0_0_12px_rgba(245,158,11,0.3)]",
     check: (d) => d.currentStreak >= 30,
@@ -85,7 +81,7 @@ const BADGES: BadgeDef[] = [
   {
     id: "centurion",
     label: "Centurion",
-    icon: TrophyIcon,
+    icon: Trophy,
     gradient: "from-violet-500 to-purple-600",
     glow: "shadow-[0_0_12px_rgba(139,92,246,0.3)]",
     check: (d) => d.totalQuestions >= 500,
@@ -93,7 +89,7 @@ const BADGES: BadgeDef[] = [
   {
     id: "streak_7",
     label: "7-Day Streak",
-    icon: StarIcon,
+    icon: Star,
     gradient: "from-emerald-500 to-teal-500",
     glow: "shadow-[0_0_12px_rgba(52,211,153,0.3)]",
     check: (d) => d.currentStreak >= 7,
@@ -101,7 +97,7 @@ const BADGES: BadgeDef[] = [
   {
     id: "scholar",
     label: "Scholar",
-    icon: AcademicCapIcon,
+    icon: GraduationCap,
     gradient: "from-sky-500 to-cyan-500",
     glow: "shadow-[0_0_12px_rgba(14,165,233,0.25)]",
     check: (d) => d.totalQuestions >= 100,
@@ -109,7 +105,7 @@ const BADGES: BadgeDef[] = [
   {
     id: "first_steps",
     label: "First Steps",
-    icon: BookOpenIcon,
+    icon: BookOpen,
     gradient: "from-slate-500 to-slate-600",
     glow: "shadow-[0_0_8px_rgba(100,116,139,0.2)]",
     check: () => true,
@@ -198,7 +194,7 @@ export function MobileDashboardHero({
           <div className="relative z-10 flex items-center gap-2.5 px-3.5 py-3 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-500/10 dark:to-yellow-500/5">
             <span className="relative inline-flex items-center justify-center shrink-0">
               <span className="absolute inset-0 rounded-full bg-amber-400/20 blur-sm animate-trophy-glow" />
-              <TrophyIcon className="h-5 w-5 relative text-amber-500 animate-trophy" />
+              <Trophy className="h-5 w-5 relative text-amber-500 animate-trophy" />
             </span>
             <div>
               <p className="text-base font-black text-foreground leading-none">{(rankPoints || 0).toLocaleString()}</p>

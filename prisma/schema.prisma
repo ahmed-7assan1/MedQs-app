@@ -110,6 +110,7 @@ model Faculty {
   guestQuizUsers GuestQuizUser[]
   medicalTeams   MedicalTeam[]
   users          User[]
+  sourceBooks    SourceBook[]
 
   @@index([universityId])
   @@index([category])
@@ -299,6 +300,7 @@ model LectureVideo {
   comments          LectureVideoComment[]
   likes             LectureVideoLike[]
   videoViews        VideoViewTracking[]
+  telegramMigrationTasks TelegramMigrationTask[]
 
   @@index([lectureId, sortOrder])
 }
@@ -543,6 +545,7 @@ model User {
   aiUsageLogs              AIUsageLog[]
   accounts                 Account[]
   auditLogs                AuditLog[]
+  channelFollows           ChannelFollow[]
 
   comments                 Comment[]
   commentLikes             CommentLike[]
@@ -2577,6 +2580,92 @@ model PageView {
   @@index([path, createdAt])
   @@index([createdAt])
   @@index([sessionId])
+}
+
+model SourceBook {
+  id           String   @id @default(uuid())
+  title        String
+  author       String?
+  fileUrl      String?
+  fullText     String?
+  analysisJson Json?
+  facultyId    String
+  semesterId   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  faculty  Faculty           @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  resources LibraryResource[]
+
+  @@index([facultyId])
+  @@index([semesterId])
+}
+
+model LibraryResource {
+  id           String   @id @default(uuid())
+  title        String
+  type         String
+  url          String?
+  payload      Json?
+  category     String
+  sourceBookId String?
+  originUniId  String?
+  sharedBy     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sourceBook SourceBook? @relation(fields: [sourceBookId], references: [id], onDelete: SetNull)
+
+  @@index([category])
+  @@index([sourceBookId])
+}
+
+model TelegramMigrationTask {
+  id                String   @id @default(uuid())
+  title             String?
+  sourceUrl         String
+  lectureVideoId    String?
+  status            String   @default("PENDING")
+  telegramMessageId Int?
+  telegramChatId    String?
+  error             String?
+  progress          Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  lectureVideo LectureVideo? @relation(fields: [lectureVideoId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([lectureVideoId])
+}
+
+model AllowedChannel {
+  id          String   @id @default(uuid())
+  youtubeId   String   @unique
+  name        String
+  handle      String?
+  thumbnail   String?
+  description String?
+  subscribers String?
+  createdAt   DateTime @default(now())
+
+  follows ChannelFollow[]
+
+  @@index([youtubeId])
+}
+
+model ChannelFollow {
+  id        String   @id @default(uuid())
+  userId    String
+  channelId String
+  createdAt DateTime @default(now())
+
+  channel AllowedChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channelId])
+  @@index([userId])
+  @@index([channelId])
 }
 
 model VideoViewTracking {

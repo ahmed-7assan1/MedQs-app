@@ -82,6 +82,7 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
 
+
   // ── Runtime ──────────────────────────────────────────────────────────────────
   compress: true,                // gzip responses
   poweredByHeader: false,        // remove X-Powered-By header

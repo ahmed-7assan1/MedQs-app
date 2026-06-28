@@ -120,13 +120,59 @@ export const en = {
           { label: "Privacy", href: "/privacy" },
           { label: "Terms", href: "/terms" },
           { label: "Contact", href: "mailto:support@medonex.com" },
-          { label: "FAQ", href: "/#faq" },
+          { label: "FAQ", href: "/faq" },
         ],
       },
     ],
     copyright: "MedOneX. All rights reserved.",
     privacy: "Privacy",
     terms: "Terms",
+  },
+  faq: {
+    eyebrow: "FAQ",
+    title: "Frequently Asked Questions",
+    subtitle: "Everything you need to know about MedOneX",
+    categories: [
+      {
+        id: "account",
+        label: "Account",
+        questions: [
+          { q: "How do I create an account?", a: "Click 'Start for Free' on the landing page or go to /auth and select 'Sign Up'. You can register with your email or sign in with Google." },
+          { q: "Is my account free?", a: "Yes! MedOneX offers free access to core features including questions, videos, and AI chat. Premium features may be added in the future." },
+          { q: "I forgot my password. What should I do?", a: "Go to /auth and click 'Forgot password'. Enter your registered email and we'll send you a reset link." },
+        ],
+      },
+      {
+        id: "platform",
+        label: "Platform",
+        questions: [
+          { q: "What is MedOneX?", a: "MedOneX is an AI-powered medical education platform that provides curated curriculum, smart analytics, practice questions, video lectures, and a community of medical students." },
+          { q: "How does the AI Dr. Q work?", a: "Dr. Q is our AI assistant that understands medicine. It can explain questions, generate practice quizzes, create flashcards, and help you understand complex medical topics." },
+          { q: "Can I use MedOneX offline?", a: "Some features like downloaded questions and materials can be accessed offline. Check the download page for available offline content." },
+        ],
+      },
+      {
+        id: "content",
+        label: "Content",
+        questions: [
+          { q: "What subjects are covered?", a: "MedOneX covers all major medical subjects including Anatomy, Physiology, Biochemistry, Pathology, Pharmacology, Microbiology, and more across different academic years." },
+          { q: "Are the questions exam-based?", a: "Yes! Our question bank is designed to simulate real medical exams. Questions are categorized by subject, difficulty, and topic." },
+          { q: "Can I track my progress?", a: "Yes. The platform provides detailed analytics on your performance, including accuracy rates, weak areas, and progress over time." },
+        ],
+      },
+      {
+        id: "technical",
+        label: "Technical",
+        questions: [
+          { q: "Which devices are supported?", a: "MedOneX works on all modern browsers on desktop, tablet, and mobile devices. We also have a mobile app available for download." },
+          { q: "How do I switch between Arabic and English?", a: "Click the language toggle button (AR/EN) in the navigation bar or any page header to switch between Arabic and English." },
+          { q: "How can I contact support?", a: "You can reach us at support@medonex.com or through our social media channels." },
+        ],
+      },
+    ],
+    ctaTitle: "Still have questions?",
+    ctaSubtitle: "We're here to help. Reach out to our support team.",
+    ctaButton: "Contact Support",
   },
   reviewModal: {
     title: "Rate your experience",
