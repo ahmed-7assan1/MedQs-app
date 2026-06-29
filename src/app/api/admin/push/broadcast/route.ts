@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { withAdmin } from "@/lib/auth-middleware";
 import webpush from "web-push";
 
 // Initialize safely to avoid build errors on Vercel
@@ -12,14 +12,9 @@ if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   );
 }
 
-export async function POST(req: Request) {
-  const session = await auth();
+export const POST = withAdmin(async ({ session, req }) => {
   const currentUser = session?.user as any;
   const userRole = currentUser?.role;
-
-  if (userRole !== "ADMIN" && userRole !== "SUPER_ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   const { title, body, icon, url, image, targetUserId } = await req.json();
 
@@ -44,7 +39,7 @@ export async function POST(req: Request) {
   // Determine target subscriptions
   const whereClause = targetUserId
     ? { userId: targetUserId }
-    : userRole === "ADMIN" && currentUser?.semesterId
+    : currentUser?.role === "ADMIN" && currentUser?.semesterId
     ? { user: { semesterId: currentUser.semesterId } }
     : {};
 
@@ -94,24 +89,18 @@ export async function POST(req: Request) {
       .catch(() => {});
   }
 
-  return NextResponse.json({ success: true, successCount, failCount });
-}
+    return NextResponse.json({ success: true, successCount, failCount });
+});
 
 // GET - Returns subscriber count for admin dashboard
-export async function GET(req: Request) {
-  const session = await auth();
+export const GET = withAdmin(async ({ session }) => {
   const currentUser = session?.user as any;
-  const userRole = currentUser?.role;
-
-  if (userRole !== "ADMIN" && userRole !== "SUPER_ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   const whereClause =
-    userRole === "ADMIN" && currentUser?.semesterId
+    currentUser?.role === "ADMIN" && currentUser?.semesterId
       ? { user: { semesterId: currentUser.semesterId } }
       : {};
 
   const count = await prisma.pushSubscription.count({ where: whereClause });
   return NextResponse.json({ count });
-}
+});

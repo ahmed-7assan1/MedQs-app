@@ -1,18 +1,10 @@
-
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { withAdmin } from '@/lib/auth-middleware';
 import { Telegraf } from 'telegraf';
 
-export async function POST(req: Request) {
-  const session = await auth();
+export const POST = withAdmin(async ({ session, req }) => {
   const currentUser = session?.user as any;
-  const userRole = currentUser?.role;
-
-  if (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN' && userRole !== 'LEADER') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const { message, telegramId } = await req.json();
   if (!message) return NextResponse.json({ error: 'Message required' }, { status: 400 });
 
@@ -25,15 +17,14 @@ export async function POST(req: Request) {
     targetUsers = [{ telegramId }];
   } else {
     const adminSemesterId = currentUser?.semesterId;
-    const isSuper = userRole === "SUPER_ADMIN";
+    const isSuper = currentUser?.role === "SUPER_ADMIN";
     
     targetUsers = await prisma.user.findMany({
       where: { 
         telegramId: { not: null },
         telegramVerified: true,
-        // Scoping: If not SUPER_ADMIN, filter by university AND semester if available
         ...(!isSuper ? {
-          universityId: currentUser?.universityId,
+          universityId: currentUser?.universityId as string,
           ...(adminSemesterId ? { semesterId: adminSemesterId } : {})
         } : {})
       },
@@ -57,4 +48,4 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ success: true, successCount, failCount });
-}
+});

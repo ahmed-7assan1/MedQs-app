@@ -1,15 +1,9 @@
 
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { withAdmin } from '@/lib/auth-middleware';
 
-export async function POST(req: Request) {
-  const session = await auth();
-  const userRole = (session?.user as any)?.role;
-
-  if (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export const POST = withAdmin(async ({ req }) => {
 
   try {
     const data = await req.json();
@@ -34,4 +28,4 @@ export async function POST(req: Request) {
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update config' }, { status: 500 });
   }
-}
+});
