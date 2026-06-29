@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { NextRequest } from 'next/server';
 import { withAuth } from '@/lib/auth-middleware';
-import { parseQuality, calculateSM2 } from '@/lib/sm2';
+import { parseQuality, calculateSM2 } from '@/lib/flashcard-engine';
 
 export const dynamic = 'force-dynamic';
 

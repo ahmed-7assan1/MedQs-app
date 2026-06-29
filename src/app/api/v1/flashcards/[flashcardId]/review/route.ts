@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { parseQuality, calculateSM2 } from "@/lib/sm2";
+import { parseQuality, calculateSM2 } from "@/lib/flashcard-engine";
 export const dynamic = "force-dynamic";
 
 type Params = { params: { flashcardId: string } };

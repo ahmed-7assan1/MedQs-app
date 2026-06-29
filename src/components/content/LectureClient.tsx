@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import { PremiumVideoPlayer } from "@/components/content/PremiumVideoPlayer";
 import { useRouter } from "next/navigation";
 import { useCommunityShareStore } from "@/lib/store";
-import { RATING_LABELS } from "@/lib/sm2";
+import { RATING_LABELS } from "@/lib/flashcard-engine";
 interface Flashcard { id: string; front: string; back: string }
 interface Question {
   id: string; body: string; imageUrl?: string | null; videoUrl?: string | null;
