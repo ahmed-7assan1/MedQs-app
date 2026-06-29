@@ -1,23 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getSessionScope } from "@/lib/tenant";
+import { withAuth } from "@/lib/auth-middleware";
+import { getCursorPagination } from "@/lib/pagination";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(req: NextRequest) {
-  const session = await auth();
-  const scope = await getSessionScope(session);
-  if (!scope) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!scope.universityId) return NextResponse.json({ error: "Set your university in profile first" }, { status: 400 });
+export const GET = withAuth(async ({ userId: authUserId, scope, req }) => {
+  if (!scope?.universityId) return NextResponse.json({ error: "Set your university in profile first" }, { status: 400 });
 
   const { searchParams } = new URL(req.url);
   const forumId = String(searchParams.get("forumId") ?? "").trim();
   const mode = (searchParams.get("mode") ?? "university").toLowerCase();
-  const page = Math.max(1, Number(searchParams.get("page") ?? 1));
-  const limit = Math.min(50, Math.max(5, Number(searchParams.get("limit") ?? 20)));
-  const skip = (page - 1) * limit;
+  const { cursor, limit } = getCursorPagination(searchParams);
 
   if (!forumId) return NextResponse.json({ error: "forumId required" }, { status: 400 });
   const forum = await prisma.forum.findUnique({ where: { id: forumId }, select: { universityId: true, status: true } });
@@ -42,11 +37,11 @@ export async function GET(req: NextRequest) {
     blockedSet = new Set(blockedIds.map(b => b.blockedId));
   } catch { /* table may not exist yet */ }
 
+  const take = limit + 1;
   const posts = await prisma.post.findMany({
     where: {
       forumId,
       universityId: scope.universityId,
-      // isForumPost: true, // Removed due to temporary type mismatch
       ...(followingIds ? { authorId: { in: followingIds } } : {}),
       authorId: blockedSet.size > 0 ? { notIn: [...blockedSet] } : undefined,
       OR: [
@@ -61,8 +56,8 @@ export async function GET(req: NextRequest) {
       ],
     },
     orderBy: { createdAt: "desc" },
-    skip,
-    take: limit,
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+    take,
     include: {
       author: {
         select: {
@@ -77,15 +72,19 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  const postIds = posts.map((p) => p.id);
+  const hasMore = posts.length > limit;
+  const items = hasMore ? posts.slice(0, limit) : posts;
+  const nextCursor = hasMore ? items[items.length - 1].id : null;
+
+  const postIds = items.map((p) => p.id);
   const likedRows =
     postIds.length === 0
       ? []
       : await prisma.like.findMany({ where: { userId: scope.userId, postId: { in: postIds } }, select: { postId: true } });
   const likedSet = new Set(likedRows.map((r) => r.postId));
 
-  return NextResponse.json(
-    posts.map((p) => ({
+  return NextResponse.json({
+    data: items.map((p) => ({
       id: p.id,
       content: p.content,
       imageUrl: p.imageUrl,
@@ -105,13 +104,11 @@ export async function GET(req: NextRequest) {
       likedByMe: likedSet.has(p.id),
       reactions: (p as any).reactions || [],
     })),
-    {
-      headers: {
-        // Serve stale data for 30s, revalidate in background for 60s.
-        // Firebase WebSockets will push any new posts in real-time.
-        "Cache-Control": "s-maxage=30, stale-while-revalidate=60",
-      },
-    }
-  );
-}
-
+    nextCursor,
+    hasMore,
+  }, {
+    headers: {
+      "Cache-Control": "s-maxage=30, stale-while-revalidate=60",
+    },
+  });
+});
