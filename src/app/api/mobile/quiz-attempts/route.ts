@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth, withOptionalAuth } from '@/lib/auth-middleware';
 
 // POST /api/mobile/quiz-attempts — Submit quiz, get score + items back
-export async function POST(req: NextRequest) {
+export const POST = withOptionalAuth(async ({ token, userId, req }) => {
   try {
-    const token = await getServerToken(req);
     const body = await req.json();
     const { pastPaperId, answers, timeTaken, focusLossCount, guestQuizUserId } = body;
 
@@ -14,7 +13,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const userId = token?.sub || (token?.id as string) || null;
+    const userId = token?.sub || token?.id || null;
 
     // Fetch correct answers for all questions in the answers list
     const questionIds = answers.map((a: any) => a.questionId);
@@ -66,14 +65,11 @@ export async function POST(req: NextRequest) {
     console.error('[MOBILE_QUIZ_ATTEMPTS_POST]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});
 
 // GET /api/mobile/quiz-attempts?userId=...&limit=20
-export async function GET(req: NextRequest) {
+export const GET = withAuth(async ({ userId, req }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -93,4 +89,4 @@ export async function GET(req: NextRequest) {
     console.error('[MOBILE_QUIZ_ATTEMPTS_GET]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

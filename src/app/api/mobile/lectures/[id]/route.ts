@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withOptionalAuth } from '@/lib/auth-middleware';
 
 // GET /api/mobile/lectures/[id]
-export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export const GET = withOptionalAuth(async ({ userId, params: rawParams }) => {
+  const params = await rawParams;
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
 
     const lecture = await prisma.lecture.findUnique({
       where: { id: params.id },
@@ -58,4 +56,4 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     console.error('[MOBILE_LECTURE_DETAIL_GET]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

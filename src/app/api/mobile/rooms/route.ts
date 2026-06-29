@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth, withOptionalAuth } from '@/lib/auth-middleware';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+export const GET = withOptionalAuth(async ({ userId, req }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search');
 
@@ -33,14 +31,10 @@ export async function GET(req: NextRequest) {
     console.error('[MOBILE_ROOMS_GET]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});
 
-export async function POST(req: NextRequest) {
+export const POST = withAuth(async ({ req, userId }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const body = await req.json();
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { universityId: true } });
     const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -54,4 +48,4 @@ export async function POST(req: NextRequest) {
     console.error('[MOBILE_ROOMS_POST]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

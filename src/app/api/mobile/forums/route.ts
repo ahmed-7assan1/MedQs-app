@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withOptionalAuth } from '@/lib/auth-middleware';
 
 export const dynamic = "force-dynamic";
 
 // GET /api/mobile/forums?universityId=...&type=GLOBAL|SEMESTER&semesterId=...
-export async function GET(req: NextRequest) {
+export const GET = withOptionalAuth(async ({ userId, req }) => {
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
     const { searchParams } = new URL(req.url);
     const universityId = searchParams.get('universityId');
     const type = searchParams.get('type') as any;
@@ -43,4 +41,4 @@ export async function GET(req: NextRequest) {
     console.error('[MOBILE_FORUMS_GET]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

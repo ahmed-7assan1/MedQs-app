@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withAuth, withOptionalAuth } from '@/lib/auth-middleware';
 
 // GET /api/mobile/forums/[id]/posts?page=1&limit=20
-export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export const GET = withOptionalAuth(async ({ userId, params: rawParams, req }) => {
+  const params = await rawParams;
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -45,16 +43,11 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     console.error('[MOBILE_FORUM_POSTS_GET]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});
 
-// POST /api/mobile/forums/[id]/posts  → create post
-export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export const POST = withAuth(async ({ req, userId, params: rawParams }) => {
+  const params = await rawParams;
   try {
-    const token = await getServerToken(req);
-    const userId = (token?.sub || token?.id) as string | undefined;
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const { content, imageUrl } = await req.json();
     if (!content) return NextResponse.json({ error: 'content required' }, { status: 400 });
 
@@ -82,4 +75,4 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     console.error('[MOBILE_FORUM_POSTS_POST]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

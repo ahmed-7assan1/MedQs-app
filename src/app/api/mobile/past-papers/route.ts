@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerToken } from '@/lib/supabase/auth-helpers';
 import { NextRequest } from 'next/server';
+import { withOptionalAuth } from '@/lib/auth-middleware';
 
 export const dynamic = "force-dynamic";
 
 // GET /api/mobile/past-papers?semesterId=...&moduleId=...&kind=...
-export async function GET(req: NextRequest) {
+export const GET = withOptionalAuth(async ({ token, req }) => {
   try {
-    const token = await getServerToken(req);
     const { searchParams } = new URL(req.url);
     const semesterId = searchParams.get('semesterId');
     const moduleId = searchParams.get('moduleId');
@@ -36,7 +35,7 @@ export async function GET(req: NextRequest) {
     });
 
     // For each paper, compute user's avgScore if logged in
-    const userId = token?.sub || token?.id as string | undefined;
+    const userId = (token?.sub || token?.id) as string | undefined;
     const enriched = await Promise.all(
       pastPapers.map(async (pp) => {
         let userAvgScore: number | null = null;
@@ -57,4 +56,4 @@ export async function GET(req: NextRequest) {
     console.error('[MOBILE_PAST_PAPERS_GET]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});
