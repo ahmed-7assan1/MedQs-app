@@ -7,6 +7,8 @@ import { notFound, redirect } from "next/navigation";
 import { Headphones, Clock, GraduationCap } from "lucide-react";
 import { LectureRecordStudio } from "@/components/content/LectureRecordStudio";
 
+export const dynamic = "force-dynamic";
+
 function toProperCase(str: string) {
   return str.toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase());
 }

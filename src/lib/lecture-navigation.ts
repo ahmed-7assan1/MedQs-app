@@ -62,10 +62,11 @@ export async function getLectureInModule(moduleId: string, lectureId: string) {
   });
   if (!lecture) return null;
 
-  // Prisma client may not be regenerated on Windows; fetch JSON columns via raw SQL.
+  // PgBouncer (transaction mode) doesn't support prepared statements; use $queryRawUnsafe.
   const rows = await prisma
-    .$queryRaw<Array<{ uiConfig: any; extras: any }>>(
-      Prisma.sql`SELECT "uiConfig","extras" FROM "Lecture" WHERE "id" = ${lectureId} LIMIT 1`
+    .$queryRawUnsafe<Array<{ uiConfig: any; extras: any }>>(
+      `SELECT "uiConfig","extras" FROM "Lecture" WHERE "id" = $1 LIMIT 1`,
+      lectureId
     )
     .catch(() => []);
   const uiConfig = rows?.[0]?.uiConfig ?? null;

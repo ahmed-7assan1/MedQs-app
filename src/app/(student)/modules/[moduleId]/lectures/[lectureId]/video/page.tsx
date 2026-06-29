@@ -8,6 +8,8 @@ import { notFound, redirect } from "next/navigation";
 import { Video, ChevronRight, Clock, Box, GraduationCap } from "lucide-react";
 import { LectureVideoStudio } from "@/components/content/LectureVideoStudio";
 
+export const dynamic = "force-dynamic";
+
 function toProperCase(str: string) {
   return str.toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase());
 }

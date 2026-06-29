@@ -72,8 +72,9 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 
 
   const rows = await prisma
-    .$queryRaw<Array<{ uiConfig: any; extras: any }>>(
-      Prisma.sql`SELECT "uiConfig","extras" FROM "Lecture" WHERE "id" = ${id} LIMIT 1`
+    .$queryRawUnsafe<Array<{ uiConfig: any; extras: any }>>(
+      `SELECT "uiConfig","extras" FROM "Lecture" WHERE "id" = $1 LIMIT 1`,
+      id
     )
     .catch(() => []);
 
@@ -108,10 +109,12 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     return NextResponse.json({ error: "No valid fields" }, { status: 400 });
 
   if (uiConfig || extrasDeleteKeys) {
-    // Load current JSON blobs
-    const rows = await prisma.$queryRaw<Array<{ uiConfig: any; extras: any }>>(
-      Prisma.sql`SELECT "uiConfig","extras" FROM "Lecture" WHERE "id" = ${id} LIMIT 1`
-    );
+    const rows = await prisma
+      .$queryRawUnsafe<Array<{ uiConfig: any; extras: any }>>(
+        `SELECT "uiConfig","extras" FROM "Lecture" WHERE "id" = $1 LIMIT 1`,
+        id
+      )
+      .catch(() => []);
     const prevUi = (rows?.[0]?.uiConfig ?? {}) as any;
     const prevExtras = (rows?.[0]?.extras ?? {}) as any;
     const nextUi = uiConfig ? { ...prevUi, ...(uiConfig as any) } : prevUi;
@@ -124,8 +127,11 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     }
     const uiJson = JSON.stringify(nextUi);
     const extrasJson = JSON.stringify(nextExtras);
-    await prisma.$executeRaw(
-      Prisma.sql`UPDATE "Lecture" SET "uiConfig" = ${uiJson}::jsonb, "extras" = ${extrasJson}::jsonb WHERE "id" = ${id}`
+    await prisma.$executeRawUnsafe(
+      `UPDATE "Lecture" SET "uiConfig" = $1::jsonb, "extras" = $2::jsonb WHERE "id" = $3`,
+      uiJson,
+      extrasJson,
+      id
     );
   }
 

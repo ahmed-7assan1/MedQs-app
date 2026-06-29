@@ -1552,10 +1552,12 @@ enum MediaSource {
   DRIVE
   TELEGRAM
   EXTERNAL
+  SPOTIFY
   youtube
   drive
   telegram
   external
+  spotify
 }
 
 enum Role {
