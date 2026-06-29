@@ -8,6 +8,7 @@
     "rebuild": "npm run clean && next build",
     "dev:clean": "npm run clean && next dev",
     "dev:turbo": "next dev --turbo",
+    "test": "vitest run",
     "dev": "next dev -H 0.0.0.0",
     "mobile:start": "npm run start --prefix medqs-mobile",
     "mobile:android": "npm run android --prefix medqs-mobile",
@@ -163,7 +164,9 @@
     "prisma": "^5.17.0",
     "tailwindcss": "^3.4.19",
     "tsx": "^4.17.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.9"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
