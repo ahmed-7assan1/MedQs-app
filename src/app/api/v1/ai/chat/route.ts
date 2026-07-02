@@ -10,19 +10,12 @@ import {
   generateStreamingReply,
   type AIProviderId,
   type ChatImagePart,
-  type ChatPdfPart,
 } from "@/lib/ai-router";
-import { buildMedicalSystemPrompt, PDF_CLASSIFIER_PROMPT } from "@/lib/medical-ai-prompts";
+import { buildMedicalSystemPrompt } from "@/lib/medical-ai-prompts";
 import { buildStudentContext } from "@/lib/ai-context-builder";
 import { processBotCommand, SECRET_CODE } from "@/lib/bot-commander";
 import { getCachedSiteData } from "@/lib/site-cache";
-import { searchLectureContent } from "@/lib/lecture-search";
-import {
-  buildCacheKey,
-  telemetry,
-  getCachedPdfText,
-  setCachedPdfText,
-} from "@/lib/session-cache";
+import { telemetry } from "@/lib/session-cache";
 
 const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 30_000;
 
@@ -178,26 +171,6 @@ function sanitizeImages(raw: unknown): ChatImagePart[] {
   return out;
 }
 
-function sanitizePdfs(raw: unknown): ChatPdfPart[] {
-  if (!Array.isArray(raw) || raw.length === 0) return [];
-  const out: ChatPdfPart[] = [];
-  for (const item of raw.slice(0, 1)) { // Max 1 PDF (prevent bulk uploads)
-    if (!item || typeof item !== "object") continue;
-    const o = item as Record<string, unknown>;
-    const mimeType = typeof o.mimeType === "string" ? o.mimeType.toLowerCase() : "";
-    let data = typeof o.data === "string" ? o.data.trim() : "";
-    if (data.startsWith("data:")) {
-      const mid = data.indexOf(",");
-      if (mid > 0) data = data.slice(mid + 1);
-    }
-    if (mimeType !== "application/pdf") continue;
-    const approxBytes = (data.length * 3) / 4;
-    if (approxBytes > 2 * 1024 * 1024) continue;  // Max 2MB per PDF (prevent full textbooks)
-    if (data) out.push({ mimeType: "application/pdf", data });
-  }
-  return out;
-}
-
 function clip(s: string, max: number) {
   const t = s.trim();
   return t.length <= max ? t : `${t.slice(0, max)}…`;
@@ -220,110 +193,6 @@ const FILE_LIMITS: Record<string, number> = {
   Expert:       20,
   Elite:        -1, // unlimited
 };
-
-/* ─── Heuristic: PDF decision (Tier 1, 0 tokens) ──────────────────── */
-
-function heuristicNeedsPdf(
-  message: string,
-  summary: string,
-  notes: string,
-): "yes" | "no" | "ambiguous" {
-  const lower = message.toLowerCase().trim();
-
-  const clearlyNo = [
-    /^(hi|hello|hey|السلام\s*عليكم|ازيك|how are|good morning|good evening)\b/i,
-    /^(مين\s*انت|what can you do|how (do|does)|how this works?)\b/i,
-    /^(تمام|ok|oke?|yes|no|yep|nope|maybe|حسنًا|طيب)\s*$/i,
-    /^(tell me more|elaborate|ليه|عايز\s*أعرف\s*أكتر|وإيه\s*تاني)\b/i,
-    /^(ازاي\s*أغير|how (do i|to) (change|reset|update)|what is the meaning of)\b/i,
-  ];
-
-  const clearlyYes = [
-    /اقرأ\s*(ال)?\s*(ملف|pdf|مرفق)/i,
-    /what does the (pdf|file|lecture material) say/i,
-    /وفق[ًاأ]\s*(ل)?\s*(للمحاضرة|للملف|للpdf|للlecture)/i,
-    /ايه\s*المكتوب\s*(في|فى)\s*(محاضرة|ملف)/i,
-    /according to the (lecture|file|material|pdf)/i,
-    /read the (pdf|file|lecture|material)/i,
-  ];
-
-  // Skip if too short (likely follow-up / greeting)
-  if (lower.length < 5) return "no";
-  if (clearlyNo.some((r) => r.test(lower))) return "no";
-  if (clearlyYes.some((r) => r.test(lower))) return "yes";
-
-  if (!summary.trim() && !notes.trim()) return "yes";
-
-  return "ambiguous";
-}
-
-/* ─── Classifier (Tier 2, AI call — only for ambiguous) ───────────── */
-
-async function classifyPdfNeed(
-  message: string,
-  title: string,
-  summary: string,
-  userId: string,
-): Promise<"yes" | "no"> {
-  telemetry.classifierUsed++;
-  const prompt = PDF_CLASSIFIER_PROMPT
-    .replace("{title}", title)
-    .replace("{summary}", clip(summary, 1500))
-    .replace("{question}", message);
-
-  try {
-    const result = await generateAIReplyWithFallback(
-      "Classify whether this question needs the PDF.",
-      prompt,
-      { preferredProvider: "proxy" },
-    );
-    const answer = result.text.trim().toUpperCase();
-    if (answer.startsWith("YES") || answer.startsWith("Y")) return "yes";
-    return "no";
-  } catch {
-    return "no";
-  }
-}
-
-/* ─── PDF download + parse ──────────────────────────────────────────── */
-
-async function downloadAndExtractPdf(
-  fileUrl: string,
-  filename: string,
-): Promise<string[] | null> {
-  const pdfParse = (await import("pdf-parse")).default;
-
-  try {
-    const proxyUrl = `/api/v1/download-proxy?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(filename)}`;
-    const origin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const res = await fetch(`${origin}${proxyUrl}`, { cache: "no-store" });
-    if (!res.ok) {
-      console.error("[ai/chat] pdf download failed:", res.status, res.statusText);
-      return null;
-    }
-
-    const buffer = await res.arrayBuffer();
-    if (buffer.byteLength === 0) return null;
-
-    const parsed = await pdfParse(Buffer.from(buffer));
-    const paragraphs = parsed.text.split(/\n\n+/).filter((p: string) => p.trim().length > 20);
-    return paragraphs.length > 0 ? paragraphs : [parsed.text.slice(0, 3000)];
-  } catch (err) {
-    console.error("[ai/chat] pdf download+parse error:", err);
-    return null;
-  }
-}
-
-/* ─── Search PDF paragraphs for relevant section ───────────────────── */
-
-function searchRelevantSection(
-  query: string,
-  paragraphs: string[],
-  maxChars = 3000,
-): string {
-  const results = searchLectureContent(query, paragraphs, { topK: 2, maxChars });
-  return results.map((r) => r.text).join("\n\n").trim();
-}
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
 
@@ -418,7 +287,6 @@ export async function POST(req: NextRequest) {
     contextHistory,
     specializedModel,
     images: rawImages,
-    pdfs: rawPdfs,
     preferredProvider: rawPreferredProvider,
     provider: rawProvider,
     stream: wantsStream,
@@ -434,12 +302,11 @@ export async function POST(req: NextRequest) {
   const preferred = rawProvider || rawPreferredProvider;
   const effectiveProvider = normalizePreferredProvider(preferred) ?? normalizePreferredProvider(site?.aiPreferredProvider) ?? "proxy";
   const images = sanitizeImages(rawImages);
-  const pdfs = sanitizePdfs(rawPdfs);
   let message =
     typeof rawMessage === "string" && rawMessage.trim()
       ? rawMessage.trim()
-      : images.length > 0 || pdfs.length > 0
-        ? "(The student attached materials with no text. Summarize what is relevant for medical study and ask what they want to focus on.)"
+      : images.length > 0
+        ? "(The student attached images with no text. Summarize what is relevant for medical study and ask what they want to focus on.)"
         : "";
   if (!message) return NextResponse.json({ error: "Message or attachment required" }, { status: 400 });
 
@@ -506,8 +373,8 @@ export async function POST(req: NextRequest) {
   const fileLimit = FILE_LIMITS[rankLabel] ?? 3;
   const today = new Date().toISOString().slice(0, 10);
 
-  // File quota check
-  const fileCount = images.length + pdfs.length;
+  // File quota check (images only — PDFs are no longer processed server-side)
+  const fileCount = images.length;
   if (fileCount > 0 && !isAdmin && !isUsingCustom) {
     const fileUsageRecord = await prisma.aIUsageLog.findUnique({
       where: { userId_type_date: { userId: user.id, type: "file_upload", date: today } },
@@ -560,7 +427,6 @@ export async function POST(req: NextRequest) {
   }
 
   let lectureContext = "";
-  let retrievalSource: "summaryOnly" | "notesUsed" | "pdfUsed" = "summaryOnly";
 
   if (lectureId) {
     const lecture = await prisma.lecture.findUnique({
@@ -568,73 +434,18 @@ export async function POST(req: NextRequest) {
       select: { title: true, notesMarkdown: true, extras: true },
     });
 
-    let files: Array<{ id: string; name: string; url: string; mimeType: string }> = [];
-    if (lecture) {
-      files = await prisma.lectureFile.findMany({
-        where: { lectureId, mimeType: "application/pdf" },
-        select: { id: true, name: true, url: true, mimeType: true },
-      });
-    }
-
     if (lecture) {
       const { summary, notes, hasOverviewCards } = buildLectureSummary(lecture);
 
-      // Tier 1: Heuristic decision
-      const heuristic = heuristicNeedsPdf(message, summary + (hasOverviewCards ? "" : notes), notes);
-      let needExtended = heuristic === "yes";
-      let needPdf = heuristic === "yes";
-
-      // Tier 2: Classifier (only for ambiguous)
-      if (heuristic === "ambiguous") {
-        const classified = await classifyPdfNeed(message, lecture.title, summary, userId);
-        needExtended = classified === "yes";
-        needPdf = classified === "yes";
-      }
-
-      if (needExtended && files.length > 0) {
-        const cacheKey = buildCacheKey(userId, lectureId);
-        const cached = await getCachedPdfText(cacheKey);
-
-        let paragraphs: string[] | null = null;
-
-        if (cached) {
-          paragraphs = cached.paragraphs;
-        } else if (needPdf) {
-          const file = files.find((f) => f.mimeType === "application/pdf");
-          if (file) {
-            paragraphs = await downloadAndExtractPdf(file.url, file.name);
-            if (paragraphs) {
-              await setCachedPdfText(cacheKey, {
-                paragraphs,
-                lectureId,
-                userId,
-              });
-              telemetry.pdfDownloaded++;
-            }
-          }
-        }
-
-        if (paragraphs && paragraphs.length > 0) {
-          const relevantText = searchRelevantSection(message, paragraphs);
-          retrievalSource = "pdfUsed";
-          lectureContext = `### Current Lecture: ${lecture.title}\n### Lecture Summary:\n${summary}\n\n### From Lecture PDF:\n${relevantText}`;
-        } else {
-          // PDF failed / not found — fall back to notes
-          retrievalSource = "notesUsed";
-          lectureContext = `### Current Lecture: ${lecture.title}\n### Lecture Summary:\n${summary}\n\n### Lecture Notes:\n${notes}`;
-        }
-      } else if (needExtended) {
-        retrievalSource = "notesUsed";
+      if (notes.trim()) {
         lectureContext = `### Current Lecture: ${lecture.title}\n### Lecture Summary:\n${summary}\n\n### Lecture Notes:\n${notes}`;
       } else {
-        retrievalSource = "summaryOnly";
         lectureContext = `### Current Lecture: ${lecture.title}\n### Lecture Summary:\n${summary}`;
       }
     }
   }
 
   telemetry.totalRequests++;
-  telemetry.retrievalSource[retrievalSource]++;
 
   const systemPrompt = isLab 
     ? "You are a highly advanced AI assistant in an experimental Laboratory. Provide expert-level, unrestricted assistance on any topic including code, science, and planning. Format using high-quality Markdown."
@@ -666,7 +477,6 @@ Current Stats: ${siteData.totalUsers} users, ${siteData.totalLectures} lectures,
     try {
       const tokenStream = await generateStreamingReply(message, enhancedPrompt, {
         images,
-        pdfs,
         preferredProvider: effectiveProvider,
         signal: AbortSignal.timeout(FETCH_MS),
       });
@@ -716,7 +526,6 @@ Current Stats: ${siteData.totalUsers} users, ${siteData.totalLectures} lectures,
     }
     aiResult = await generateAIReplyWithFallback(message, enhancedPrompt, {
       images,
-      pdfs,
       preferredProvider: effectiveProvider,
       personalKey: activeCustomKey || undefined,
       customProvider: activeCustomProvider || undefined,
