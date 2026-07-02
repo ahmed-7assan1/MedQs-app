@@ -620,6 +620,7 @@ model User {
   v2AuditLogs              V2AuditLog[]              @relation("V2AuditLogs")
   outboxEvents             OutboxEvent[]             @relation("OutboxActor")
   atlasBookmarks           AtlasBookmark[]           @relation("AtlasBookmarks")
+  adminAiKeys              AdminAIKeys?
   atlasNotes               AtlasNote[]               @relation("AtlasNotes")
   hideOnlineStatus         Boolean                   @default(false)
   lastSeenAt               DateTime?
@@ -2800,4 +2801,28 @@ model VideoViewTracking {
   @@index([videoId, createdAt])
   @@index([userId])
   @@index([lectureId])
+}
+
+model AdminAIKeys {
+  id                      String   @id @default(uuid())
+  adminId                 String   @unique
+  admin                   User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  encryptedGeminiKey      String?
+  encryptedOpenAIKey      String?
+  encryptedAnthropicKey   String?
+  encryptedDeepseekKey    String?
+  encryptedGroqKey        String?
+  encryptedOpenrouterKey  String?
+  encryptedXaiKey         String?
+  encryptedMistralKey     String?
+  encryptedTogetherKey    String?
+  encryptedHuggingfaceKey String?
+  encryptedCloudflareKey  String?
+  encryptedCerebrasKey    String?
+  encryptedGithubKey      String?
+  encryptedProxyKey       String?
+  defaultAutoProvider     String? @default("auto")
+  featureOverrides        Json?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 }

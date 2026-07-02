@@ -7,7 +7,7 @@ import { useThemeStore } from "@/lib/store";
 import { DrawMedHeader } from "./DrawMedHeader";
 import { DrawMedLibrary } from "./DrawMedLibrary";
 import { motion, AnimatePresence } from "framer-motion";
-import { useDrQChat, getFirstModel } from "@/hooks/useDrQChat";
+import { useDrQChat, getFirstModel, getFirstKey, streamGemini } from "@/hooks/useDrQChat";
 import {
   Loader2,
   X,
@@ -386,7 +386,7 @@ export function DrawMedClient() {
   const handleAiSend = useCallback(async () => {
     const msg = aiMessageRef.current;
     if (!msg.trim() || aiLoading) return;
-    const apiKey = settings.byokKeys[settings.activeProvider] ?? "";
+    const apiKey = getFirstKey(settings.byokKeys, settings.activeProvider) ?? "";
     const drq = await import("@/hooks/useDrQChat");
     const skipAuth = drq.PROVIDER_CONFIGS[settings.activeProvider]?.needsKey === false;
     if (!apiKey && !skipAuth) {
@@ -401,8 +401,17 @@ export function DrawMedClient() {
     abortRef.current = controller;
 
     try {
-      const baseURL = drq.PROVIDER_CONFIGS[settings.activeProvider].baseURL || `https://api.${settings.activeProvider}.com/v1`;
       const model = getFirstModel(settings.activeModels, settings.activeProvider);
+
+      if (settings.activeProvider === "gemini") {
+        await streamGemini(apiKey, model, [
+          { role: "system", content: "You are a helpful drawing assistant. Help the user create and describe drawings for their medical whiteboard." },
+          { role: "user", content: msg }
+        ], [], (full) => { setAiResponse(full); }, false, controller.signal);
+        return;
+      }
+
+      const baseURL = drq.PROVIDER_CONFIGS[settings.activeProvider].baseURL || `https://api.${settings.activeProvider}.com/v1`;
       const needsHeader = baseURL.includes("openrouter") || baseURL.includes("ovh");
       const resp = await fetch(`${baseURL}/chat/completions`, {
         signal: controller.signal,
@@ -422,7 +431,6 @@ export function DrawMedClient() {
             { role: "user", content: msg }
           ],
           stream: true,
-          max_tokens: 1024,
         }),
       });
       if (!resp.ok) {

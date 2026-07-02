@@ -448,8 +448,8 @@ async function callSiliconFlow(
   return { provider: "siliconflow", text };
 }
 
-async function callHuggingFace(message: string, systemPrompt: string): Promise<ProviderResult> {
-  const apiKey = process.env.HUGGINGFACE_API_KEY;
+async function callHuggingFace(message: string, systemPrompt: string, personalKey?: string): Promise<ProviderResult> {
+  const apiKey = personalKey || process.env.HUGGINGFACE_API_KEY;
   if (!apiKey) throw new Error("HuggingFace API key missing");
 
   const res = await fetch("https://api-inference.huggingface.co/v1/chat/completions", {
@@ -542,7 +542,7 @@ export async function generateAIReplyWithFallback(
       else if (options.customProvider === "openrouter") result = await callOpenRouter(message, systemPrompt, options.personalKey, options.customModel);
       else if (options.customProvider === "xai") result = await callXAI(message, systemPrompt, options.personalKey, options.customModel);
       else if (options.customProvider === "siliconflow") result = await callSiliconFlow(message, systemPrompt, options.personalKey, options.customModel, options.customUrl);
-      else if (options.customProvider === "huggingface") result = await callHuggingFace(message, systemPrompt);
+      else if (options.customProvider === "huggingface") result = await callHuggingFace(message, systemPrompt, options.personalKey);
       else if (options.customProvider === "mistral") result = await callMistral(message, systemPrompt, options.personalKey, options.customModel);
       else throw new Error("Unsupported custom provider");
       

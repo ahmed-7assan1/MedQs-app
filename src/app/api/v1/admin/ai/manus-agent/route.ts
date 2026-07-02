@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 import { generateJsonWithFallback } from "@/lib/ai-router";
+import { resolveBestKey } from "@/lib/byok-resolver";
 import { scrapeUrlContent } from "@/lib/manus-fetcher";
 import { searchOpenIMedicalImage } from "@/lib/open-i";
 
@@ -25,8 +26,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const lectureId = String(body.lectureId || "").trim();
     const url = String(body.url || "").trim();
-    const personalKey = String(body.apiKey || "").trim();
+    let personalKey = String(body.apiKey || "").trim();
     const personalProvider = String(body.provider || "").trim();
+    if (!personalKey && personalProvider) {
+      const userWithKeys = await prisma.user.findUnique({
+        where: { id: session!.user!.id },
+        include: { adminAiKeys: true },
+      });
+      const resolved = resolveBestKey(userWithKeys, personalProvider);
+      if (resolved) personalKey = resolved.key;
+    }
 
     if (!lectureId || !url) {
       return NextResponse.json({ error: "lectureId and url are required" }, { status: 400 });

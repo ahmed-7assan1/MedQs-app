@@ -50,6 +50,7 @@ export type Thread = {
   createdAt: number;
   updatedAt: number;
   pinnedProvider?: string;
+  lectureId?: string;
 };
 
 export type AIProvider = "gemini" | "groq" | "siliconflow" | "cloudflare" | "huggingface" | "together" | "openrouter" | "ovhcloud" | "github" | "cerebras" | "mistral";
@@ -70,6 +71,7 @@ export type BYOKKeys = {
 
 export type DrQSettings = {
   byokKeys: BYOKKeys;
+  serverKeyPreviews?: Record<string, { keyPreview: string }>;
   activeProvider: AIProvider;
   activeModels: Partial<Record<AIProvider, string[]>>;
   activePersona: string;
@@ -114,6 +116,7 @@ export const PROVIDER_CONFIGS: Record<AIProvider, {
     models: [
       "gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-2.0-flash",
     ],
+    baseURL: "https://generativelanguage.googleapis.com/v1beta",
     icon: "G",
     keyUrl: "https://aistudio.google.com/app/apikey",
   },
@@ -460,7 +463,7 @@ const DEFAULT_SETTINGS: DrQSettings = {
 
 type MessageForAPI = { role: "user" | "assistant" | "system"; content: string };
 
-async function streamGemini(
+export async function streamGemini(
   apiKey: string,
   model: string,
   messages: MessageForAPI[],
@@ -602,7 +605,7 @@ async function streamOpenAICompat(
         "X-Title": "MedOneX Dr. Q"
       } : {}),
     },
-    body: JSON.stringify({ model, messages: apiMessages, stream: true, max_tokens: 4096 }),
+    body: JSON.stringify({ model, messages: apiMessages, stream: true }),
     signal: signal ?? AbortSignal.timeout(STREAM_TIMEOUT),
   });
 
@@ -724,12 +727,20 @@ export function useDrQChat() {
       const storedThreads = localStorage.getItem(THREADS_KEY);
       if (storedThreads) {
         const parsed: Thread[] = JSON.parse(storedThreads);
-        setThreads(parsed);
+        // 24h message expiry — filter out messages older than 24 hours
+        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        const cleaned = parsed.map(t => ({
+          ...t,
+          messages: t.messages.filter(m => (now - m.timestamp) < TWENTY_FOUR_HOURS),
+        }));
+        setThreads(cleaned);
         const lastActiveId = localStorage.getItem(ACTIVE_THREAD_KEY);
-        if (lastActiveId && parsed.find(t => t.id === lastActiveId)) {
+        if (lastActiveId && cleaned.find(t => t.id === lastActiveId && !t.lectureId)) {
           setActiveThreadId(lastActiveId);
-        } else if (parsed.length > 0) {
-          setActiveThreadId(parsed[0].id);
+        } else {
+          const firstGlobal = cleaned.find(t => !t.lectureId);
+          if (firstGlobal) setActiveThreadId(firstGlobal.id);
         }
       }
 
@@ -741,13 +752,13 @@ export function useDrQChat() {
     fetchLimits();
   }, []);
 
-  // Fetch BYOK keys from server (cross-device sync)
+  // Fetch settings from server (key previews for UI, no plaintext keys)
   useEffect(() => {
     if (!userId) return;
-    fetch("/api/v1/user/byok-keys").then(r => r.json()).then(data => {
+    fetch("/api/v1/user/ai-settings").then(r => r.json()).then(data => {
       if (data?.keys) {
         setSettings(prev => {
-          const merged = { ...prev, byokKeys: { ...data.keys, ...prev.byokKeys } };
+          const merged = { ...prev, serverKeyPreviews: data.keys };
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
           return merged;
         });
@@ -759,10 +770,15 @@ export function useDrQChat() {
   const saveToServerRef = useRef<((keys: BYOKKeys) => void) | null>(null);
   saveToServerRef.current = (keys: BYOKKeys) => {
     if (!userId) return;
-    fetch("/api/v1/user/byok-keys", {
+    const flatKeys: Record<string, { key: string }> = {};
+    for (const [provider, keyArray] of Object.entries(keys)) {
+      const first = Array.isArray(keyArray) ? keyArray.find(k => k) : keyArray;
+      if (first) flatKeys[provider] = { key: first };
+    }
+    fetch("/api/v1/user/ai-settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ keys }),
+      body: JSON.stringify({ keys: flatKeys }),
     }).catch(() => {});
   };
 
@@ -956,7 +972,7 @@ export function useDrQChat() {
   // ─── Send Message ────────────────────────────────────────────────────────────
 
   const sendMessage = useCallback(
-    async (content: string, files: FileAttachment[] = [], replyToId?: string, webSearch?: boolean) => {
+    async (content: string, files: FileAttachment[] = [], replyToId?: string, webSearch?: boolean, lectureContext?: { lectureId: string; lectureTitle: string; lectureContent?: string; selectedText?: string }) => {
       if (!content.trim() && files.length === 0) return;
       if (loading) return;
 
@@ -1133,21 +1149,11 @@ export function useDrQChat() {
 
         // 1. Persona & Context Injection
         let systemPrompt = "";
-        let tieredContext = "";
         try {
-          // Fetch tiered context from server (basic always + syllabus/quiz/leaderboard if detected)
-          try {
-            const ctxRes = await fetch(`/api/v1/ai/context?message=${encodeURIComponent(content)}`);
-            if (ctxRes.ok) {
-              const ctxData = await ctxRes.json();
-              if (ctxData.context) tieredContext = ctxData.context;
-            }
-          } catch {}
-
           const { DRQ_PERSONAS } = require("@/components/ai/DrQPersonas");
           const persona = DRQ_PERSONAS[activePersona] || DRQ_PERSONAS.explainer;
           systemPrompt = persona.systemPrompt;
-          
+
           // MedOneX Identity Context (concise for token efficiency)
           systemPrompt = `You are MedOneX Expert AI — a medical AI tutor on medonex.app. Speak in the user's language (Arabic/English). Keep medical terms in English (e.g. "Inflammation في الـ Liver"). Stay on medical topics. Be concise.
 
@@ -1163,8 +1169,15 @@ ENGLISH-ONLY RULE: All :::question and :::flashcard content MUST be in English o
 
 ${systemPrompt}`;
 
-          if (tieredContext) {
-            systemPrompt += `\n\n### Student Context:\n${tieredContext}\n(Use this data when relevant. Do NOT ask the user for info already provided above.)`;
+          // ─── Lecture Context Injection ───
+          if (lectureContext) {
+            systemPrompt += `\n\nYou are currently helping with the lecture: "${lectureContext.lectureTitle}" (ID: ${lectureContext.lectureId}).`;
+            if (lectureContext.lectureContent) {
+              systemPrompt += `\n\nHere is the lecture content for reference. Use it to answer questions about this lecture:\n${lectureContext.lectureContent.slice(0, 10000)}`;
+            }
+            if (lectureContext.selectedText) {
+              systemPrompt += `\n\nThe user has selected the following text from the lecture:\n"${lectureContext.selectedText}"\nIf the user asks about this, prioritize answering based on this selected text in the context of the lecture.`;
+            }
           }
         } catch (e) {
           systemPrompt = "You are Dr. Q, a helpful medical AI assistant.";
@@ -1585,6 +1598,42 @@ ${systemPrompt}`;
     [messages, loading, settings, threads, activeThreadId, saveThreads]
   );
 
+  // ─── Lecture-Scoped Thread Management ──────────────────────────────────
+
+  const preLectureThreadIdRef = useRef<string | null>(null);
+
+  const switchToLectureThread = useCallback((lectureId: string, lectureTitle: string) => {
+    if (preLectureThreadIdRef.current === null) {
+      preLectureThreadIdRef.current = activeThreadId;
+    }
+    const existing = threads.find(t => t.lectureId === lectureId);
+    if (existing) {
+      setActiveThreadId(existing.id);
+      return existing.id;
+    }
+    const newId = `thread-${Date.now()}`;
+    const thread: Thread = {
+      id: newId,
+      title: lectureTitle,
+      messages: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      lectureId,
+    };
+    setThreads(prev => [thread, ...prev]);
+    setActiveThreadId(newId);
+    return newId;
+  }, [threads, activeThreadId]);
+
+  const restoreGlobalThread = useCallback(() => {
+    if (preLectureThreadIdRef.current) {
+      const prevId = preLectureThreadIdRef.current;
+      preLectureThreadIdRef.current = null;
+      setActiveThreadId(prevId);
+      localStorage.setItem(ACTIVE_THREAD_KEY, prevId);
+    }
+  }, []);
+
   const stopGeneration = useCallback(() => {
     abortRef.current = true;
     abortControllerRef.current?.abort();
@@ -1635,6 +1684,9 @@ ${systemPrompt}`;
     stopGeneration,
     regenerate,
     setReaction,
+    // lecture thread management
+    switchToLectureThread,
+    restoreGlobalThread,
     // settings
     updateSettings,
     // export

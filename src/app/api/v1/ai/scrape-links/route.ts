@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { generateJsonWithFallback, AIProviderId } from "@/lib/ai-router";
+import { resolveBestKey } from "@/lib/byok-resolver";
 import * as cheerio from "cheerio";
 
 export async function POST(req: NextRequest) {
@@ -21,6 +23,16 @@ export async function POST(req: NextRequest) {
       customProvider, 
       useCustomKey 
     } = await req.json();
+
+    let effectiveKey = customKey;
+    if (!effectiveKey && provider) {
+      const userWithKeys = await prisma.user.findUnique({
+        where: { id: session!.user!.id },
+        include: { adminAiKeys: true },
+      });
+      const resolved = resolveBestKey(userWithKeys, provider);
+      if (resolved) effectiveKey = resolved.key;
+    }
 
     if (!text && urls.length === 0) {
       return NextResponse.json({ error: "Provide text or URLs to scrape" }, { status: 400 });
@@ -84,9 +96,9 @@ export async function POST(req: NextRequest) {
       {
         systemPrompt,
         preferredProvider: provider as AIProviderId,
-        personalKey: customKey,
-        customProvider,
-        useCustomKey
+        personalKey: effectiveKey,
+        customProvider: customProvider || provider,
+        useCustomKey: useCustomKey || !!effectiveKey
       }
     );
 

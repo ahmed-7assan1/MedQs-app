@@ -9,6 +9,7 @@ import { AdminStudentBar } from "@/components/admin/AdminStudentBar";
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { OnboardingTutorial } from "@/components/system/OnboardingTutorial";
+import { LectureSidebarProvider } from "@/contexts/LectureSidebarContext";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { MobileBottomSheet } from "@/components/layout/MobileBottomSheet";
@@ -124,6 +125,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
               />
             </div>
 
+            <LectureSidebarProvider>
             <div className="main-content flex-1 flex flex-col min-w-0">
               {!isGuest && sessionUserId && <NotificationsLoader userId={sessionUserId} />}
               {!isGuest && <AdBannerModal semesterId={userSemesterId ?? undefined} />}
@@ -146,6 +148,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
               {isAdmin && <AdminStudentBar />}
               <PremiumNotificationPrompt />
             </div>
+            </LectureSidebarProvider>
           </div>
         </SiteConfigProvider>
       </TelegramBlocker>

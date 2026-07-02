@@ -27,7 +27,7 @@ export const GeminiKeylessProvider: ProxyProvider = {
                     },
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: systemPrompt + "\n\n" + message }] }],
-                        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+                        generationConfig: { temperature: 0.7 }
                     })
                 });
 

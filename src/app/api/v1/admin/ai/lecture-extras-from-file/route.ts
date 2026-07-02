@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 import { generateLectureExtrasWithMeta } from "@/lib/gemini";
+import { resolveBestKey } from "@/lib/byok-resolver";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -69,6 +70,16 @@ export async function POST(req: NextRequest) {
     const effectiveProvider =
       normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
 
+    let effectiveKey: string | undefined;
+    if (effectiveProvider) {
+      const userWithKeys = await prisma.user.findUnique({
+        where: { id: session!.user!.id },
+        include: { adminAiKeys: true },
+      });
+      const resolved = resolveBestKey(userWithKeys, effectiveProvider);
+      if (resolved) effectiveKey = resolved.key;
+    }
+
     const out = await generateLectureExtrasWithMeta(
       lecture.title,
       lecture.subject.name,
@@ -78,7 +89,7 @@ export async function POST(req: NextRequest) {
       wantMnemonics,
       wantCases,
       wantMindMaps,
-      { preferredProvider: effectiveProvider }
+      { preferredProvider: effectiveProvider, customApiKey: effectiveKey }
     );
 
     if (!dryRun) {

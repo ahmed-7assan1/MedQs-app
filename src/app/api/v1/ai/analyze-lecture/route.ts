@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 import { generateAIReplyWithFallback } from "@/lib/ai-router";
+import { resolveBestKey } from "@/lib/byok-resolver";
 
 export const maxDuration = 60; // 60 seconds max duration for Vercel Hobby
 
@@ -114,12 +115,21 @@ export async function POST(req: NextRequest) {
 
   // ─── Step 2: Generate with AI ────────────────────────────────────────────────
   try {
+    const userWithKeys = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { adminAiKeys: true },
+    });
+    const resolved = resolveBestKey(userWithKeys, "gemini");
+
     const result = await generateAIReplyWithFallback(
       ANALYSIS_PROMPT(contentText || "(Analyze the attached PDF file)"),
       "You are a medical education content generator. Output ONLY valid JSON — no markdown, no explanation, no preamble.",
       {
         preferredProvider: "gemini",
         pdfs: pdfParts.length > 0 ? pdfParts : undefined,
+        personalKey: resolved?.key,
+        useCustomKey: !!resolved,
+        customProvider: "gemini",
       }
     );
 

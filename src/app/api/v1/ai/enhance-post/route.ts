@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { generateAIReplyWithFallback } from "@/lib/ai-router";
+import { prisma } from "@/lib/prisma";
+import { resolveBestKey } from "@/lib/byok-resolver";
+import { fetchWithFallback } from "@/lib/ai-fetcher";
+import { PROVIDERS } from "@/lib/providers";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -9,6 +12,24 @@ export async function POST(req: NextRequest) {
   try {
     const { content } = await req.json();
     if (!content?.trim()) return NextResponse.json({ error: "Content required" }, { status: 400 });
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { adminAiKeys: true, siteConfig: true },
+    });
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+    const provider = "siliconflow";
+    const resolved = resolveBestKey(user, provider);
+    if (!resolved) {
+      return NextResponse.json(
+        { error: `No API key found for ${provider}. Add one in Settings → AI` },
+        { status: 400 }
+      );
+    }
+
+    const config = PROVIDERS[provider as keyof typeof PROVIDERS];
+    const model = config?.defaultModel || "deepseek-ai/DeepSeek-R1";
 
     const systemPrompt = `You are a professional social media editor for a medical student community called MedOneX. 
     The student wants to enhance their post to be more professional, engaging, and clear. 
@@ -20,13 +41,18 @@ export async function POST(req: NextRequest) {
     - DO NOT add hashtags (the system adds them separately).
     - Return ONLY the enhanced content, with no introductory or concluding remarks.`;
 
-    const result = await generateAIReplyWithFallback(
-      `Please enhance this post content:\n\n${content}`,
-      systemPrompt,
-      { preferredProvider: "siliconflow" }
+    const text = await fetchWithFallback(
+      session.user.id,
+      provider,
+      model,
+      [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Please enhance this post content:\n\n${content}` },
+      ],
+      resolved.key
     );
 
-    return NextResponse.json({ enhanced: result.text.trim() });
+    return NextResponse.json({ enhanced: text.trim() });
   } catch (error) {
     console.error("[enhance-post]", error);
     return NextResponse.json({ error: "Failed to enhance content" }, { status: 500 });

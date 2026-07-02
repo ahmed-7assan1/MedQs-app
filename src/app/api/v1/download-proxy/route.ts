@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const url = searchParams.get("url");
+  const filename = searchParams.get("filename") || "download";
 
   if (!url) {
     return NextResponse.json({ error: "No URL provided" }, { status: 400 });
@@ -29,6 +30,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: `Origin returned HTTP ${res.status}: ${res.statusText}` }, { status: 502 });
     }
 
+    const contentType = res.headers.get("Content-Type") || "application/octet-stream";
+    const contentLength = res.headers.get("Content-Length");
+
+    console.log("[download-proxy] Got content-type:", contentType, "content-length:", contentLength);
+
     const buffer = await res.arrayBuffer();
     if (buffer.byteLength === 0) {
        console.error("[download-proxy] Origin returned 0 bytes");
@@ -37,12 +43,16 @@ export async function GET(req: NextRequest) {
 
     console.log("[download-proxy] Successfully fetched", buffer.byteLength, "bytes");
 
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": res.headers.get("Content-Type") || "application/octet-stream",
-        "Cache-Control": "public, max-age=3600"
-      }
-    });
+    const responseHeaders: Record<string, string> = {
+      "Content-Type": contentType,
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "public, max-age=3600",
+    };
+    if (contentLength) {
+      responseHeaders["Content-Length"] = contentLength;
+    }
+
+    return new NextResponse(buffer, { headers: responseHeaders });
 
   } catch (error: any) {
     console.error("[api/v1/download-proxy]", error);

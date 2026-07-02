@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { PaperPlaneRight, Spinner, X, Robot, Stop, Check, Copy, BookOpen, Link as LinkIcon } from "@phosphor-icons/react";
+import { PaperPlaneRight, X, Robot, Stop, Check, Copy, BookOpen, Link as LinkIcon } from "@phosphor-icons/react";
+import { AnimatedThinking } from "./AnimatedThinking";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import toast from "react-hot-toast";
@@ -157,8 +158,16 @@ export function CustomAgentChat({ agent, onClose, isDark }: { agent: AgentData; 
         {streaming && (
           <div className="flex justify-start">
             <div className={cn("rounded-2xl px-4 py-3 text-sm rounded-bl-md flex items-center gap-2", isDark ? "bg-[#1a1a1a] text-gray-400" : "bg-gray-100 text-gray-500")}>
-              <Spinner size={14} className="animate-spin" />
-              Thinking...
+              <div className="flex gap-0.5">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="w-1.5 h-1.5 rounded-full bg-current opacity-40"
+                    style={{ animation: `pulse 1.2s ease-in-out ${i * 0.25}s infinite` }}
+                  />
+                ))}
+              </div>
+              <AnimatedThinking className="font-bold" />
             </div>
           </div>
         )}

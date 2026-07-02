@@ -12,8 +12,9 @@ export async function GET(req: NextRequest) {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         Referer: "https://medonex.app/",
+        Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
       },
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(15000),
     });
 
     if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
@@ -31,15 +32,12 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect fill="#e2e8f0" width="400" height="400"/></svg>`;
-
-    return new NextResponse(svg, {
-      status: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "image/svg+xml",
-        "Cache-Control": "public, max-age=300",
-      },
-    });
+    return NextResponse.json(
+      { error: "Failed to fetch image" },
+      {
+        status: 502,
+        headers: { "Access-Control-Allow-Origin": "*" },
+      }
+    );
   }
 }

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { generateFlashcardsFromPastedTextWithMeta } from "@/lib/gemini";
+import { resolveBestKey } from "@/lib/byok-resolver";
 
 const MIN_CHARS = 80;
 const MAX_CHARS = 12_000;
@@ -48,7 +50,16 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const out = await generateFlashcardsFromPastedTextWithMeta(text, focus, { preferredProvider: effectiveProvider });
+    const userWithKeys = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { adminAiKeys: true },
+    });
+    const resolved = effectiveProvider ? resolveBestKey(userWithKeys, effectiveProvider) : null;
+
+    const out = await generateFlashcardsFromPastedTextWithMeta(text, focus, {
+      preferredProvider: effectiveProvider,
+      customApiKey: resolved?.key,
+    });
     const flashcards = out.data;
     if (flashcards.length === 0) {
       return NextResponse.json(

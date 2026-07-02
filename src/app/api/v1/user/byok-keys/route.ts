@@ -1,18 +1,15 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { PROVIDERS, getKeyField } from "@/lib/providers";
 
-const FIELD_MAP: Record<string, string> = {
-  gemini: "personalGeminiKey",
-  groq: "personalGroqKey",
-  siliconflow: "personalSiliconFlowKey",
-  cloudflare: "personalCloudflareKey",
-  huggingface: "personalHuggingfaceKey",
-  together: "personalTogetherKey",
-  openrouter: "personalOpenRouterKey",
-  github: "personalGithubKey",
-  cerebras: "personalCerebrasKey",
-};
+// Built dynamically from Provider Registry — covers all 14 providers
+const FIELD_MAP: Record<string, string> = {};
+for (const [id, config] of Object.entries(PROVIDERS)) {
+  if (config.keyField) {
+    FIELD_MAP[id] = config.keyField;
+  }
+}
 
 export async function GET() {
   const session = await auth();

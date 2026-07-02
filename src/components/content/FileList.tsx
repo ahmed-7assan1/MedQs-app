@@ -34,8 +34,32 @@ function FileItem({ file }: { file: LectureFile }) {
     if (downloading) return;
     setDownloading(true);
     setProgress(0);
-    await downloadFileInline(file.url, file.name, (p) => setProgress(p));
-    setDownloading(false);
+    const proxyUrl = `/api/v1/download-proxy?url=${encodeURIComponent(file.url)}&filename=${encodeURIComponent(file.name)}`;
+    try {
+      const res = await fetch(proxyUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const isPDF = file.mimeType.includes("pdf");
+      const isImg = file.mimeType.includes("image");
+      const ext = isPDF ? ".pdf" : isImg ? ".jpg" : "";
+      const downloadName = file.name + (file.name.toLowerCase().endsWith(ext) ? "" : ext);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = downloadName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 5000);
+      setProgress(100);
+    } catch (err) {
+      console.error("Download failed:", err);
+      window.open(proxyUrl, "_blank");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (

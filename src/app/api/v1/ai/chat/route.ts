@@ -350,6 +350,18 @@ export async function POST(req: NextRequest) {
       activeCustomUrl = user.personalSiliconFlowUrl || undefined;
     } else if (customProvider === "mistral") {
       activeCustomKey = user.personalMistralKey;
+    } else if (customProvider === "deepseek") {
+      activeCustomKey = user.personalDeepseekKey || (user as any).personalDeepseekKey;
+    } else if (customProvider === "cloudflare") {
+      activeCustomKey = user.personalCloudflareKey;
+    } else if (customProvider === "huggingface") {
+      activeCustomKey = user.personalHuggingfaceKey;
+    } else if (customProvider === "together") {
+      activeCustomKey = user.personalTogetherKey;
+    } else if (customProvider === "github") {
+      activeCustomKey = user.personalGithubKey;
+    } else if (customProvider === "cerebras") {
+      activeCustomKey = user.personalCerebrasKey;
     }
   }
 

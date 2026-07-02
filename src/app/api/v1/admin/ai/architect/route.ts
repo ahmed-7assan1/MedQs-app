@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isAdminRole } from "@/lib/tenant";
 import { generateJsonWithFallback } from "@/lib/ai-router";
+import { resolveBestKey } from "@/lib/byok-resolver";
 
 function semanticMatch(a: string, b: string): boolean {
   if (!a || !b) return false;
@@ -136,8 +137,16 @@ export async function POST(req: NextRequest) {
     if (mode === "analyze") {
       const file = form.get("file") as File | null;
       const rawText = String(form.get("text") || "").trim();
-      const personalKey = String(form.get("apiKey") || "");
+      let personalKey = String(form.get("apiKey") || "");
       const personalProvider = String(form.get("provider") || "puter");
+      if (!personalKey && personalProvider) {
+        const userWithKeys = await prisma.user.findUnique({
+          where: { id: session!.user!.id },
+          include: { adminAiKeys: true },
+        });
+        const resolved = resolveBestKey(userWithKeys, personalProvider);
+        if (resolved) personalKey = resolved.key;
+      }
       let text = rawText;
 
       if (file) text = await fileToText(file);

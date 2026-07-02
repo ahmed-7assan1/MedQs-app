@@ -1,25 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  FileText, Layers, HelpCircle, Video, Sparkles, PlayCircle,
+  FileText, Layers, HelpCircle, Video, Sparkles, PlayCircle, X,
   ArrowLeft, CheckCircle2, BookOpen, Brain, Zap, Star,
   AlignLeft, ChevronRight, Music2, Mic2, Radio, ExternalLink,
-  Youtube, Play, Download, FileImage, FolderArchive, Microscope, ShieldCheck, ListChecks,
+  Youtube, Play, Download, FileImage, FolderArchive, Microscope, ShieldCheck, ListChecks, Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LectureClient } from "@/components/content/LectureClient";
 import ReactMarkdown from "react-markdown";
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
+import { useLectureCache } from "@/hooks/useLectureCache";
+import { useLectureSidebar } from "@/contexts/LectureSidebarContext";
 import dynamic from "next/dynamic";
-
-// Dynamically import heavy components to reduce initial bundle size
-const AIAssistantPanel = dynamic(() => import("@/components/ai/AIAssistant").then(m => m.AIAssistantPanel), {
-  loading: () => <div className="h-96 w-full animate-pulse bg-white/5 rounded-3xl" />,
-  ssr: false
-});
 
 const PremiumVideoPlayer = dynamic(() => import("@/components/content/PremiumVideoPlayer").then(m => m.PremiumVideoPlayer), {
   loading: () => <div className="aspect-video w-full animate-pulse bg-white/5 rounded-3xl" />,
@@ -40,29 +36,46 @@ const TAB_META: Record<string, { icon: any; color: string }> = {
   drq:        { icon: Sparkles,     color: "text-primary"     },
 };
 
-import { downloadFileInline } from "@/lib/download-helper";
-import { Loader2 } from "lucide-react";
-
 function FileCard({ file }: { file: { id: string; name: string; url: string; mimeType: string } }) {
   const isPDF = file.mimeType.includes("pdf");
   const isImg = file.mimeType.includes("image");
-  const [downloading, setDownloading] = useState(false);
-  const [progress, setProgress] = useState(0);
+
+  const proxyUrl = `/api/v1/download-proxy?url=${encodeURIComponent(file.url)}&filename=${encodeURIComponent(file.name)}`;
+
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (downloading) return;
-    setDownloading(true);
-    setProgress(0);
-    await downloadFileInline(file.url, file.name, (p) => setProgress(p));
-    setDownloading(false);
+    if (downloadingId === file.id) return;
+    setDownloadingId(file.id);
+    try {
+      const res = await fetch(proxyUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const ext = isPDF ? ".pdf" : isImg ? ".jpg" : "";
+      const downloadName = file.name + (file.name.toLowerCase().endsWith(ext) ? "" : ext);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = downloadName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 5000);
+    } catch (err) {
+      console.error("Download failed, fallback to window.open:", err);
+      window.open(proxyUrl, "_blank");
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   return (
     <button
       onClick={handleDownload}
-      disabled={downloading}
-      className="group flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:border-orange-500/20 hover:shadow-md hover:-translate-y-0.5 text-left active:scale-[0.99] disabled:opacity-80"
+      className="group flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:border-orange-500/20 hover:shadow-md hover:-translate-y-0.5 text-left active:scale-[0.99]"
     >
       <div className={cn(
         "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors",
@@ -80,17 +93,8 @@ function FileCard({ file }: { file: { id: string; name: string; url: string; mim
           {file.mimeType.split("/")[1] || "File"}
         </p>
       </div>
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all relative">
-        {downloading ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            {progress > 0 && progress < 100 && (
-              <span className="absolute -bottom-5 text-[8px] font-bold text-primary">{progress}%</span>
-            )}
-          </>
-        ) : (
-          <Download className="h-4 w-4" />
-        )}
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all">
+        <Download className="h-4 w-4" />
       </div>
     </button>
   );
@@ -204,6 +208,41 @@ export function LectureExperienceClient({
   lecture, moduleId, isAdmin = false, userId,
 }: { lecture: any; moduleId: string; isAdmin?: boolean; userId?: string }) {
   const [active, setActive] = useState<TabId>("overview");
+  const sidebar = useLectureSidebar();
+  const { sidebarOpen, setSelectedText } = sidebar;
+
+  const { lecture: cachedLecture } = useLectureCache(lecture.id);
+
+  useEffect(() => {
+    function handleSelection() {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || !sel.rangeCount) {
+        setSelectedText("");
+        return;
+      }
+      const text = sel.toString().trim();
+      if (text.length > 0 && text.length <= 3000) {
+        setSelectedText(text);
+      } else if (text.length > 3000) {
+        setSelectedText(text.slice(0, 3000) + "...");
+      } else {
+        setSelectedText("");
+      }
+    }
+    document.addEventListener("selectionchange", handleSelection);
+    return () => document.removeEventListener("selectionchange", handleSelection);
+  }, [setSelectedText]);
+
+  useEffect(() => {
+    sidebar.openSidebar(lecture.id, lecture.title, cachedLecture?.content);
+    return () => {
+      sidebar.closeSidebar();
+    };
+  }, [lecture.id]);
+
+  useEffect(() => {
+    sidebar.setActiveSection(active);
+  }, [active, sidebar]);
 
   const recordCount   = lecture?.records?.length || 0;
   const fileCount     = lecture?.files?.length || 0;
@@ -225,13 +264,14 @@ export function LectureExperienceClient({
     tabs.splice(tabs.length - 1, 0, { id: "checklist", label: "Checklist" });
   }
 
-  if (isAdmin) tabs.push({ id: "drq", label: "Dr. Q" });
 
   const base   = `/modules/${moduleId}/lectures/${lecture.id}`;
   const extras = lecture.extras || {};
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
+      {/* ── Main content wrapper (shrinks on desktop when sidebar is open) ── */}
+      <div className="transition-all duration-300" style={sidebarOpen ? { marginRight: sidebar.sidebarWidth } : undefined}>
 
       {/* ── Mobile back navigation & title row ── */}
       <div className="md:hidden px-4 pb-2 pt-2 space-y-3 shrink-0">
@@ -254,9 +294,27 @@ export function LectureExperienceClient({
               </span>
             )}
           </div>
-          <h1 className="text-[22px] font-black leading-tight tracking-tight text-foreground capitalize">
-            {lecture.title}
-          </h1>
+          <div className="flex items-center justify-between gap-2">
+            <h1 className="text-[22px] font-black leading-tight tracking-tight text-foreground capitalize">
+              {lecture.title}
+            </h1>
+            <button
+              type="button"
+              onClick={() => {
+                if (sidebarOpen) { sidebar.closeSidebar(); }
+                else { sidebar.openSidebar(lecture.id, lecture.title, cachedLecture?.content); }
+              }}
+              className={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all",
+                sidebarOpen
+                  ? "bg-white/10 text-white shadow-sm"
+                  : "bg-primary text-primary-foreground shadow-sm hover:scale-105"
+              )}
+              aria-label={sidebarOpen ? "Close AI chat" : "Open AI chat"}
+            >
+              {sidebarOpen ? <X className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -353,6 +411,34 @@ export function LectureExperienceClient({
                   <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-emerald-500 transition-colors" />
                 </button>
               )}
+
+              <button
+                onClick={() => {
+                  if (sidebarOpen) { sidebar.closeSidebar(); }
+                  else { sidebar.openSidebar(lecture.id, lecture.title, cachedLecture?.content); }
+                }}
+                className={cn(
+                  "group flex items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5",
+                  sidebarOpen
+                    ? "border-primary/30 bg-primary/5 shadow-primary/10"
+                    : "border-border hover:border-primary/30 hover:shadow-primary/10"
+                )}
+              >
+                <div className={cn(
+                  "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors",
+                  sidebarOpen ? "bg-primary/20" : "bg-primary/10"
+                )}>
+                  {sidebarOpen
+                    ? <X className="h-5 w-5 text-primary" />
+                    : <Sparkles className="h-5 w-5 text-primary" />
+                  }
+                </div>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-bold text-foreground">{sidebarOpen ? "Close AI" : "Lecture AI"}</p>
+                  <p className="text-[11px] text-muted-foreground">{sidebarOpen ? "Tap to close sidebar" : "Ask about this lecture"}</p>
+                </div>
+                {!sidebarOpen && <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors" />}
+              </button>
             </div>
           </div>
         </div>
@@ -594,27 +680,17 @@ export function LectureExperienceClient({
             </div>
           )}
 
-          {/* Dr. Q */}
-          {active === "drq" && isAdmin && (
-            <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-xl">
-              <div className="flex items-center gap-3 border-b border-border px-6 py-4 bg-gradient-to-r from-primary/5 to-transparent">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">AI Assistant</p>
-                  <h3 className="text-sm font-black text-foreground">Ask Dr. Q</h3>
-                </div>
-                <span className="ml-auto rounded-full bg-primary/10 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-primary border border-primary/20">Admin</span>
-              </div>
-              <div className="h-[560px]">
-                <AIAssistantPanel embedded fullPage lectureId={lecture.id} lectureTitle={lecture.title} />
-              </div>
-            </div>
-          )}
 
         </div>
       </main>
+    </div>
+
+    {sidebarOpen && (
+      <div
+        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+        onClick={sidebar.closeSidebar}
+      />
+    )}
     </div>
   );
 }

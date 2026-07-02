@@ -23,6 +23,9 @@ import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import toast from "react-hot-toast";
 import { getAIEndpoint } from "@/lib/api-config";
+import { AnimatedThinking } from "./AnimatedThinking";
+import { streamGemini } from "@/hooks/useDrQChat";
+import type { DrQSettings, FileAttachment } from "@/hooks/useDrQChat";
 
 interface UsageInfo {
   used: number;
@@ -181,6 +184,16 @@ function saveActiveId(id: string | null) {
     else localStorage.removeItem(ACTIVE_THREAD_KEY);
   } catch {
     /* ignore */
+  }
+}
+
+function getBYOKSettings(): DrQSettings | null {
+  try {
+    const raw = localStorage.getItem("medqs-drq-settings-v4");
+    if (!raw) return null;
+    return JSON.parse(raw) as DrQSettings;
+  } catch {
+    return null;
   }
 }
 
@@ -504,10 +517,28 @@ export function AIAssistantPanel({
       (attachPdf ? `\n_[PDF: ${attachPdf.name}]_` : "") +
       (imgs.length ? `\n_[${imgs.length} image${imgs.length > 1 ? "s" : ""}]_` : "");
 
-    const history = messages.map((m) => ({
+    const history: { role: "user" | "assistant"; content: string }[] = messages.map((m) => ({
       role: m.role,
       content: m.content,
     }));
+
+    // Build BYOK file attachments before state resets
+    const byokSettings = getBYOKSettings();
+    const geminiKey = byokSettings?.byokKeys?.gemini?.[0];
+    const fileAttachments: FileAttachment[] = imgs.map((img, i) => ({
+      name: `image-${i + 1}`,
+      mimeType: img.mimeType,
+      data: `data:${img.mimeType};base64,${img.data}`,
+      size: Math.round((img.data.length * 3) / 4),
+    }));
+    if (pdfs.length > 0 && attachPdf) {
+      fileAttachments.push({
+        name: attachPdf.name,
+        mimeType: "application/pdf",
+        data: `data:application/pdf;base64,${pdfs[0].data}`,
+        size: Math.round((pdfs[0].data.length * 3) / 4),
+      });
+    }
 
     setInput("");
     setAttachImages([]);
@@ -516,9 +547,43 @@ export function AIAssistantPanel({
     setMessages((m) => [...m, { role: "user", content: userLine, attachments: userAttachments }]);
     setLoading(true);
     setLastFailedPayload(null);
+
     try {
-      await postChat(combined || "(See attached materials.)", imgs, pdfs, history, lectureId, specializedModel, puterModel);
+      if (geminiKey) {
+        const model = byokSettings.activeModels?.gemini?.[0] || "gemini-2.0-flash";
+
+        const fullHistory = [
+          ...(history as { role: "user" | "assistant"; content: string }[]),
+          { role: "user", content: combined || "(See attached materials.)" }
+        ];
+
+        setMessages((m) => [...m, { role: "assistant", content: "" }]);
+
+        await streamGemini(
+          geminiKey,
+          model,
+          fullHistory as any,
+          fileAttachments,
+          (chunk: string) => {
+            setMessages((m) => {
+              const updated = [...m];
+              const last = updated[updated.length - 1];
+              if (last?.role === "assistant") {
+                updated[updated.length - 1] = { ...last, content: chunk };
+              }
+              return updated;
+            });
+          }
+        );
+      } else {
+        await postChat(combined || "(See attached materials.)", imgs, pdfs, history, lectureId, specializedModel, puterModel);
+      }
     } catch (err) {
+      setMessages((m) => {
+        const last = m[m.length - 1];
+        if (last?.role === "assistant" && !last.content) return m.slice(0, -1);
+        return m;
+      });
       setLastFailedPayload({
         message: combined || "(See attached materials.)",
         images: imgs,
@@ -549,9 +614,61 @@ export function AIAssistantPanel({
     setMessages((m) => (m[m.length - 1]?.role === "assistant" ? m.slice(0, -1) : m));
     setLoading(true);
     try {
-      await postChat(message, images, pdfs, history);
-      setLastFailedPayload(null);
+      const byokSettings = getBYOKSettings();
+      const geminiKey = byokSettings?.byokKeys?.gemini?.[0];
+
+      if (geminiKey) {
+        const model = byokSettings.activeModels?.gemini?.[0] || "gemini-2.0-flash";
+        const fileAttachments: FileAttachment[] = images.map((img, i) => ({
+          id: `img-${Date.now()}-${i}`,
+          name: `image-${i + 1}`,
+          mimeType: img.mimeType,
+          data: `data:${img.mimeType};base64,${img.data}`,
+          size: Math.round((img.data.length * 3) / 4),
+        }));
+        if (pdfs.length > 0) {
+          fileAttachments.push({
+            name: "document.pdf",
+            mimeType: "application/pdf",
+            data: `data:application/pdf;base64,${pdfs[0].data}`,
+            size: Math.round((pdfs[0].data.length * 3) / 4),
+          });
+        }
+
+        const fullHistory = [
+          ...(history as { role: "user" | "assistant"; content: string }[]),
+          { role: "user", content: message }
+        ];
+
+        setMessages((m) => [...m, { role: "assistant", content: "" }]);
+
+        await streamGemini(
+          geminiKey,
+          model,
+          fullHistory as any,
+          fileAttachments,
+          (chunk: string) => {
+            setMessages((m) => {
+              const updated = [...m];
+              const last = updated[updated.length - 1];
+              if (last?.role === "assistant") {
+                updated[updated.length - 1] = { ...last, content: chunk };
+              }
+              return updated;
+            });
+          }
+        );
+        setLastFailedPayload(null);
+      } else {
+        await postChat(message, images, pdfs, history);
+        setLastFailedPayload(null);
+      }
     } catch (err) {
+      setMessages((m) => {
+        const last = m[m.length - 1];
+        if (last?.role === "assistant" && !last.content) return m.slice(0, -1);
+        return m;
+      });
       const detail = err instanceof Error && err.message ? err.message : null;
       setMessages((m) => [
         ...m,
@@ -881,17 +998,17 @@ export function AIAssistantPanel({
 
       {loading && (
         <div className="flex justify-start">
-          <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm px-4 py-2.5 border" style={{ borderColor: "#50505020", backgroundColor: "#50505008" }}>
-            <span className="text-sm font-bold" style={{ color: "#505050" }}>Thinking</span>
+          <div className="flex items-center gap-2 rounded-2xl rounded-bl-sm px-4 py-2.5 border" style={{ borderColor: "#50505020", backgroundColor: "#50505008" }}>
             <div className="flex gap-0.5">
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
-                  className="w-1 h-1 rounded-full"
+                  className="w-1.5 h-1.5 rounded-full"
                   style={{ backgroundColor: "#505050", animation: `pulse 1.2s ease-in-out ${i * 0.25}s infinite` }}
                 />
               ))}
             </div>
+            <AnimatedThinking className="text-sm font-bold" />
           </div>
         </div>
       )}

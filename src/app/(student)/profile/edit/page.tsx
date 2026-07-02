@@ -45,6 +45,12 @@ function EditProfileContent() {
     personalSiliconFlowKey: "",
     personalSiliconFlowModel: "",
     personalSiliconFlowUrl: "",
+    personalMistralKey: "",
+    personalTogetherKey: "",
+    personalHuggingfaceKey: "",
+    personalCloudflareKey: "",
+    personalCerebrasKey: "",
+    personalGithubKey: "",
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
@@ -64,6 +70,21 @@ function EditProfileContent() {
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [keyPreviews, setKeyPreviews] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!loading) {
+      fetch("/api/v1/user/ai-settings").then(r => r.json()).then(data => {
+        if (data?.keys) {
+          const previews: Record<string, string> = {};
+          for (const [k, v] of Object.entries(data.keys)) {
+            previews[k] = (v as any).keyPreview || "";
+          }
+          setKeyPreviews(previews);
+        }
+      }).catch(() => {});
+    }
+  }, [loading]);
 
   const TABS = [
     { id: "identity", label: "Identity", icon: User },
@@ -122,6 +143,12 @@ function EditProfileContent() {
             personalSiliconFlowKey: me.personalSiliconFlowKey ?? "",
             personalSiliconFlowModel: me.personalSiliconFlowModel ?? "",
             personalSiliconFlowUrl: me.personalSiliconFlowUrl ?? "",
+            personalMistralKey: me.personalMistralKey ?? "",
+            personalTogetherKey: me.personalTogetherKey ?? "",
+            personalHuggingfaceKey: me.personalHuggingfaceKey ?? "",
+            personalCloudflareKey: me.personalCloudflareKey ?? "",
+            personalCerebrasKey: me.personalCerebrasKey ?? "",
+            personalGithubKey: me.personalGithubKey ?? "",
           });
           setAvatarUrl(me.image ?? null);
           setCoverUrl(me.coverImage ?? null);
@@ -224,7 +251,7 @@ function EditProfileContent() {
         }
       }
 
-      const payload = {
+      const payload: Record<string, any> = {
         ...form,
         handle: form.handle.trim() || null,
         nickname: form.nickname.trim() || null,
@@ -236,6 +263,22 @@ function EditProfileContent() {
         semesterId: selectedSem.trim() ? selectedSem : null,
         coverImage: finalCoverUrl,
       };
+      // Remove AI keys from profile payload — they're saved via ai-settings
+      delete payload.personalGeminiKey;
+      delete payload.personalOpenAIKey;
+      delete payload.personalGroqKey;
+      delete payload.personalOpenRouterKey;
+      delete payload.personalXAIKey;
+      delete payload.personalAnthropicKey;
+      delete payload.personalSiliconFlowKey;
+      delete payload.personalSiliconFlowModel;
+      delete payload.personalSiliconFlowUrl;
+      delete payload.personalMistralKey;
+      delete payload.personalTogetherKey;
+      delete payload.personalHuggingfaceKey;
+      delete payload.personalCloudflareKey;
+      delete payload.personalCerebrasKey;
+      delete payload.personalGithubKey;
       const res = await fetch("/api/v1/auth/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -245,6 +288,34 @@ function EditProfileContent() {
         const err = await res.json().catch(() => ({}));
         toast.error(typeof err?.error === "string" ? err.error : "Could not save profile");
         return;
+      }
+      // Save AI keys separately via encrypted ai-settings
+      const aiKeys: Record<string, { key: string }> = {};
+      const keyMappings: Record<string, string> = {
+        personalGeminiKey: "gemini",
+        personalOpenAIKey: "openai",
+        personalGroqKey: "groq",
+        personalOpenRouterKey: "openrouter",
+        personalXAIKey: "xai",
+        personalAnthropicKey: "anthropic",
+        personalSiliconFlowKey: "siliconflow",
+        personalMistralKey: "mistral",
+        personalTogetherKey: "together",
+        personalHuggingfaceKey: "huggingface",
+        personalCloudflareKey: "cloudflare",
+        personalCerebrasKey: "cerebras",
+        personalGithubKey: "github",
+      };
+      for (const [field, provider] of Object.entries(keyMappings)) {
+        const val = (form as any)[field];
+        if (val) aiKeys[provider] = { key: val };
+      }
+      if (Object.keys(aiKeys).length > 0) {
+        fetch("/api/v1/user/ai-settings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ keys: aiKeys }),
+        }).catch(() => {});
       }
       toast.success("Profile updated!");
       router.replace(`/profile/me?updated=${Date.now()}`);
@@ -863,49 +934,103 @@ function EditProfileContent() {
                             <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
                               <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Gemini Key</label>
                               <div className="flex items-center gap-2">
-                                <input type="password" value={form.personalGeminiKey} onChange={(e) => setForm((f) => ({ ...f, personalGeminiKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <input type="password" placeholder={keyPreviews.gemini || "Enter Gemini key..."} value={form.personalGeminiKey} onChange={(e) => setForm((f) => ({ ...f, personalGeminiKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
                                 <TestKeyButton provider="gemini" keyValue={form.personalGeminiKey} />
+                                {!form.personalGeminiKey && keyPreviews.gemini && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.gemini}</span>}
                               </div>
                             </div>
                             <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
                               <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">OpenAI Key</label>
                               <div className="flex items-center gap-2">
-                                <input type="password" value={form.personalOpenAIKey} onChange={(e) => setForm((f) => ({ ...f, personalOpenAIKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <input type="password" placeholder={keyPreviews.openai || "Enter OpenAI key..."} value={form.personalOpenAIKey} onChange={(e) => setForm((f) => ({ ...f, personalOpenAIKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
                                 <TestKeyButton provider="openai" keyValue={form.personalOpenAIKey} />
+                                {!form.personalOpenAIKey && keyPreviews.openai && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.openai}</span>}
                               </div>
                             </div>
                             <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
                               <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Groq Key</label>
                               <div className="flex items-center gap-2">
-                                <input type="password" value={form.personalGroqKey} onChange={(e) => setForm((f) => ({ ...f, personalGroqKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <input type="password" placeholder={keyPreviews.groq || "Enter Groq key..."} value={form.personalGroqKey} onChange={(e) => setForm((f) => ({ ...f, personalGroqKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
                                 <TestKeyButton provider="groq" keyValue={form.personalGroqKey} />
+                                {!form.personalGroqKey && keyPreviews.groq && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.groq}</span>}
                               </div>
                             </div>
                             <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
                               <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">OpenRouter Key</label>
                               <div className="flex items-center gap-2">
-                                <input type="password" value={form.personalOpenRouterKey} onChange={(e) => setForm((f) => ({ ...f, personalOpenRouterKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <input type="password" placeholder={keyPreviews.openrouter || "Enter OpenRouter key..."} value={form.personalOpenRouterKey} onChange={(e) => setForm((f) => ({ ...f, personalOpenRouterKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
                                 <TestKeyButton provider="openrouter" keyValue={form.personalOpenRouterKey} />
+                                {!form.personalOpenRouterKey && keyPreviews.openrouter && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.openrouter}</span>}
                               </div>
                             </div>
                             <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
                               <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Anthropic Key</label>
                               <div className="flex items-center gap-2">
-                                <input type="password" value={form.personalAnthropicKey} onChange={(e) => setForm((f) => ({ ...f, personalAnthropicKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <input type="password" placeholder={keyPreviews.anthropic || "Enter Anthropic key..."} value={form.personalAnthropicKey} onChange={(e) => setForm((f) => ({ ...f, personalAnthropicKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
                                 <TestKeyButton provider="anthropic" keyValue={form.personalAnthropicKey} />
+                                {!form.personalAnthropicKey && keyPreviews.anthropic && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.anthropic}</span>}
                               </div>
                             </div>
                             <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
                               <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">xAI Key</label>
                               <div className="flex items-center gap-2">
-                                <input type="password" value={form.personalXAIKey} onChange={(e) => setForm((f) => ({ ...f, personalXAIKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <input type="password" placeholder={keyPreviews.xai || "Enter xAI key..."} value={form.personalXAIKey} onChange={(e) => setForm((f) => ({ ...f, personalXAIKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
                                 <TestKeyButton provider="xai" keyValue={form.personalXAIKey} />
+                                {!form.personalXAIKey && keyPreviews.xai && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.xai}</span>}
+                              </div>
+                            </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Mistral Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" placeholder={keyPreviews.mistral || "Enter Mistral key..."} value={form.personalMistralKey} onChange={(e) => setForm((f) => ({ ...f, personalMistralKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="mistral" keyValue={form.personalMistralKey} />
+                                {!form.personalMistralKey && keyPreviews.mistral && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.mistral}</span>}
+                              </div>
+                            </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Together AI Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" placeholder={keyPreviews.together || "Enter Together AI key..."} value={form.personalTogetherKey} onChange={(e) => setForm((f) => ({ ...f, personalTogetherKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="together" keyValue={form.personalTogetherKey} />
+                                {!form.personalTogetherKey && keyPreviews.together && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.together}</span>}
+                              </div>
+                            </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Hugging Face Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" placeholder={keyPreviews.huggingface || "Enter Hugging Face key..."} value={form.personalHuggingfaceKey} onChange={(e) => setForm((f) => ({ ...f, personalHuggingfaceKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="huggingface" keyValue={form.personalHuggingfaceKey} />
+                                {!form.personalHuggingfaceKey && keyPreviews.huggingface && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.huggingface}</span>}
+                              </div>
+                            </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Cloudflare Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" placeholder={keyPreviews.cloudflare || "Enter Cloudflare key..."} value={form.personalCloudflareKey} onChange={(e) => setForm((f) => ({ ...f, personalCloudflareKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="cloudflare" keyValue={form.personalCloudflareKey} />
+                                {!form.personalCloudflareKey && keyPreviews.cloudflare && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.cloudflare}</span>}
+                              </div>
+                            </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">Cerebras Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" placeholder={keyPreviews.cerebras || "Enter Cerebras key..."} value={form.personalCerebrasKey} onChange={(e) => setForm((f) => ({ ...f, personalCerebrasKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="cerebras" keyValue={form.personalCerebrasKey} />
+                                {!form.personalCerebrasKey && keyPreviews.cerebras && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.cerebras}</span>}
+                              </div>
+                            </div>
+                            <div className="group rounded-2xl border dark:border-white/5 border-slate-100 dark:bg-white/5 bg-slate-50 p-5">
+                              <label className="mb-3 block text-xs font-black uppercase tracking-widest dark:text-white text-slate-800">GitHub Models Key</label>
+                              <div className="flex items-center gap-2">
+                                <input type="password" placeholder={keyPreviews.github || "Enter GitHub token..."} value={form.personalGithubKey} onChange={(e) => setForm((f) => ({ ...f, personalGithubKey: e.target.value }))} className="flex-1 rounded-2xl border dark:border-white/5 border-slate-200 dark:bg-black/40 bg-white px-4 py-3 text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono" />
+                                <TestKeyButton provider="github" keyValue={form.personalGithubKey} />
+                                {!form.personalGithubKey && keyPreviews.github && <span className="text-[10px] font-mono text-gray-400">{keyPreviews.github}</span>}
                               </div>
                             </div>
                         </div>
-                     </div>
-                  </div>
-               </section>
+                      </div>
+                   </div>
+                </section>
             </div>
           )}
         </div>

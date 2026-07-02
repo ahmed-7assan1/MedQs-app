@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 import { generateStudyNotesWithMeta } from "@/lib/gemini";
 import { generateAIReplyWithFallback } from "@/lib/ai-router";
 import { redisIncrWithExpire } from "@/lib/redis";
+import { resolveBestKey } from "@/lib/byok-resolver";
 
 export const maxDuration = 60; // 60 seconds max duration for Vercel Hobby
 
@@ -41,6 +43,16 @@ export async function POST(req: NextRequest) {
   const site = await getCfg().catch(() => null);
   const effectiveProvider = normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
 
+  let effectiveApiKey: string | undefined;
+  if (effectiveProvider) {
+    const userWithKeys = await prisma.user.findUnique({
+      where: { id: session!.user!.id },
+      include: { adminAiKeys: true },
+    });
+    const resolved = resolveBestKey(userWithKeys, effectiveProvider);
+    if (resolved) effectiveApiKey = resolved.key;
+  }
+
   if (!file) return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
 
   if (file.size > 35 * 1024 * 1024)
@@ -73,12 +85,18 @@ export async function POST(req: NextRequest) {
         const row = await generateAIReplyWithFallback(ocrPrompt, "OCR extraction for education content.", {
           preferredProvider: effectiveProvider,
           images: [{ mimeType: file.type || "image/png", data: buffer.toString("base64") }],
+          personalKey: effectiveApiKey,
+          useCustomKey: !!effectiveApiKey,
+          customProvider: effectiveProvider as any,
         });
         text = `${text}\n${row.text}`.trim();
       } else if (lcName.endsWith(".pdf")) {
         const row = await generateAIReplyWithFallback(ocrPrompt, "OCR extraction for PDF content.", {
           preferredProvider: effectiveProvider,
           pdfs: [{ mimeType: "application/pdf", data: buffer.toString("base64") }],
+          personalKey: effectiveApiKey,
+          useCustomKey: !!effectiveApiKey,
+          customProvider: effectiveProvider as any,
         });
         text = `${text}\n${row.text}`.trim();
       }
@@ -103,6 +121,7 @@ export async function POST(req: NextRequest) {
   try {
     const generated = await generateStudyNotesWithMeta(text, instructions, {
       preferredProvider: effectiveProvider,
+      customApiKey: effectiveApiKey,
     });
     
     return NextResponse.json({

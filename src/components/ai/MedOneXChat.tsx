@@ -44,7 +44,25 @@ import "./MedOneXChat.css";
 import { edgeTTS } from "@/lib/tts";
 import { textSimilarity } from "@/lib/echoUtils";
 
-export function MedOneXChat() {
+export function MedOneXChat({
+  embedded = false,
+  onClose,
+  lectureId,
+  lectureTitle,
+  lectureContent,
+  selectedText,
+  activeSection,
+  onClearSelectedText,
+}: {
+  embedded?: boolean;
+  onClose?: () => void;
+  lectureId?: string;
+  lectureTitle?: string;
+  lectureContent?: string;
+  selectedText?: string;
+  activeSection?: string;
+  onClearSelectedText?: () => void;
+}) {
   const { theme, setTheme } = useThemeStore();
   const isDark = theme === "dark";
   const { siteName, logoUrl } = useSiteConfig();
@@ -53,6 +71,7 @@ export function MedOneXChat() {
     threads, activeThreadId, messages, loading, streamingId,
     settings, limits, superExpertStatus, newThread, switchThread, deleteThread,
     sendMessage, stopGeneration, regenerate, setReaction, updateSettings,
+    switchToLectureThread, restoreGlobalThread,
   } = useDrQChat();
 
   const endRef = useRef<HTMLDivElement>(null);
@@ -66,6 +85,30 @@ export function MedOneXChat() {
   const mobileInputRef = useRef<HTMLTextAreaElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
+  const prevLectureIdRef = useRef<string | null | undefined>(undefined);
+  const lectureContextRef = useRef<{ lectureId?: string; lectureTitle?: string; lectureContent?: string; selectedText?: string }>({});
+  lectureContextRef.current = { lectureId, lectureTitle, lectureContent, selectedText };
+
+  // Auto-switch to lecture-scoped thread when entering/exiting lecture mode
+  useEffect(() => {
+    if (lectureId) {
+      switchToLectureThread(lectureId, lectureTitle ?? "");
+    } else if (!lectureId && prevLectureIdRef.current) {
+      restoreGlobalThread();
+    }
+    prevLectureIdRef.current = lectureId ?? null;
+  }, [lectureId, lectureTitle, switchToLectureThread, restoreGlobalThread]);
+
+  // Restore global thread on unmount (e.g. when sidebar closes on navigation away)
+  useEffect(() => {
+    return () => {
+      if (prevLectureIdRef.current) {
+        restoreGlobalThread();
+        prevLectureIdRef.current = null;
+      }
+    };
+  }, [restoreGlobalThread]);
+
   const [mobileFocused, setMobileFocused] = useState(false);
   const [files, setFiles] = useState<FileAttachment[]>([]);
   const [showConfig, setShowConfig] = useState(false);
@@ -430,7 +473,7 @@ export function MedOneXChat() {
   // ─── Auto-resize (desktop only) ───
   useEffect(() => {
     const el = inputRef.current;
-    if (!el || window.innerWidth < 768) return;
+    if (!el || (!embedded && window.innerWidth < 768)) return;
     el.style.height = "0px";
     const newHeight = Math.min(el.scrollHeight, 200);
     if (newHeight !== prevDesktopHeightRef.current) {
@@ -485,7 +528,12 @@ export function MedOneXChat() {
       setShowApiAlert(true);
       return;
     }
-    sendMessage(input, files, replyContext?.id, webSearchEnabled);
+    sendMessage(input, files, replyContext?.id, webSearchEnabled, {
+      lectureId: lectureId!,
+      lectureTitle: lectureTitle!,
+      lectureContent,
+      selectedText,
+    });
     setInput("");
     setFiles([]);
     setReplyContext(null);
@@ -692,7 +740,7 @@ export function MedOneXChat() {
       </AnimatePresence>
 
       {/* ─── Swipe Zone (left edge) ─── */}
-      {!showSidebar && (
+      {!embedded && !showSidebar && (
         <div
           className="fixed left-0 top-0 bottom-0 w-6 z-[10008] touch-none md:hidden"
           onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
@@ -703,8 +751,29 @@ export function MedOneXChat() {
         />
       )}
 
+      {embedded ? (
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#050505] shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <Sparkle size={18} weight="fill" className="text-primary shrink-0" />
+            <span className="text-sm font-bold truncate text-white">MedOneX Expert</span>
+            {lectureId && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary truncate max-w-[120px] border border-primary/20">
+                {lectureTitle || "Lecture"}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            {onClose && (
+              <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                <X size={16} weight="bold" />
+              </button>
+            )}
+          </div>
+        </div>
+      ) : null}
+
       {/* ─── Top Bar (hamburger + questions/flashcards/resources) ─── */}
-      <div className={cn(
+      {!embedded && <div className={cn(
         "fixed top-0 left-0 right-0 z-50 h-14 md:h-12 flex items-start md:items-center justify-between md:justify-end md:border-b transition-colors duration-200 ease-out",
         isDark
           ? "bg-black md:bg-black/80 md:backdrop-blur-xl md:border-white/[0.06]"
@@ -761,9 +830,9 @@ export function MedOneXChat() {
             </button>
           )}
         </div>
-      </div>
+      </div>}
 
-      <MobileChatSidebar
+      {!embedded && <MobileChatSidebar
         showSidebar={showSidebar}
         onClose={() => setShowSidebar(false)}
         isDark={isDark}
@@ -782,10 +851,9 @@ export function MedOneXChat() {
         onOpenSaved={() => setShowSaved(true)}
         onOpenLibrary={() => setShowLibrary(true)}
         onOpenAgentGallery={() => setShowAgentGallery(true)}
-      />
+      />}
 
-      {/* ─── Desktop Sidebar — always rendered, collapsible (ChatGPT-style) ─── */}
-      <div className="hidden md:block fixed left-0 top-0 bottom-0 z-max">
+      {!embedded && <div className="hidden md:block fixed left-0 top-0 bottom-0 z-max">
         <div className={cn(
           "h-full overflow-hidden flex flex-col",
           showSidebar ? "w-[260px]" : "w-[52px]",
@@ -889,7 +957,7 @@ export function MedOneXChat() {
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
       {/* ─── Threads Container — bottom sheet on mobile ─── */}
       <AnimatePresence>
@@ -1083,11 +1151,12 @@ export function MedOneXChat() {
 
       <div
         className={cn(
-          "flex flex-col flex-1 min-h-0 pb-24",
-          "transition-[margin] duration-200 ease-out",
-          showSidebar && "translate-x-[85vw]",
+          "flex flex-col flex-1 min-h-0",
+          embedded ? "" : "pb-24",
+          !embedded && "transition-[margin] duration-200 ease-out",
+          !embedded && showSidebar && "translate-x-[85vw]",
           "md:translate-x-0",
-          showSidebar ? "md:ml-[260px]" : "md:ml-[52px]"
+          !embedded && (showSidebar ? "md:ml-[260px]" : "md:ml-[52px]")
         )}
         ref={mainRef}
       >
@@ -1119,7 +1188,7 @@ export function MedOneXChat() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className="h-full flex flex-col items-center justify-center px-6 pt-16 md:pt-24"
+              className={cn("h-full flex flex-col items-center justify-center", embedded ? "px-4 pt-8" : "px-6 pt-16 md:pt-24")}
             >
               <motion.div
                 initial={{ scale: 0 }}
@@ -1192,7 +1261,7 @@ export function MedOneXChat() {
               </motion.div>
             </motion.div>
           ) : (
-            <div className="w-full px-4 sm:px-6 md:px-0 md:max-w-[48rem] md:mx-auto py-6 pb-8 space-y-6">
+            <div className={cn("w-full space-y-4", embedded ? "px-3 py-4" : "px-4 sm:px-6 md:px-0 md:max-w-[48rem] md:mx-auto py-6 pb-8 space-y-6")}>
               {messages.map((m, idx) => (
                 <motion.div
                   key={m.id}
@@ -1352,7 +1421,150 @@ export function MedOneXChat() {
     </div>
     {/* ^ mainRef closes here */}
 
-      {/* Desktop fixed input */}
+      {embedded ? (
+        /* ── Embedded capsule input (matches mobile style) ── */
+        <div className="flex-shrink-0 border-t border-white/10 bg-[#050505]">
+          {selectedText && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 border-b border-primary/10">
+              <span className="text-[10px] font-medium text-primary truncate max-w-[250px]">
+                &ldquo;{selectedText.slice(0, 80)}...&rdquo;
+              </span>
+              {onClearSelectedText && (
+                <button onClick={onClearSelectedText} className="p-0.5 rounded hover:bg-primary/10">
+                  <X size={12} weight="bold" className="text-primary" />
+                </button>
+              )}
+            </div>
+          )}
+          <div className="px-2 pb-2 pt-2">
+            <div
+              onClick={() => { if (!inputFocused) inputRef.current?.focus(); }}
+              className={cn(
+                "flex flex-col rounded-[20px] ring-1 transition-all duration-200 ease-out cursor-text overflow-hidden",
+                isDark ? "ring-white/10 bg-[#141414]/90 backdrop-blur-xl text-white" : "ring-gray-200/80 bg-white text-[#050505]"
+              )}
+            >
+              <div className="grid transition-all duration-200 ease-out" style={{ gridTemplateRows: inputFocused ? '1fr' : '0fr' }}>
+                <div className="overflow-hidden min-h-0">
+                  {files.length > 0 && (
+                    <div className={cn(
+                      "flex flex-wrap gap-1.5 px-3 pt-2.5 pb-1.5 max-h-[120px] overflow-y-auto border-b",
+                      isDark ? "border-white/10" : "border-gray-200/60"
+                    )}>
+                      {files.map((f, i) => (
+                        <div key={i} className={cn("flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs max-w-[160px] transition-all", isDark ? "bg-white/10" : "bg-gray-100")}>
+                          {f.loading ? (
+                            <div className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0">
+                              <svg className="animate-spin h-2.5 w-2.5 text-indigo-500" viewBox="0 0 24 24" fill="none">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                            </div>
+                          ) : f.mimeType.startsWith("image/") ? (
+                            <Image src={f.data} alt={f.name} width={16} height={16} className="w-4 h-4 rounded object-cover flex-shrink-0" unoptimized />
+                          ) : (
+                            <span className="text-[10px] flex-shrink-0">{f.name.match(/\.pdf$/i) ? "📄" : f.name.match(/\.pptx?$/i) ? "📊" : "📎"}</span>
+                          )}
+                          <span className="truncate max-w-[80px]">{f.name}</span>
+                          <button onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))} className="flex-shrink-0 ml-0.5 opacity-60 hover:opacity-100 transition-opacity"><X size={10} weight="bold" /></button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <textarea
+                    ref={inputRef}
+                    rows={1}
+                    value={input}
+                    onChange={e => startTransition(() => setInput(e.target.value))}
+                    onKeyDown={handleKeyDown}
+                    onFocus={() => setInputFocused(true)}
+                    onBlur={() => setInputFocused(false)}
+                    placeholder={isRecording ? (voicePersona?.lang === "ar" ? "تسجيل..." : "Recording...") : "Ask about this lecture..."}
+                    className={cn(
+                      "w-full bg-transparent border-none outline-none resize-none px-3 pt-3 pb-1 text-sm leading-relaxed no-scrollbar",
+                      isDark ? "text-white placeholder-gray-400" : "text-[#050505] placeholder-gray-400"
+                    )}
+                  />
+                </div>
+              </div>
+              <div className={cn("flex items-center justify-between px-2", inputFocused ? "pb-2 pt-0" : "py-2")}>
+                {inputFocused ? (
+                  <div className="flex items-center gap-0.5">
+                    <button onMouseDown={(e) => e.preventDefault()} onClick={() => fileInputRef.current?.click()} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-400 hover:text-white hover:bg-white/10" : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5")}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                    </button>
+                    <button
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        const currentIdx = personaList.indexOf(settings.activePersona as DrQPersonaId);
+                        const nextPersona = personaList[(currentIdx + 1) % personaList.length];
+                        const ws = Object.values(DRQ_WORKSPACES).find(w => w.personaId === nextPersona);
+                        if (ws) updateSettings({ activePersona: nextPersona, activeProvider: ws.defaultProvider, activeModels: { ...settings.activeModels, [ws.defaultProvider]: [ws.defaultModel] } });
+                        else updateSettings({ activePersona: nextPersona });
+                      }}
+                      className={cn("flex items-center justify-center w-8 h-8 rounded-full transition-all select-none", isDark ? "text-gray-400 hover:text-gray-200 hover:bg-white/10" : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5")}
+                      title={(DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}
+                    >
+                      {React.cloneElement((DRQ_PERSONAS[settings.activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).icon as React.ReactElement, { size: 14, weight: "regular" })}
+                    </button>
+                    <button onMouseDown={(e) => e.preventDefault()} onClick={() => setShowProviderPicker(true)} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all text-base", isDark ? "text-gray-400 hover:text-gray-200 hover:bg-white/10" : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5")} title={PROVIDER_CONFIGS[settings.activeProvider]?.label}>
+                      <Brain size={14} weight="regular" />
+                    </button>
+                    <button onMouseDown={(e) => e.preventDefault()} onClick={toggleVoiceMode} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", (voiceMode || isRecording) ? "text-red-500 bg-red-500/15" : isDark ? "text-gray-400 hover:text-white hover:bg-white/10" : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5")} title={voiceMode ? "Voice Mode" : "Voice Chat"}>
+                      <Microphone size={14} weight={(voiceMode || isRecording) ? "fill" : "regular"} />
+                    </button>
+                    {voiceMode && (
+                      <button onMouseDown={(e) => e.preventDefault()} onClick={() => setVoiceMuted(v => !v)} className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors", isDark ? "text-gray-400 hover:text-white hover:bg-white/10" : "text-[#050505]/60 hover:text-[#050505] hover:bg-black/5")} title={voiceMuted ? "Unmute voice" : "Mute voice"}>
+                        {voiceMuted ? <SpeakerSlash size={14} weight="fill" /> : <SpeakerHigh size={14} weight="fill" />}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center w-7 h-7 rounded-full transition-colors">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={cn(isDark ? "text-gray-400" : "text-gray-500")}>
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                    </button>
+                    <button onMouseDown={(e) => e.preventDefault()} onClick={toggleVoiceMode} className={cn("flex items-center justify-center w-7 h-7 rounded-full transition-colors", (voiceMode || isRecording) ? "text-red-500" : isDark ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-[#050505]")} title={voiceMode ? "Voice Mode" : "Voice Chat"}>
+                      <Microphone size={16} weight={(voiceMode || isRecording) ? "fill" : "regular"} />
+                    </button>
+                    {voiceMode && (
+                      <button onMouseDown={(e) => e.preventDefault()} onClick={() => setVoiceMuted(v => !v)} className={cn("flex items-center justify-center w-7 h-7 rounded-full transition-colors", isDark ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-[#050505]")} title={voiceMuted ? "Unmute voice" : "Mute voice"}>
+                        {voiceMuted ? <SpeakerSlash size={16} weight="fill" /> : <SpeakerHigh size={16} weight="fill" />}
+                      </button>
+                    )}
+                    <span className={cn("text-sm font-medium truncate", isDark ? "text-gray-300" : "text-gray-600")}>{isRecording ? (voicePersona?.lang === "ar" ? "تسجيل..." : "Recording...") : "MedOneX Expert"}</span>
+                  </div>
+                )}
+                {loading ? (
+                  <button onMouseDown={(e) => e.preventDefault()} onClick={stopGeneration} className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center leading-none transition-all hover:opacity-80"
+                    style={{ backgroundColor: isDark ? "#FFFFFF" : "#000000" }}>
+                    <Stop size={13} weight="fill" color={isDark ? "#000000" : "#FFFFFF"} />
+                  </button>
+                ) : (
+                  <button
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={handleSend}
+                    disabled={!input.trim() && files.length === 0}
+                    className={cn(
+                      "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ease-out active:scale-90",
+                      input.trim() || files.length > 0
+                        ? isDark ? "bg-white text-black hover:bg-gray-200 shadow-md" : "bg-[#141414] text-white hover:bg-gray-800 shadow-md"
+                        : isDark ? "bg-white/5 text-gray-500" : "bg-black/5 text-gray-300"
+                    )}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 19V5M5 12l7-7 7 7" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+      /* Desktop fixed input */
       <div className={cn(
         "hidden md:block fixed bottom-0 z-max transition-colors duration-200 ease-out",
         showSidebar ? "left-[260px] right-0" : "left-[52px] right-0"
@@ -1555,9 +1767,9 @@ export function MedOneXChat() {
             </div>
           </div>
         </div>
-      </div>
+      </div>)}
 
-      {/* Solid fill below mobile capsule */}
+      {!embedded && <>{/* Solid fill below mobile capsule */}
       <div className={cn(
         "md:hidden fixed bottom-0 left-0 right-0 z-max pointer-events-none transition-colors duration-200 ease-out",
         isDark ? "bg-black" : "bg-white"
@@ -1874,6 +2086,7 @@ export function MedOneXChat() {
           <span className={cn("block text-[8px] leading-tight text-center", isDark ? "text-gray-500" : "text-gray-500")}>This AI chat is for educational purposes only &bull; Please set your API key for accurate responses</span>
         </div>
       </motion.div>
+      </>}
 
       {/* ─── Global Bottom Sheets (from floating toolbar) ─── */}
       <QuestionsBottomSheet

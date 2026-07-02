@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 import { generateJsonWithFallback } from "@/lib/ai-router";
+import { resolveBestKey } from "@/lib/byok-resolver";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -29,7 +30,18 @@ export async function POST(req: NextRequest) {
     const wantQuestions = String((form as any).get("questions") ?? "") === "1";
     const wantVideos = String((form as any).get("videos") ?? "") === "1";
     const preferredProvider = String((form as any).get("preferredProvider") ?? "").trim() || undefined;
+    const customApiKey = String((form as any).get("customApiKey") ?? "").trim() || undefined;
     const dryRun = String((form as any).get("dryRun") ?? "") === "1";
+
+    let effectiveKey = customApiKey;
+    if (!effectiveKey && preferredProvider) {
+      const userWithKeys = await prisma.user.findUnique({
+        where: { id: session!.user!.id },
+        include: { adminAiKeys: true },
+      });
+      const resolved = resolveBestKey(userWithKeys, preferredProvider);
+      if (resolved) effectiveKey = resolved.key;
+    }
 
     const file = (form as any).get("file") as File | null;
     const linkText = String((form as any).get("linkText") || "").trim();
@@ -93,6 +105,9 @@ Rules:
     const row = await generateJsonWithFallback<typeof fallback>(prompt, fallback, {
       preferredProvider,
       systemPrompt: "You are a careful medical education assistant. Return only JSON.",
+      personalKey: effectiveKey,
+      useCustomKey: !!effectiveKey,
+      customProvider: effectiveKey ? preferredProvider as any : undefined,
     });
 
     const notesMarkdown = wantNotes ? String(row.data.notesMarkdown ?? "").trim() : "";

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertLecture, requireAdminWriter } from "@/lib/admin-scope";
 import { generateLectureEnhancementsWithMeta } from "@/lib/gemini";
+import { resolveBestKey } from "@/lib/byok-resolver";
 
 function normalizePreferredProvider(raw: unknown): "gemini" | "openai" | "anthropic" | "deepseek" | undefined {
   if (typeof raw !== "string") return undefined;
@@ -20,6 +21,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const lectureId = typeof body.lectureId === "string" ? body.lectureId.trim() : "";
   const preferredProvider = typeof body.preferredProvider === "string" ? body.preferredProvider.trim() : "";
+  const customApiKey = typeof body.customApiKey === "string" ? body.customApiKey.trim() : "";
   const instructions = typeof body.instructions === "string" ? body.instructions : "";
   const wantNotes = Boolean(body.notes);
   const wantFlashcards = Boolean(body.flashcards);
@@ -42,6 +44,16 @@ export async function POST(req: NextRequest) {
   const effectiveProvider =
     normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
 
+  let effectiveKey = customApiKey;
+  if (!effectiveKey && effectiveProvider) {
+    const userWithKeys = await prisma.user.findUnique({
+      where: { id: session!.user!.id },
+      include: { adminAiKeys: true },
+    });
+    const resolved = resolveBestKey(userWithKeys, effectiveProvider);
+    if (resolved) effectiveKey = resolved.key;
+  }
+
   try {
     const out = await generateLectureEnhancementsWithMeta(
       lecture.title,
@@ -50,7 +62,7 @@ export async function POST(req: NextRequest) {
       instructions,
       wantNotes,
       wantFlashcards,
-      { preferredProvider: effectiveProvider }
+      { preferredProvider: effectiveProvider, customApiKey: effectiveKey }
     );
     const { notesMarkdown, flashcards } = out.data;
 

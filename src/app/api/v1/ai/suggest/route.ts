@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 import { suggestQuestionDetailsWithMeta } from "@/lib/gemini";
 import { redisIncrWithExpire } from "@/lib/redis";
+import { resolveBestKey } from "@/lib/byok-resolver";
 
 const RATE_LIMIT = 20; // requests per hour per admin user
 
@@ -36,10 +38,20 @@ export async function POST(req: NextRequest) {
   if (!body?.trim())
     return NextResponse.json({ error: "Question body required" }, { status: 400 });
 
+  let effectiveApiKey = customApiKey;
+  if (!effectiveApiKey && effectiveProvider) {
+    const userWithKeys = await prisma.user.findUnique({
+      where: { id: session!.user!.id },
+      include: { adminAiKeys: true },
+    });
+    const resolved = resolveBestKey(userWithKeys, effectiveProvider);
+    if (resolved) effectiveApiKey = resolved.key;
+  }
+
   try {
     const out = await suggestQuestionDetailsWithMeta(body, { 
       preferredProvider: effectiveProvider,
-      customApiKey,
+      customApiKey: effectiveApiKey,
       customModel,
     });
     return NextResponse.json({

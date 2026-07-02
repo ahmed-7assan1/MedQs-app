@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 import { extractQuestionsFromTextByModeWithMeta, validateQuestionsWithMeta } from "@/lib/gemini";
 import { generateAIReplyWithFallback } from "@/lib/ai-router";
 import { redisIncrWithExpire } from "@/lib/redis";
+import { resolveBestKey } from "@/lib/byok-resolver";
 
 export const maxDuration = 60; // 60 seconds max duration for Vercel Hobby
 
@@ -44,6 +46,17 @@ export async function POST(req: NextRequest) {
   const site = await getCfg().catch(() => null);
   const effectiveProvider =
     normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
+
+  let effectiveApiKey = customApiKey;
+  if (!effectiveApiKey && effectiveProvider) {
+    const userWithKeys = await prisma.user.findUnique({
+      where: { id: session!.user!.id },
+      include: { adminAiKeys: true },
+    });
+    const resolved = resolveBestKey(userWithKeys, effectiveProvider);
+    if (resolved) effectiveApiKey = resolved.key;
+  }
+
   if (!file) return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
 
   if (file.size > 35 * 1024 * 1024)
@@ -72,8 +85,8 @@ export async function POST(req: NextRequest) {
           images: [{ mimeType: file.type || "image/png", data: buffer.toString("base64") }],
           personalKey: ocrKey,
           customModel: ocrModel,
-          useCustomKey: useOcrKey,
-          customProvider: useOcrKey ? "gemini" : undefined,
+          useCustomKey: !!ocrKey,
+          customProvider: ocrKey ? "gemini" : undefined,
         });
         if (row.text && row.text.trim().length > 20) {
            text = row.text.trim();
@@ -85,8 +98,8 @@ export async function POST(req: NextRequest) {
           pdfs: [{ mimeType: "application/pdf", data: buffer.toString("base64") }],
           personalKey: ocrKey,
           customModel: ocrModel,
-          useCustomKey: useOcrKey,
-          customProvider: useOcrKey ? "gemini" : undefined,
+          useCustomKey: !!ocrKey,
+          customProvider: ocrKey ? "gemini" : undefined,
         });
         if (row.text && row.text.trim().length > 20) {
            text = row.text.trim();
@@ -123,7 +136,7 @@ export async function POST(req: NextRequest) {
   try {
     const extracted = await extractQuestionsFromTextByModeWithMeta(text, questionMode as any, {
       preferredProvider: effectiveProvider,
-      customApiKey,
+      customApiKey: effectiveApiKey,
       customModel,
     });
     // Validation is a second AI pass; skip on large/slow requests to reduce timeout risk.
@@ -134,7 +147,7 @@ export async function POST(req: NextRequest) {
           extracted.data.questions.map((q) => ({ body: q.body, answer: q.answer })),
           { 
             preferredProvider: effectiveProvider,
-            customApiKey,
+            customApiKey: effectiveApiKey,
             customModel,
           }
         )

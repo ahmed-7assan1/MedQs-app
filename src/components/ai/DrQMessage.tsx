@@ -45,6 +45,7 @@ import { ResourcesBottomSheet, type ResourceItem } from "./ResourcesBottomSheet"
 import toast from "react-hot-toast";
 import { edgeTTS } from "@/lib/tts";
 import { EDGE_TTS_ARABIC_VOICES, type EdgeTTSVoice } from "./edgeTTSVoices";
+import { AnimatedThinking } from "./AnimatedThinking";
 
 interface MessageProps {
   message: ChatMessage;
@@ -352,24 +353,19 @@ const DrQMessageInner: React.FC<MessageProps> = ({
         )}
 
         {message.isStreaming && !message.content ? (
-          <div className="flex items-center gap-1.5 py-4">
-            <span
-              className="text-sm font-bold"
-              style={{ color: "#505050" }}
-            >
-              Thinking
-            </span>
+          <div className="flex items-center gap-2 py-4">
             <div className="flex gap-0.5">
               {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
-                  className="w-1 h-1 rounded-full"
+                  className="w-1.5 h-1.5 rounded-full"
                   style={{ backgroundColor: "#505050" }}
                   animate={{ opacity: [0.2, 1, 0.2] }}
                   transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.25, ease: "easeInOut" }}
                 />
               ))}
             </div>
+            <AnimatedThinking className="text-sm font-bold" />
           </div>
         ) : (
           <div className="relative">
@@ -707,6 +703,7 @@ function ImageGallerySection({ directUrls, searchTopics }: { directUrls: string[
   type GalleryImg = { url: string; fallbacks: string[] };
   const [galleryImages, setGalleryImages] = useState<GalleryImg[]>([]);
   const [loading, setLoading] = useState(searchTopics.length > 0);
+  const [searchDone, setSearchDone] = useState(false);
 
   useEffect(() => {
     const direct: GalleryImg[] = directUrls.map(u => ({
@@ -716,6 +713,7 @@ function ImageGallerySection({ directUrls, searchTopics }: { directUrls: string[
 
     if (searchTopics.length === 0) {
       setGalleryImages(direct);
+      setSearchDone(true);
       return;
     }
 
@@ -723,7 +721,7 @@ function ImageGallerySection({ directUrls, searchTopics }: { directUrls: string[
     Promise.all(searchTopics.map(topic =>
       fetch(`/api/v1/images/search?q=${encodeURIComponent(topic)}&max=4`)
         .then(r => r.json())
-        .then(data => (data.images || []).map((img: any) => img.url))
+        .then(data => data.images || [])
         .catch(() => [])
     )).then((results) => {
       if (cancelled) return;
@@ -733,7 +731,8 @@ function ImageGallerySection({ directUrls, searchTopics }: { directUrls: string[
       }));
       setGalleryImages([...direct, ...searched]);
       setLoading(false);
-    }).catch(() => { if (!cancelled) setLoading(false); });
+      setSearchDone(true);
+    }).catch(() => { if (!cancelled) { setLoading(false); setSearchDone(true); } });
 
     return () => { cancelled = true; };
   }, [directUrls, searchTopics]);
@@ -741,7 +740,11 @@ function ImageGallerySection({ directUrls, searchTopics }: { directUrls: string[
   const handleImgError = useCallback((_e: React.SyntheticEvent<HTMLImageElement>, idx: number) => {
     setGalleryImages(prev => {
       const img = prev[idx];
-      if (!img || img.fallbacks.length === 0) return prev;
+      if (!img) return prev;
+      if (img.fallbacks.length === 0) {
+        const next = prev.filter((_, i) => i !== idx);
+        return next;
+      }
       const [nextUrl, ...rest] = img.fallbacks;
       const next = [...prev];
       next[idx] = { url: nextUrl, fallbacks: rest };
@@ -765,6 +768,13 @@ function ImageGallerySection({ directUrls, searchTopics }: { directUrls: string[
   }
 
   const validImages = galleryImages.map(g => g.url).filter(Boolean);
+  if (validImages.length === 0 && searchDone) {
+    return (
+      <div className="flex items-center gap-2 py-2 text-xs text-slate-400 dark:text-white/40 font-medium italic">
+        <WarningCircle size={14} weight="bold" /> No images available for this topic
+      </div>
+    );
+  }
   if (validImages.length === 0) return null;
   return <AiImageGallery images={validImages} onError={handleImgError} />;
 }
@@ -774,8 +784,43 @@ function ImageGallerySection({ directUrls, searchTopics }: { directUrls: string[
 function AiImageGallery({ images, onError }: { images: string[]; onError?: (e: React.SyntheticEvent<HTMLImageElement>, idx: number) => void }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [loadedMap, setLoadedMap] = useState<Record<number, boolean>>({});
 
   const open = (i: number) => { setActiveIdx(i); setLightboxOpen(true); };
+
+  const handleLoad = (i: number) => {
+    setLoadedMap(prev => ({ ...prev, [i]: true }));
+  };
+
+  const imgRefs = useRef<Record<number, { timeout: ReturnType<typeof setTimeout> | null }>>({});
+
+  const clearImgTimeout = (i: number) => {
+    if (imgRefs.current[i]?.timeout) {
+      clearTimeout(imgRefs.current[i].timeout);
+      imgRefs.current[i].timeout = null;
+    }
+  };
+
+  const imgProps = (url: string, i: number) => ({
+    src: url,
+    alt: `Generated image ${i + 1}`,
+    loading: "lazy" as const,
+    referrerPolicy: "no-referrer" as const,
+    onLoad: () => { clearImgTimeout(i); handleLoad(i); },
+    onError: (e: React.SyntheticEvent<HTMLImageElement>) => { clearImgTimeout(i); onError?.(e, i); },
+  });
+
+  const handleImgRef = (el: HTMLImageElement | null, i: number) => {
+    if (!el) return;
+    clearImgTimeout(i);
+    imgRefs.current[i] = {
+      timeout: setTimeout(() => {
+        if (!loadedMap[i]) {
+          onError?.(new Event('timeout') as unknown as React.SyntheticEvent<HTMLImageElement>, i);
+        }
+      }, 15000),
+    };
+  };
 
   if (images.length === 1) {
     return (
@@ -785,18 +830,19 @@ function AiImageGallery({ images, onError }: { images: string[]; onError?: (e: R
           animate={{ opacity: 1, y: 0 }}
           className="relative group rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-lg max-w-xl"
         >
+          {!loadedMap[0] && (
+            <div className="aspect-video rounded-2xl bg-slate-200 dark:bg-white/5 animate-pulse" />
+          )}
           <img
-            src={images[0]}
-            alt="AI generated image"
-            className="w-full h-auto object-cover cursor-pointer transition-transform duration-500 group-hover:scale-[1.02]"
+            {...imgProps(images[0], 0)}
+            ref={(el) => handleImgRef(el, 0)}
+            className={`w-full h-auto object-cover cursor-pointer transition-transform duration-500 group-hover:scale-[1.02] ${loadedMap[0] ? 'block' : 'hidden'}`}
             onClick={() => open(0)}
-            loading="lazy"
-            onError={(e) => onError?.(e, 0)}
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+          <div className={`absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none ${loadedMap[0] ? 'block' : 'hidden'}`} />
           <button
             onClick={() => open(0)}
-            className="absolute top-3 right-3 p-2 rounded-xl bg-black/40 backdrop-blur-sm text-white/80 opacity-0 group-hover:opacity-100 transition-all hover:bg-black/60"
+            className={`absolute top-3 right-3 p-2 rounded-xl bg-black/40 backdrop-blur-sm text-white/80 opacity-0 group-hover:opacity-100 transition-all hover:bg-black/60 ${loadedMap[0] ? 'block' : 'hidden'}`}
           >
             <ImageIcon size={16} weight="bold" />
           </button>
@@ -826,15 +872,16 @@ function AiImageGallery({ images, onError }: { images: string[]; onError?: (e: R
             className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-md aspect-square cursor-pointer"
             onClick={() => open(i)}
           >
+            {!loadedMap[i] && (
+              <div className="absolute inset-0 rounded-xl bg-slate-200 dark:bg-white/5 animate-pulse" />
+            )}
             <img
-              src={url}
-              alt={`Generated image ${i + 1}`}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              loading="lazy"
-              onError={(e) => onError?.(e, i)}
+              {...imgProps(url, i)}
+              ref={(el) => handleImgRef(el, i)}
+              className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${loadedMap[i] ? 'block' : 'hidden'}`}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold">
+            <div className={`absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity ${loadedMap[i] ? 'block' : 'hidden'}`} />
+            <div className={`absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold ${loadedMap[i] ? 'block' : 'hidden'}`}>
               {i + 1}/{images.length}
             </div>
           </motion.div>
@@ -926,6 +973,7 @@ function Lightbox({ images, activeIdx, isOpen, onClose, onPrev, onNext, onError 
               alt={`Image ${activeIdx + 1}`}
               className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl"
               draggable={false}
+              referrerPolicy="no-referrer"
               onError={(e) => onError?.(e, activeIdx)}
             />
           </motion.div>

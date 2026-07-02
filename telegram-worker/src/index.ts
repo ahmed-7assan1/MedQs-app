@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { createBot } from "./lib";
 import { setSql, initDb } from "./lib/helpers";
+import { callAI, PROVIDER_MODELS } from "./lib/ai";
 import postgres from "postgres";
 
 type Bindings = {
@@ -140,5 +141,107 @@ app.options("/api/files/preview", (c) => new Response(null, {
     "Access-Control-Max-Age": "86400",
   },
 }));
+
+// ─── JWT Auth Middleware ────────────────────────────────────────────────
+
+async function jwtMiddleware(c: any, next: any) {
+  const authHeader = c.req.header("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return c.json({ error: "Missing or invalid Authorization header" }, 401);
+  }
+  const token = authHeader.slice(7);
+  const secret = c.env.WORKER_JWT_SECRET;
+  if (!secret) {
+    console.warn("WORKER_JWT_SECRET not set, skipping JWT validation");
+    return next();
+  }
+  try {
+    const encoder = new TextEncoder();
+    const parts = token.split(".");
+    if (parts.length !== 3) throw new Error("Invalid JWT format");
+    const data = `${parts[0]}.${parts[1]}`;
+    const signature = Uint8Array.from(atob(parts[2].replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+    const key = await crypto.subtle.importKey(
+      "raw", encoder.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false, ["verify"]
+    );
+    const valid = await crypto.subtle.verify("HMAC", key, signature, encoder.encode(data));
+    if (!valid) throw new Error("Invalid signature");
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    c.set("jwtPayload", payload);
+    return next();
+  } catch (e: any) {
+    return c.json({ error: "Invalid JWT token" }, 401);
+  }
+}
+
+// ─── AI Routes ──────────────────────────────────────────────────────────
+
+app.post("/v1/generate", jwtMiddleware, async (c) => {
+  try {
+    const { provider, model, messages, apiKey, temperature, maxTokens } = await c.req.json();
+
+    if (!provider || !model || !messages) {
+      return c.json({ error: "Missing required fields: provider, model, messages" }, 400);
+    }
+
+    const cfg = PROVIDER_MODELS[provider];
+    if (!cfg) {
+      return c.json({ error: `Unknown provider: ${provider}` }, 400);
+    }
+
+    const key = apiKey || c.env[`${provider.toUpperCase()}_API_KEY`];
+    if (!key) {
+      return c.json({ error: `No API key available for ${provider}` }, 400);
+    }
+
+    const result = await callAI(provider, key, model, cfg.baseURL, messages, undefined, maxTokens);
+    return c.json({ content: result });
+  } catch (e: any) {
+    console.error("/v1/generate error:", e);
+    return c.json({ error: e.message || "Internal error" }, 500);
+  }
+});
+
+app.post("/v1/test-key", jwtMiddleware, async (c) => {
+  try {
+    const { provider, apiKey } = await c.req.json();
+    if (!provider || !apiKey) {
+      return c.json({ valid: false, error: "Missing provider or apiKey" }, 400);
+    }
+
+    const cfg = PROVIDER_MODELS[provider];
+    if (!cfg) {
+      return c.json({ valid: false, error: `Unknown provider: ${provider}` });
+    }
+
+    const testMessages = [{ role: "user", content: "Respond with exactly: OK" }];
+    const result = await callAI(provider, apiKey, cfg.model, cfg.baseURL, testMessages);
+
+    if (result && !result.startsWith("❌")) {
+      return c.json({ valid: true });
+    }
+    return c.json({ valid: false, error: "Key test failed: unexpected response" });
+  } catch (e: any) {
+    return c.json({ valid: false, error: e.message || "Key validation failed" });
+  }
+});
+
+app.get("/v1/models", jwtMiddleware, async (c) => {
+  const provider = c.req.query("provider");
+  if (provider) {
+    const cfg = PROVIDER_MODELS[provider];
+    if (!cfg) {
+      return c.json({ error: `Unknown provider: ${provider}` }, 400);
+    }
+    return c.json({ models: [cfg.model] });
+  }
+  const allModels: Record<string, string[]> = {};
+  for (const [p, cfg] of Object.entries(PROVIDER_MODELS)) {
+    allModels[p] = [cfg.model];
+  }
+  return c.json({ models: allModels });
+});
 
 export default app;

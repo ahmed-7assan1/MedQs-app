@@ -19,7 +19,7 @@ Instructions:
 - Founder LinkedIn: https://www.linkedin.com/in/a7medm7assan
 - Contact WhatsApp: +201093510425`;
 
-const PROVIDER_MODELS: Record<string, { model: string; baseURL: string }> = {
+export const PROVIDER_MODELS: Record<string, { model: string; baseURL: string }> = {
   gemini: { model: "gemini-2.0-flash", baseURL: "https://generativelanguage.googleapis.com" },
   groq: { model: "llama-3.3-70b-versatile", baseURL: "https://api.groq.com/openai/v1" },
   openrouter: { model: "openrouter/free", baseURL: "https://openrouter.ai/api/v1" },
@@ -29,15 +29,22 @@ const PROVIDER_MODELS: Record<string, { model: string; baseURL: string }> = {
   xai: { model: "grok-2", baseURL: "https://api.x.ai/v1" },
   huggingface: { model: "meta-llama/Llama-3.3-70B-Instruct", baseURL: "https://api-inference.huggingface.co/v1" },
   mistral: { model: "mistral-large-latest", baseURL: "https://api.mistral.ai/v1" },
+  openai: { model: "gpt-4o-mini", baseURL: "https://api.openai.com/v1" },
+  anthropic: { model: "claude-3-5-sonnet-20240620", baseURL: "https://api.anthropic.com/v1" },
+  together: { model: "meta-llama/Llama-3.3-70B-Instruct-Turbo", baseURL: "https://api.together.xyz/v1" },
+  cloudflare: { model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", baseURL: "https://api.cloudflare.com/client/v4/accounts" },
+  cerebras: { model: "llama-3.3-70b", baseURL: "https://api.cerebras.ai/v1" },
+  github: { model: "gpt-4o", baseURL: "https://models.github.ai/inference" },
 };
 
-async function callAI(
+export async function callAI(
   provider: string,
   apiKey: string,
   model: string,
   baseURL: string,
   messages: { role: string; content: string }[],
-  media?: { data: string; mimeType: string }
+  media?: { data: string; mimeType: string },
+  maxTokens?: number
 ): Promise<string> {
   if (provider === "gemini") {
     const url = `${baseURL}/v1beta/models/${model}:generateContent?key=${apiKey}`;
@@ -100,7 +107,7 @@ async function callAI(
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({ model, messages }),
+    body: JSON.stringify({ model, messages, ...(maxTokens ? { max_tokens: maxTokens } : {}) }),
   });
   const data: any = await res.json();
   if (!res.ok) throw new Error(data?.error?.message ?? "API error");
