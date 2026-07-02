@@ -4,8 +4,28 @@ export type SearchResult = {
   index: number;
 };
 
+const ARABIC_STOP_WORDS = new Set([
+  "في", "من", "على", "الى", "إلى", "عن", "أن", "إن", "هذا", "هذه", "ذلك",
+  "التي", "الذي", "كان", "يكون", "أو", "لا", "ما", "لم", "لن", "له", "لها",
+  "هم", "هن", "كانت", "مع", "كل", "قد", "غير", "اذا", "إذا", "ثم", "حتى",
+  "بين", "تحت", "فوق", "هو", "هي", "هل", "لقد", "ذلك", "تلك", "هؤلاء",
+  "الذين", "اللذين", "اللواتي", "اللائي", "به", "بها", "لهم", "لهن",
+  "فيه", "فيها", "منه", "منها", "عليه", "عليها", "عنه", "عنها",
+]);
+
+function normalizeArabic(word: string): string {
+  return word
+    .replace(/[إأآا]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[\u064B-\u065F]/g, "");
+}
+
 function tokenize(text: string): string[] {
-  return text.toLowerCase().split(/[\s\p{P}]+/u).filter(Boolean);
+  return text.toLowerCase().split(/[\s\p{P}]+/u)
+    .filter(Boolean)
+    .map((t) => normalizeArabic(t))
+    .filter((t) => !ARABIC_STOP_WORDS.has(t));
 }
 
 function bm25(
