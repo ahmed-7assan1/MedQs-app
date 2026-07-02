@@ -120,6 +120,21 @@ export default async function DashboardPage() {
     }
   } catch (_) {}
 
+  // Optimise profile image URL for display quality
+  let userImage = dbUser?.image || null;
+  if (userImage) {
+    if (userImage.includes("lh3.googleusercontent.com")) {
+      // Google OAuth avatars default to s96-c (96x96). Bump to 512px.
+      userImage = userImage.replace(/=s\d+(-c)?/, "=s512-c");
+    } else if (userImage.includes("res.cloudinary.com")) {
+      // Insert Cloudinary transformations for quality + size
+      userImage = userImage.replace(
+        /\/image\/upload\//,
+        "/image/upload/w_320,q_auto:best/"
+      );
+    }
+  }
+
   const dashboardData: DashboardData = {
     firstName,
     greeting,
@@ -136,7 +151,7 @@ export default async function DashboardPage() {
     progressToNext,
     isProfileIncomplete,
     ads: ads.length ? ads : undefined,
-    userImage: dbUser?.image || null,
+    userImage,
   };
 
   return <DashboardShell data={dashboardData} />;

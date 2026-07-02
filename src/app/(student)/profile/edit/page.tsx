@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Save, Loader2, User, Phone, BookOpen, Palette, Send, Sparkles, ShieldCheck, ChevronLeft, Camera, Trash2, LogOut, ShieldAlert, Cpu, CircleCheck, XCircle } from "lucide-react";
 import { useThemeStore } from "@/lib/store";
@@ -53,7 +53,9 @@ function EditProfileContent() {
     personalGithubKey: "",
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const originalAvatarRef = useRef<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const originalCoverRef = useRef<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [telegramVerified, setTelegramVerified] = useState(false);
@@ -151,7 +153,9 @@ function EditProfileContent() {
             personalGithubKey: me.personalGithubKey ?? "",
           });
           setAvatarUrl(me.image ?? null);
+          originalAvatarRef.current = me.image ?? null;
           setCoverUrl(me.coverImage ?? null);
+          originalCoverRef.current = me.coverImage ?? null;
           setTelegramVerified(me.telegramVerified ?? false);
           setSelectedUni(me.universityId ?? "");
           setSelectedFaculty(me.facultyId ?? "");
@@ -230,24 +234,29 @@ function EditProfileContent() {
       let finalAvatarUrl = avatarUrl;
       let finalCoverUrl = coverUrl;
 
-      // Upload avatar if changed
-      if (avatarFile) {
-        const res = await uploadFiles("avatar", { files: [avatarFile] });
-        if (res?.[0]?.url) {
-           finalAvatarUrl = res[0].url;
-           await fetch("/api/v1/auth/avatar-url", {
-             method: "POST",
-             headers: { "Content-Type": "application/json" },
-             body: JSON.stringify({ url: finalAvatarUrl }),
-           });
+      // Save avatar if changed (already uploaded to UploadThing during crop)
+      if (avatarUrl && avatarUrl !== originalAvatarRef.current) {
+        const res = await fetch("/api/v1/auth/avatar-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: avatarUrl }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          finalAvatarUrl = data.url;
         }
       }
 
-      // Upload cover if changed
-      if (coverFile) {
-        const res = await uploadFiles("avatar", { files: [coverFile] });
-        if (res?.[0]?.url) {
-           finalCoverUrl = res[0].url;
+      // Save cover if changed (already uploaded to UploadThing during crop)
+      if (coverUrl && coverUrl !== originalCoverRef.current) {
+        const res = await fetch("/api/v1/auth/cover-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: coverUrl }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          finalCoverUrl = data.url;
         }
       }
 

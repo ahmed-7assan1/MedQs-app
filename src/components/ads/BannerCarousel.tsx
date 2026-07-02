@@ -80,7 +80,7 @@ export function BannerCarousel({ ads }: BannerCarouselProps) {
   );
 
   return (
-    <div className="relative w-full h-[180px] md:h-[220px] lg:h-[280px] rounded-2xl overflow-hidden shadow-lg bg-muted">
+    <div className="relative w-full h-[180px] md:h-[220px] lg:h-[280px] rounded-t-2xl overflow-hidden bg-muted">
       {ad.linkUrl ? (
         <Link href={ad.linkUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
           {inner}

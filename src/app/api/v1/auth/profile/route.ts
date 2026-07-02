@@ -3,7 +3,6 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { syncFileToTelegram } from "@/lib/telegram-storage";
 import { getFacultyPrefix, getUniqueUniAbbr } from "@/lib/telegram-auth";
 import { encryptKey } from "@/lib/encryption";
 
@@ -146,13 +145,6 @@ export async function PUT(req: NextRequest) {
       const facultyPrefix = getFacultyPrefix(faculty.category);
       const yearSuffix = new Date().getFullYear().toString().slice(-2);
       studentCode = `${uniAbbr}${facultyPrefix}${yearSuffix}-${resolvedStudentId}-${finalPhone}`;
-    }
-  }
-
-  if (parsed.data.coverImage && !parsed.data.coverImage.includes("/api/v1/files/telegram")) {
-    const tgSync = await syncFileToTelegram(parsed.data.coverImage, "cover.jpg", "image/jpeg");
-    if (tgSync?.fileId) {
-      parsed.data.coverImage = `/api/v1/files/telegram/cover?fileId=${tgSync.fileId}`;
     }
   }
 

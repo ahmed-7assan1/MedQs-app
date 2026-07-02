@@ -8,6 +8,7 @@ import { useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { BannerCarousel } from "@/components/ads/BannerCarousel";
 import { NAV_ITEMS } from "@/components/layout/FloatingIslandNavbar";
+import { useDominantColor } from "@/hooks/use-dominant-color";
 import type { DashboardData } from "@/types/dashboard";
 
 function getInitials(name: string): string {
@@ -27,6 +28,9 @@ export function ProfileCoverSection({ data, hasAds }: { data: DashboardData; has
   const initials = getInitials(data.firstName);
   const showImage = !!data.userImage;
 
+  const bannerImageUrl = hasAds && data.ads?.[0]?.imageUrl || null;
+  const dominantColor = useDominantColor(bannerImageUrl);
+
   const avatar = (
     <div className="relative h-[100px] w-[100px] md:h-[120px] md:w-[120px] lg:h-40 lg:w-40 rounded-full border-4 border-background shadow-xl">
       {showImage ? (
@@ -34,6 +38,9 @@ export function ProfileCoverSection({ data, hasAds }: { data: DashboardData; has
           src={data.userImage!}
           alt={data.firstName}
           fill
+          priority
+          sizes="(max-width: 768px) 100px, (max-width: 1024px) 120px, 160px"
+          quality={95}
           className="rounded-full object-cover"
         />
       ) : (
@@ -49,8 +56,20 @@ export function ProfileCoverSection({ data, hasAds }: { data: DashboardData; has
       {hasAds && data.ads ? (
         <BannerCarousel ads={data.ads} />
       ) : (
-        <div className="w-full h-[180px] md:h-[220px] lg:h-[280px] rounded-2xl bg-gradient-to-br from-primary/30 via-accent/20 to-background border border-border/40 shadow-lg" />
+        <div className="w-full h-[180px] md:h-[220px] lg:h-[280px] rounded-t-2xl bg-gradient-to-br from-primary/30 via-accent/20 to-background" />
       )}
+
+      {/* Dynamic glow behind content */}
+      <div
+        className="pointer-events-none absolute z-0 transition-all duration-1000"
+        style={{
+          top: "60%",
+          insetInline: "5%",
+          height: "40%",
+          background: `radial-gradient(ellipse 80% 60% at 50% 0%, ${dominantColor === "transparent" ? "transparent" : dominantColor.replace("rgb", "rgba").replace(")", ",0.35)")} 0%, transparent 70%)`,
+          opacity: dominantColor === "transparent" ? 0 : 1,
+        }}
+      />
 
       {/* Theme toggle — top-right corner */}
       <button
