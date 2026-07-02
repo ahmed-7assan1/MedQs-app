@@ -630,7 +630,7 @@ export async function POST(req: NextRequest) {
       specializedModel
     );
 
-  let personalContext = isLab ? "" : await buildStudentContext(userId, message).catch(() => "");
+  let personalContext = isLab ? "" : await buildStudentContext(userId, message, user).catch(() => "");
   
   const siteContext = siteData 
     ? `### Platform Information (${siteData.siteConfig?.siteName ?? "MedOneX"}):

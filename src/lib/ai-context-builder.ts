@@ -30,11 +30,19 @@ export function detectTiers(message: string): ContextTier[] {
 export async function buildStudentContext(
   userId: string,
   message?: string,
+  existingUser?: {
+    name: string | null;
+    semesterId: string | null;
+    points: number;
+    semester: { name: string; id: string } | null;
+    university: { name: string } | null;
+    rank: { label: string } | null;
+  },
 ): Promise<string> {
   const tiers = message ? detectTiers(message) : ["syllabus", "quiz"];
   const parts: string[] = [];
 
-  const user = await prisma.user.findUnique({
+  const user = existingUser ?? await prisma.user.findUnique({
     where: { id: userId },
     include: {
       university: { select: { name: true } },

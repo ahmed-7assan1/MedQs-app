@@ -508,6 +508,7 @@ model QuizAttemptItem {
   question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@index([attemptId])
+  @@index([attemptId, isCorrect])
   @@index([questionId])
 }
 
