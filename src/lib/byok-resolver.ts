@@ -1,6 +1,10 @@
 import { decryptKey } from "@/lib/encryption";
 import { getKeyField } from "@/lib/providers";
 
+function looksEncrypted(value: string): boolean {
+  return value.startsWith("{") && value.includes('"encrypted"') && value.includes('"iv"') && value.includes('"tag"');
+}
+
 export type KeySource = "user" | "admin" | "site";
 
 export interface ResolvedKey {
@@ -25,13 +29,15 @@ export function resolveBestKey(
   if (keyField) {
     const rawKey = user[keyField] as string | undefined | null;
     if (rawKey) {
-      try {
-        const decrypted = decryptKey(rawKey);
-        return { key: decrypted, source: "user" };
-      } catch {
-        // If it's not encrypted (legacy), return as-is
-        return { key: rawKey, source: "user" };
+      if (looksEncrypted(rawKey)) {
+        try {
+          const decrypted = decryptKey(rawKey);
+          return { key: decrypted, source: "user" };
+        } catch {
+          return null;
+        }
       }
+      return { key: rawKey, source: "user" };
     }
   }
 
@@ -40,12 +46,15 @@ export function resolveBestKey(
     const adminKeyField = `encrypted${provider.charAt(0).toUpperCase() + provider.slice(1)}Key`;
     const adminRaw = user.adminAiKeys[adminKeyField] as string | undefined | null;
     if (adminRaw) {
-      try {
-        const decrypted = decryptKey(adminRaw);
-        return { key: decrypted, source: "admin" };
-      } catch {
-        return { key: adminRaw, source: "admin" };
+      if (looksEncrypted(adminRaw)) {
+        try {
+          const decrypted = decryptKey(adminRaw);
+          return { key: decrypted, source: "admin" };
+        } catch {
+          return null;
+        }
       }
+      return { key: adminRaw, source: "admin" };
     }
   }
 
