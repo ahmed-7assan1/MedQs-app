@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { syncFileToTelegram } from "@/lib/telegram-storage";
 import { getFacultyPrefix, getUniqueUniAbbr } from "@/lib/telegram-auth";
+import { encryptKey } from "@/lib/encryption";
 
 const optionalSocialUrl = z
   .union([z.string(), z.null(), z.undefined()])
@@ -156,13 +157,19 @@ export async function PUT(req: NextRequest) {
   }
 
   // Handle key overrides for masked keys (ignore overwrite if client sent '••••••••')
-  const geminiKey = parsed.data.personalGeminiKey === "••••••••" ? current?.personalGeminiKey : parsed.data.personalGeminiKey;
-  const openaiKey = parsed.data.personalOpenAIKey === "••••••••" ? current?.personalOpenAIKey : parsed.data.personalOpenAIKey;
-  const groqKey = parsed.data.personalGroqKey === "••••••••" ? current?.personalGroqKey : parsed.data.personalGroqKey;
-  const openrouterKey = parsed.data.personalOpenRouterKey === "••••••••" ? current?.personalOpenRouterKey : parsed.data.personalOpenRouterKey;
-  const xaiKey = parsed.data.personalXAIKey === "••••••••" ? current?.personalXAIKey : parsed.data.personalXAIKey;
-  const anthropicKey = parsed.data.personalAnthropicKey === "••••••••" ? current?.personalAnthropicKey : parsed.data.personalAnthropicKey;
-  const siliconflowKey = parsed.data.personalSiliconFlowKey === "••••••••" ? current?.personalSiliconFlowKey : parsed.data.personalSiliconFlowKey;
+  // Encrypt new keys at rest — existing encrypted keys are preserved when masked
+  const maybeEncrypt = (raw: string | null | undefined, existing: string | null | undefined): string | null | undefined => {
+    if (raw === "••••••••" || raw === undefined) return existing;
+    if (!raw || !raw.trim()) return null;
+    return encryptKey(raw.trim());
+  };
+  const geminiKey = maybeEncrypt(parsed.data.personalGeminiKey, current?.personalGeminiKey);
+  const openaiKey = maybeEncrypt(parsed.data.personalOpenAIKey, current?.personalOpenAIKey);
+  const groqKey = maybeEncrypt(parsed.data.personalGroqKey, current?.personalGroqKey);
+  const openrouterKey = maybeEncrypt(parsed.data.personalOpenRouterKey, current?.personalOpenRouterKey);
+  const xaiKey = maybeEncrypt(parsed.data.personalXAIKey, current?.personalXAIKey);
+  const anthropicKey = maybeEncrypt(parsed.data.personalAnthropicKey, current?.personalAnthropicKey);
+  const siliconflowKey = maybeEncrypt(parsed.data.personalSiliconFlowKey, current?.personalSiliconFlowKey);
 
   // Remove verificationCode from data before passing to update
   const { verificationCode: _, ...updateData } = parsed.data;
