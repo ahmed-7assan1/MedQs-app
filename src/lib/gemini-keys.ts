@@ -3,6 +3,7 @@ const DAILY_QUOTA_COOLDOWN_MS = 86_400_000; // 24 hours
 const STORAGE_KEY = "medqs-gemini-cooldown-v1";
 
 const geminiQuotaExhaustedAt = new Map<string, { at: number; reason: "rate" | "daily" }>();
+let roundRobinIndex = 0;
 
 // Restore from localStorage on module load
 try {
@@ -72,7 +73,11 @@ export async function getGeminiApiKeys(personalKey?: string, strictPersonal = fa
   allKeys.push(...envKeys);
   if (allKeys.length === 0) return [];
   const fresh = allKeys.filter((k) => isKeyFresh(k));
-  return fresh.length > 0 ? fresh : allKeys;
+  const pool = fresh.length > 0 ? fresh : allKeys;
+  if (pool.length <= 1) return pool;
+  const start = roundRobinIndex % pool.length;
+  roundRobinIndex = (roundRobinIndex + 1) % pool.length;
+  return [...pool.slice(start), ...pool.slice(0, start)];
 }
 
 export async function callGeminiWithRetry<T>(
