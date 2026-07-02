@@ -200,6 +200,8 @@ model Lecture {
   order         Int                   @default(0)
   subjectId     String
   notesMarkdown String?
+  extractedText String?               @db.Text
+  searchVector  Unsupported("tsvector")?
   extras        Json?
   uiConfig      Json?
   teamId        String?
@@ -217,6 +219,7 @@ model Lecture {
   activities    UserLectureActivity[]
 
   @@index([teamId])
+  @@index([searchVector], type: Gin)
 }
 
 model Checklist {

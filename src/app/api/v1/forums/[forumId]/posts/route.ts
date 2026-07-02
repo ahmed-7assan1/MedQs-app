@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { redisIncrWithExpire } from "@/lib/redis";
+import { defer } from "@/lib/defer";
 import { loadForumPostsForUser } from "@/lib/forum-posts";
 import { unstable_cache } from "next/cache";
 
@@ -246,25 +247,22 @@ export async function POST(
       }
     }
 
-    // Log engagement points (fire-and-forget)
-    prisma.engagementLog
-      .create({ data: { userId, action: "post", points: 5 } })
-      .catch(() => {});
-    prisma.user
-      .update({ where: { id: userId }, data: { points: { increment: 5 } } })
-      .catch(() => {});
-
     const returnPost = { ...post, likedByMe: false };
 
-    // --- Firebase Real-time Mirroring ---
-    try {
-      const { adminDb } = await import("@/lib/firebase/admin");
-      // Clean up dates for Firestore JSON compatibility
-      const firestorePost = JSON.parse(JSON.stringify(returnPost));
-      await adminDb.doc(`forums/${forumId}/posts/${post.id}`).set(firestorePost);
-    } catch (firebaseErr) {
-      console.error("[POST-API] Firestore sync failed:", firebaseErr);
-    }
+    // Defer engagement logging + Firestore sync (don't block the response)
+    defer(async () => {
+      await Promise.allSettled([
+        prisma.engagementLog.create({ data: { userId, action: "post", points: 5 } }),
+        prisma.user.update({ where: { id: userId }, data: { points: { increment: 5 } } }),
+      ]);
+      try {
+        const { adminDb } = await import("@/lib/firebase/admin");
+        const firestorePost = JSON.parse(JSON.stringify(returnPost));
+        await adminDb.doc(`forums/${forumId}/posts/${post.id}`).set(firestorePost);
+      } catch (firebaseErr) {
+        console.error("[POST-API] Firestore sync failed:", firebaseErr);
+      }
+    });
 
     return NextResponse.json(returnPost, { status: 201 });
   } catch (err: any) {

@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { verifyMobileToken } from '@/lib/supabase/auth-helpers';
 import { prisma } from "@/lib/prisma";
+import { redisIncrWithExpire } from "@/lib/redis";
 import {
   AIConfigurationError,
   generateAIReplyWithFallback,
@@ -17,11 +18,10 @@ import { processBotCommand, SECRET_CODE } from "@/lib/bot-commander";
 import { getCachedSiteData } from "@/lib/site-cache";
 import { searchLectureContent } from "@/lib/lecture-search";
 import {
-  pdfTextCache,
   buildCacheKey,
-  PDF_CACHE_TTL,
   telemetry,
-  type PdfCacheEntry,
+  getCachedPdfText,
+  setCachedPdfText,
 } from "@/lib/session-cache";
 
 const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 30_000;
@@ -364,6 +364,19 @@ export async function POST(req: NextRequest) {
   try { bodyJson = JSON.parse(rawBody); } catch { /* ignore */ }
   const peekMessage: string = typeof bodyJson.message === "string" ? bodyJson.message.trim() : "";
 
+  // ── Server-enforced rate limit (protects shared Gemini quota) ──
+  const isByok = !!(bodyJson as any)?.byokEnabled;
+  const rlKey = isByok ? `byok:${userId}` : `server:${userId}`;
+  const rlMax = isByok ? 100 : 20;
+  const rlWindow = isByok ? 3600 : 86400;
+  const rlCount = await redisIncrWithExpire(rlKey, rlWindow);
+  if (rlCount > rlMax) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded. Try again later." },
+      { status: 429, headers: { "Retry-After": String(isByok ? 3600 : 86400) } },
+    );
+  }
+
   if (peekMessage.includes(SECRET_CODE)) {
     // Verify the user is ADMIN (only admins can use bot commands)
     const callerRole = await prisma.user
@@ -580,25 +593,21 @@ export async function POST(req: NextRequest) {
 
       if (needExtended && files.length > 0) {
         const cacheKey = buildCacheKey(userId, lectureId);
-        const cached = pdfTextCache.get(cacheKey);
-        const cacheNow = Date.now();
+        const cached = await getCachedPdfText(cacheKey);
 
         let paragraphs: string[] | null = null;
 
-        if (cached && cacheNow - cached.lastAccessed < PDF_CACHE_TTL) {
-          cached.lastAccessed = cacheNow;
+        if (cached) {
           paragraphs = cached.paragraphs;
-          telemetry.pdfCacheHit++;
         } else if (needPdf) {
           const file = files.find((f) => f.mimeType === "application/pdf");
           if (file) {
             paragraphs = await downloadAndExtractPdf(file.url, file.name);
             if (paragraphs) {
-              pdfTextCache.set(cacheKey, {
+              await setCachedPdfText(cacheKey, {
                 paragraphs,
                 lectureId,
                 userId,
-                lastAccessed: cacheNow,
               });
               telemetry.pdfDownloaded++;
             }

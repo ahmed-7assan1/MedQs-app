@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { pdfTextCache, buildCacheKey, telemetry } from "@/lib/session-cache";
+import { buildCacheKey, clearCachedPdfText, telemetry } from "@/lib/session-cache";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -20,8 +20,7 @@ export async function POST(req: NextRequest) {
 
   if (lectureId) {
     const pdfKey = buildCacheKey(userId, lectureId);
-    pdfTextCache.delete(pdfKey);
-    telemetry.pdfCacheCleared++;
+    await clearCachedPdfText(pdfKey);
   }
 
   return NextResponse.json({ ok: true });

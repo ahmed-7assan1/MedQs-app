@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { broadcastNotification } from "@/lib/redis";
+import { defer } from "@/lib/defer";
 import { assertSemester, requireAdminWriter } from "@/lib/admin-scope";
 
 // PUT /api/v1/notifications/read-all
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
     })),
   });
 
-  await broadcastNotification(userIds, { title, body, channel: "BROADCAST" });
+  defer(() => broadcastNotification(userIds, { title, body, channel: "BROADCAST" }));
 
   return NextResponse.json({ sent: userIds.length });
 }

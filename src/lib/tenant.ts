@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { cacheGet, cacheSet } from "@/lib/redis";
 import type { AuthSession as Session } from "@/lib/auth";
 
 export type SessionScope = {
@@ -10,6 +11,8 @@ export type SessionScope = {
   isLeader: boolean;
 };
 
+const SCOPE_CACHE_TTL = 300; // 5 minutes
+
 export async function getSessionScope(session: Session | null): Promise<SessionScope | null> {
   const userId = session?.user?.id;
   if (!userId) return null;
@@ -17,12 +20,18 @@ export async function getSessionScope(session: Session | null): Promise<SessionS
   const tokenUni = (session?.user as any)?.universityId as string | undefined;
   const tokenSem = (session?.user as any)?.semesterId as string | undefined;
 
+  const cacheKey = `scope:${userId}`;
+  const cached = await cacheGet(cacheKey);
+  if (cached) {
+    return JSON.parse(cached) as SessionScope;
+  }
+
   // Prefer DB as source of truth (handles stale token fields).
   const db = await prisma.user
     .findUnique({ where: { id: userId }, select: { universityId: true, semesterId: true, facultyId: true, isLeader: true, role: true } })
     .catch(() => null);
 
-  return {
+  const scope: SessionScope = {
     userId,
     role: db?.role ?? role,
     semesterId: db?.semesterId ?? (tokenSem ?? null),
@@ -30,6 +39,15 @@ export async function getSessionScope(session: Session | null): Promise<SessionS
     facultyId: db?.facultyId ?? null,
     isLeader: db?.isLeader ?? false,
   };
+
+  await cacheSet(cacheKey, JSON.stringify(scope), SCOPE_CACHE_TTL).catch(() => {});
+
+  return scope;
+}
+
+export async function invalidateSessionScope(userId: string): Promise<void> {
+  const { cacheDel } = await import("@/lib/redis");
+  await cacheDel(`scope:${userId}`).catch(() => {});
 }
 
 export function isAdminRole(role: unknown): boolean {

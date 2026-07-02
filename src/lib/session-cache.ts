@@ -1,13 +1,13 @@
+import { cacheGet, cacheSet, cacheDel } from "@/lib/redis";
+
 export type PdfCacheEntry = {
   paragraphs: string[];
   lectureId: string;
   userId: string;
-  lastAccessed: number;
 };
 
-export const pdfTextCache = new Map<string, PdfCacheEntry>();
-export const PDF_CACHE_TTL = 30 * 60 * 1000;
-export const MAX_CACHE_SIZE = 100;
+export const PDF_CACHE_TTL_SECONDS = 1800; // 30 minutes
+const CACHE_PREFIX = "pdf:";
 
 export const telemetry = {
   pdfCacheHit: 0,
@@ -19,22 +19,21 @@ export const telemetry = {
 };
 
 export function buildCacheKey(userId: string, id: string): string {
-  return `${userId}:${id}`;
+  return `${CACHE_PREFIX}${userId}:${id}`;
 }
 
-// Periodic cleanup — only pdfTextCache now
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of pdfTextCache) {
-    if (now - entry.lastAccessed > PDF_CACHE_TTL) {
-      pdfTextCache.delete(key);
-      telemetry.pdfCacheCleared++;
-    }
-  }
-  if (pdfTextCache.size > MAX_CACHE_SIZE) {
-    const sorted = [...pdfTextCache.entries()].sort((a, b) => a[1].lastAccessed - b[1].lastAccessed);
-    for (let i = 0; i < sorted.length - MAX_CACHE_SIZE; i++) {
-      pdfTextCache.delete(sorted[i][0]);
-    }
-  }
-}, 5 * 60 * 1000);
+export async function getCachedPdfText(cacheKey: string): Promise<PdfCacheEntry | null> {
+  const raw = await cacheGet(cacheKey);
+  if (!raw) return null;
+  telemetry.pdfCacheHit++;
+  return JSON.parse(raw) as PdfCacheEntry;
+}
+
+export async function setCachedPdfText(cacheKey: string, entry: PdfCacheEntry): Promise<void> {
+  await cacheSet(cacheKey, JSON.stringify(entry), PDF_CACHE_TTL_SECONDS);
+}
+
+export async function clearCachedPdfText(cacheKey: string): Promise<void> {
+  await cacheDel(cacheKey);
+  telemetry.pdfCacheCleared++;
+}

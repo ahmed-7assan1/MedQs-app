@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "react-hot-toast";
 
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
-import { syncAllThreadsToFirestore, subscribeToThreads, deleteThreadFromFirestore } from "@/lib/firebase/firestore";
+import { saveThreadToFirestore, subscribeToThreads, deleteThreadFromFirestore } from "@/lib/firebase/firestore";
 import { getAIEndpoint } from "@/lib/api-config";
 import { getCachedResponse, setCachedResponse, getDirectReply } from "@/lib/chat-cache";
 import {
@@ -866,7 +866,9 @@ export function useDrQChat() {
   useEffect(() => {
     if (!userId || threads.length === 0 || loading) return;
     const timeoutId = setTimeout(() => {
-      syncAllThreadsToFirestore(userId, threads);
+      // Only sync the most recently updated thread instead of all threads
+      const latest = threads.toSorted((a, b) => b.updatedAt - a.updatedAt)[0];
+      saveThreadToFirestore(userId, latest);
     }, 2000);
     return () => clearTimeout(timeoutId);
   }, [threads, userId, loading]);

@@ -92,29 +92,65 @@ export async function GET(req: NextRequest) {
     modules.push({ id: m.id, label: m.name, sub: "Academic Module", href: `/modules/${m.id}`, type: "module" });
   }
 
-  const lecRows = await prisma.lecture.findMany({
-    where: {
-      title: contains,
-      ...(superUser
-        ? {}
-        : {
-            subject: { module: { semester: { academicYear: { universityId: uniId! } } } },
-          }),
-    },
-    select: {
-      id: true,
-      title: true,
-      subject: { select: { name: true, module: { select: { id: true, name: true } } } },
-    },
-    take,
-  });
+  const scopeFilter = superUser
+    ? ""
+    : `AND s."universityId" = '${uniId!}'`;
+  const lecSql = `
+    SELECT l.id, l.title, s.name AS "subjectName", m.id AS "moduleId", m.name AS "moduleName"
+    FROM "Lecture" l
+    JOIN "Subject" s ON s.id = l."subjectId"
+    JOIN "Module" m ON m.id = s."moduleId"
+    JOIN "Semester" sem ON sem.id = m."semesterId"
+    JOIN "AcademicYear" ay ON ay.id = sem."academicYearId"
+    WHERE l."searchVector" @@ plainto_tsquery('arabic', $1)
+      ${scopeFilter}
+    ORDER BY ts_rank(l."searchVector", plainto_tsquery('arabic', $1)) DESC
+    LIMIT ${take}
+  `;
+  interface LecRow {
+    id: string;
+    title: string;
+    subjectName: string;
+    moduleId: string;
+    moduleName: string;
+  }
+  let lecRows: LecRow[] = [];
+  try {
+    lecRows = await prisma.$queryRawUnsafe<LecRow[]>(lecSql, q);
+  } catch {
+    // fallback to title search if full-text fails
+  }
+  if (lecRows.length === 0) {
+    const fallbackRows = await prisma.lecture.findMany({
+      where: {
+        title: contains,
+        ...(superUser
+          ? {}
+          : {
+              subject: { module: { semester: { academicYear: { universityId: uniId! } } } },
+            }),
+      },
+      select: {
+        id: true,
+        title: true,
+        subject: { select: { name: true, module: { select: { id: true, name: true } } } },
+      },
+      take,
+    });
+    lecRows = fallbackRows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      subjectName: r.subject.name,
+      moduleId: r.subject.module?.id ?? "__none__",
+      moduleName: r.subject.module?.name ?? "General",
+    }));
+  }
   for (const l of lecRows) {
-    const mid = l.subject.module?.id ?? "__none__";
     lectures.push({
       id: l.id,
       label: l.title,
-      sub: `${l.subject.module?.name ?? "General"} · ${l.subject.name}`,
-      href: `/modules/${mid}/lectures/${l.id}`,
+      sub: `${l.moduleName} · ${l.subjectName}`,
+      href: `/modules/${l.moduleId}/lectures/${l.id}`,
       type: "lecture",
     });
   }
