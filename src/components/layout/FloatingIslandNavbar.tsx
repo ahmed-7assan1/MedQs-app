@@ -14,7 +14,7 @@ import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { useThemeStore } from "@/lib/store";
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   { href: "/dashboard-app", label: "Home", icon: Home },
   { href: "/modules", label: "Lectures", icon: BookOpen },
   { href: "/videos", label: "Videos", icon: Video },

@@ -4,7 +4,7 @@ import {
   ImagePlus, Plus, Calendar, Trash2, Edit3, Loader2, 
   ExternalLink, Eye, EyeOff, LayoutPanelTop, Search, Filter, X, Megaphone, ToggleRight, ToggleLeft
 } from "lucide-react";
-import { FileUploader } from "@/components/ui/FileUploader";
+import { BannerUploader } from "@/components/ui/BannerUploader";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
@@ -144,11 +144,8 @@ export default function AdminAdsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="aspect-[21/9] overflow-hidden rounded-xl border border-white/[0.02]">
-                   <FileUploader
-                     folder="ad"
-                     accept="image/jpeg,image/png,image/webp"
-                     maxSizeMB={10}
+                <div className="aspect-[21/9] overflow-hidden rounded-xl border border-white/[0.02] bg-background/30">
+                   <BannerUploader
                      onUpload={(files) => { if (files[0]) setForm((f) => ({ ...f, imageUrl: files[0].url })); }}
                    />
                 </div>

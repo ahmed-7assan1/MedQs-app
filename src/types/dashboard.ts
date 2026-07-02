@@ -30,5 +30,6 @@ export interface DashboardData {
   activityArr: ActivityItem[];
   progressToNext: number;
   isProfileIncomplete: boolean;
+  userImage?: string | null;
   ads?: DashboardAd[];
 }

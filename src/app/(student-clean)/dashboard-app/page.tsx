@@ -136,6 +136,7 @@ export default async function DashboardPage() {
     progressToNext,
     isProfileIncomplete,
     ads: ads.length ? ads : undefined,
+    userImage: dbUser?.image || null,
   };
 
   return <DashboardShell data={dashboardData} />;

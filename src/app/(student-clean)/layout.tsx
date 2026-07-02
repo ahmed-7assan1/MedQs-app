@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import dynamic from "next/dynamic";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
-import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
-import { GlobalTopBar } from "@/components/layout/GlobalTopBar";
+import { NavbarWrapper } from "@/components/layout/NavbarWrapper";
+import { TopBarWrapper } from "@/components/layout/TopBarWrapper";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { MobileChromeController } from "@/components/layout/MobileChromeController";
 import { prisma } from "@/lib/prisma";
@@ -13,7 +13,7 @@ import { PuterScript } from "@/components/system/PuterScript";
 import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
 import { unstable_cache } from "next/cache";
 
-const Sidebar = dynamic(() => import("@/components/layout/Sidebar").then(m => m.Sidebar), { ssr: false });
+const Sidebar = dynamic(() => import("@/components/layout/SidebarWrapper").then(m => m.SidebarWrapper), { ssr: false });
 const FirebaseProvider = dynamic(() => import("@/components/providers/FirebaseProvider").then(m => m.FirebaseProvider), { ssr: false });
 
 const getCachedSiteConfig = unstable_cache(
@@ -126,14 +126,14 @@ export default async function CleanStudentLayout({ children }: { children: React
 
           <MobileChromeController />
           {/* Desktop Navigation */}
-          <FloatingIslandNavbar
+          <NavbarWrapper
             userImage={userImage}
             userName={isGuest ? undefined : displayName}
             userId={isGuest ? "" : sessionUserId}
           />
 
           {/* Floating Mobile Header */}
-          <GlobalTopBar
+          <TopBarWrapper
             userImage={userImage}
             userName={isGuest ? undefined : displayName}
             userId={isGuest ? "" : sessionUserId}

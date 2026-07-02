@@ -10,7 +10,7 @@ import { EcosystemCards } from "@/components/dashboard/sections/EcosystemCards";
 import { AIRecommendations } from "@/components/dashboard/sections/AIRecommendations";
 import { LearningHeatmap } from "@/components/dashboard/sections/LearningHeatmap";
 import { AchievementsShelf } from "@/components/dashboard/sections/AchievementsShelf";
-import { BannerCarousel } from "@/components/ads/BannerCarousel";
+import { ProfileCoverSection } from "@/components/dashboard/sections/ProfileCoverSection";
 
 export function DashboardMobileView({ data }: { data: DashboardData }) {
   const hasAds = !!data.ads?.length;
@@ -19,16 +19,13 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
     <div className="md:hidden scroll-smooth">
       <div className="pb-4 space-y-6">
         <div className="px-4 pt-6">
-          {hasAds && data.ads && (
-            <div className="mb-6">
-              <BannerCarousel ads={data.ads} />
-            </div>
-          )}
+          <ProfileCoverSection data={data} hasAds={hasAds} />
+
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-6"
+            className="space-y-6 mt-[45px] md:mt-[54px] lg:mt-[72px]"
           >
             <MissionControlHero data={data} />
             <ContinueLearningSection data={data} />

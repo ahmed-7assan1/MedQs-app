@@ -18,7 +18,7 @@ import { GlobalSearch } from "@/components/search/GlobalSearch";
 import toast from "react-hot-toast";
 
 interface NotifItem { id: string; title: string; body: string; read: boolean; createdAt: string; channel: string; }
-interface SidebarProps {
+export interface SidebarProps {
   userName: string; userImage?: string; userId: string;
   isAdmin?: boolean; siteName?: string; logoUrl?: string;
   isGuest?: boolean; unreadCount?: number;
