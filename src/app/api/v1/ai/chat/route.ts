@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import {
   AIConfigurationError,
   generateAIReplyWithFallback,
+  generateStreamingReply,
   type AIProviderId,
   type ChatImagePart,
   type ChatPdfPart,
@@ -22,6 +23,8 @@ import {
   telemetry,
   type PdfCacheEntry,
 } from "@/lib/session-cache";
+
+const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 30_000;
 
 function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
   if (typeof raw !== "string") return undefined;
@@ -405,6 +408,7 @@ export async function POST(req: NextRequest) {
     pdfs: rawPdfs,
     preferredProvider: rawPreferredProvider,
     provider: rawProvider,
+    stream: wantsStream,
     // BYOK properties
     customKey,
     customProvider,
@@ -648,6 +652,50 @@ Current Stats: ${siteData.totalUsers} users, ${siteData.totalLectures} lectures,
   ].filter(Boolean).join("\n\n---\n\n");
 
 
+  // ── Streaming branch (non-BYOK, when client requests stream: true) ────────
+  if (wantsStream && !isUsingCustom) {
+    try {
+      const tokenStream = await generateStreamingReply(message, enhancedPrompt, {
+        images,
+        pdfs,
+        preferredProvider: effectiveProvider,
+        signal: AbortSignal.timeout(FETCH_MS),
+      });
+      const meta: { provider?: string; fallbackFrom?: string } = (tokenStream as any).meta ?? {};
+
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const token of tokenStream) {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ token })}\n\n`));
+            }
+            if (!useCustomKey && !isAdmin) {
+              await prisma.aIUsageLog.upsert({
+                where: { userId_type_date: { userId: user.id, type: "chat", date: today } },
+                create: { userId: user.id, type: "chat", date: today, count: 1 },
+                update: { count: { increment: 1 } },
+              });
+            }
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, provider: meta.provider, fallbackFrom: meta.fallbackFrom, used: 1, limit: dailyLimit, filesUsed: 0, fileLimit, rankLabel })}\n\n`));
+            controller.close();
+          } catch (e) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: e instanceof Error ? e.message : "Stream error" })}\n\n`));
+            controller.close();
+          }
+        },
+      });
+      return new NextResponse(stream, {
+        headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
+      });
+    } catch (e) {
+      console.error("[ai/chat] stream error:", e);
+      const detail = e instanceof Error ? e.message.trim() : "";
+      return NextResponse.json({ error: detail || "The AI service did not respond." }, { status: 503 });
+    }
+  }
+
+  // ── Non-streaming branch (BYOK + fallback) ────────────────────────────────
   let aiResult: { provider: string; text: string; fallbackFrom?: string };
   try {
     // If BYOK is active but no key is set, fail fast instead of falling through to server env keys

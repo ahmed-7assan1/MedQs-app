@@ -1485,20 +1485,44 @@ ${systemPrompt}`;
               const err = await res.json().catch(() => ({}));
               throw new Error(err.error || "API error");
             }
-            const data = await res.json();
-            if (data.reply) {
-              const replyText = data.reply as string;
-              const chunkSize = Math.max(1, Math.floor(replyText.length / 20));
-              for (let i = 0; i < replyText.length; i += chunkSize) {
-                if (abortRef.current) break;
-                finalContent = replyText.slice(0, i + chunkSize);
-                onChunk(finalContent);
-                await new Promise(r => setTimeout(r, 20));
+            const contentType = res.headers.get("content-type") || "";
+            if (contentType.includes("text/event-stream")) {
+              const reader = res.body?.getReader();
+              if (!reader) throw new Error("No response body");
+              const decoder = new TextDecoder();
+              let buffer = "";
+              let done = false;
+              while (!done) {
+                const { done: readerDone, value } = await reader.read();
+                if (readerDone) break;
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                buffer = lines.pop() || "";
+                for (const line of lines) {
+                  const trimmed = line.trim();
+                  if (!trimmed.startsWith("data: ")) continue;
+                  try {
+                    const parsed = JSON.parse(trimmed.substring(6));
+                    if (parsed.token) {
+                      finalContent = (finalContent || "") + parsed.token;
+                      onChunk(finalContent);
+                    } else if (parsed.done) {
+                      done = true;
+                    } else if (parsed.error) {
+                      throw new Error(parsed.error);
+                    }
+                  } catch {}
+                }
               }
-              finalContent = replyText;
-              onChunk(finalContent);
             } else {
-              throw new Error(data.error || "Invalid response format");
+              const data = await res.json();
+              if (data.reply) {
+                const replyText = data.reply as string;
+                finalContent = replyText;
+                onChunk(finalContent);
+              } else {
+                throw new Error(data.error || "Invalid response format");
+              }
             }
           } else {
             const rawKeys = byokKeys[effectiveProvider];

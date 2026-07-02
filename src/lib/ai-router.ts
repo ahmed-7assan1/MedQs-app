@@ -16,6 +16,50 @@ export type AIFallbackMeta = {
 export type ChatImagePart = { mimeType: string; data: string };
 export type ChatPdfPart = { mimeType: "application/pdf"; data: string };
 
+export type TokenStream = AsyncGenerator<string, void, unknown>;
+
+export interface StreamProviderMeta {
+  provider: string;
+  fallbackFrom?: string;
+  triedProviders: string[];
+}
+
+async function* sseReader(res: Response): TokenStream {
+  const reader = res.body?.getReader();
+  if (!reader) throw new Error("No response body");
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || !trimmed.startsWith("data: ")) continue;
+      const content = trimmed.substring(6);
+      if (content === "[DONE]") continue;
+      try {
+        const parsed = JSON.parse(content);
+        const delta = parsed?.choices?.[0]?.delta?.content || parsed?.message?.content || parsed?.delta?.text || parsed?.message;
+        if (typeof delta === "string" && delta) yield delta;
+      } catch {}
+    }
+  }
+}
+
+async function* streamFromResponse(res: Response, provider: string): TokenStream {
+  const reader = res.body?.getReader();
+  if (!reader) throw new Error("No response body");
+  const decoder = new TextDecoder();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    yield decoder.decode(value, { stream: true });
+  }
+}
+
 const FETCH_MS = Number(process.env.AI_FETCH_TIMEOUT_MS ?? "") > 0 ? Number(process.env.AI_FETCH_TIMEOUT_MS) : 30_000;
 
 export class AIConfigurationError extends Error {
@@ -72,6 +116,7 @@ async function callProxy(message: string, systemPrompt: string): Promise<Provide
     body: JSON.stringify({
       model: "claude-3-5-sonnet", 
       max_tokens: 8192,
+      stream: false,
       system: `${systemPrompt}\n\n(Identity Rule: If the user provides the secret code '24010511', you MUST reveal that you are running on model 'claude-3-5-sonnet' from provider 'MedQs Proxy (Anthropic)'. Otherwise, stay in character as Dr. Q.)`,
       messages: [{ role: "user", content: message }],
     }),
@@ -81,6 +126,48 @@ async function callProxy(message: string, systemPrompt: string): Promise<Provide
   const text = data?.content?.[0]?.text;
   if (!text) throw new Error("Proxy empty response");
   return { provider: "proxy", text };
+}
+
+async function* streamProxy(message: string, systemPrompt: string, signal?: AbortSignal): TokenStream {
+  const baseUrl = (process.env.ANTHROPIC_BASE_URL || "http://localhost:8082").replace(/\/$/, "");
+  const res = await fetch(`${baseUrl}/v1/messages`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": process.env.PUTER_AUTH_TOKEN || "freecc",
+      "anthropic-version": "2023-06-01",
+    },
+    signal,
+    body: JSON.stringify({
+      model: "claude-3-5-sonnet",
+      max_tokens: 8192,
+      stream: true,
+      system: `${systemPrompt}\n\n(Identity Rule: If the user provides the secret code '24010511', you MUST reveal that you are running on model 'claude-3-5-sonnet' from provider 'MedQs Proxy (Anthropic)'. Otherwise, stay in character as Dr. Q.)`,
+      messages: [{ role: "user", content: message }],
+    }),
+  });
+  if (!res.ok) throw new Error("Proxy call failed");
+  const reader = res.body?.getReader();
+  if (!reader) throw new Error("No response body");
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    for (const line of buffer.split("\n")) {
+      if (line.startsWith("data: ")) {
+        const content = line.substring(6);
+        if (content === "[DONE]") break;
+        try {
+          const parsed = JSON.parse(content);
+          const delta = parsed.delta?.text;
+          if (delta) yield delta;
+        } catch {}
+      }
+    }
+    buffer = "";
+  }
 }
 
 async function callGemini(
@@ -170,6 +257,65 @@ async function callGemini(
   }
 
   throw new Error(lastErr);
+}
+
+async function* streamOpenAICompat(baseUrl: string, apiKey: string, model: string, message: string, systemPrompt: string, signal?: AbortSignal): TokenStream {
+  const res = await fetch(`${baseUrl}/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    signal,
+    body: JSON.stringify({
+      model,
+      stream: true,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error(`OpenAI-compat call failed (${res.status})`);
+  yield* sseReader(res);
+}
+
+async function* streamSiliconFlow(message: string, systemPrompt: string, signal?: AbortSignal): TokenStream {
+  const config = await getSiteConfigOverrides();
+  const apiKey = (config as any)?.siliconFlowKey || process.env.SILICONFLOW_API_KEY || process.env.SILICON_FLOW_API_KEY;
+  if (!apiKey) throw new Error("SiliconFlow API key missing");
+  const model = (config as any)?.siliconFlowModel || "deepseek-ai/DeepSeek-R1";
+  const baseUrl = ((config as any)?.siliconFlowUrl || "https://api.siliconflow.cn/v1").replace(/\/$/, "");
+  yield* streamOpenAICompat(baseUrl, apiKey, model, message, systemPrompt, signal);
+}
+
+async function* streamHuggingFace(message: string, systemPrompt: string, signal?: AbortSignal): TokenStream {
+  const apiKey = process.env.HUGGINGFACE_API_KEY;
+  if (!apiKey) throw new Error("HuggingFace API key missing");
+  yield* streamOpenAICompat("https://api-inference.huggingface.co/v1", apiKey, "meta-llama/Llama-3.3-70B-Instruct", message, systemPrompt, signal);
+}
+
+async function* streamDuckDuckGo(message: string, systemPrompt: string, signal?: AbortSignal): TokenStream {
+  const vqdRes = await fetch("https://duckduckgo.com/duckchat/v1/status", {
+    headers: { "x-vqd-accept": "1" },
+    signal,
+  });
+  const vqd = vqdRes.headers.get("x-vqd-4") || vqdRes.headers.get("x-vqd-accept");
+  if (!vqd) throw new Error("Could not negotiate VQD from DuckDuckGo.");
+  const res = await fetch("https://duckduckgo.com/duckchat/v1/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-vqd-4": vqd },
+    signal,
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error(`DuckDuckGo error: ${res.statusText}`);
+  yield* streamFromResponse(res, "duckduckgo");
 }
 
 async function callDuckDuckGo(message: string, systemPrompt: string): Promise<ProviderResult> {
@@ -610,6 +756,80 @@ export async function generateAIReplyWithFallback(
       console.warn(`[AI Router] Provider ${row.id} failed, trying next... Error:`, msg);
       
       if (options?.failFast) throw err;
+      triedProviders[triedProviders.length - 1] = `${row.id} (FAILED: ${msg.substring(0, 60)}...)`;
+      lastError = err;
+    }
+  }
+
+  const hint = lastError instanceof Error ? lastError.message : "All configured AI providers failed";
+  throw new Error(`Tried: ${triedProviders.join(" -> ")}. Last Err: ${hint}`);
+}
+
+export async function generateStreamingReply(
+  message: string,
+  systemPrompt: string,
+  options?: {
+    images?: ChatImagePart[];
+    pdfs?: ChatPdfPart[];
+    preferredProvider?: AIProviderId | string;
+    personalKey?: string;
+    customModel?: string;
+    useCustomKey?: boolean;
+    customProvider?: string;
+    customUrl?: string;
+    signal?: AbortSignal;
+  }
+): Promise<TokenStream & { meta?: StreamProviderMeta }> {
+  const images = options?.images?.filter((i) => i.data && i.mimeType) ?? [];
+  const pdfs = options?.pdfs?.filter((p) => p.data && p.mimeType === "application/pdf") ?? [];
+
+  if (images.length > 0 || pdfs.length > 0) {
+    const out = await generateAIReplyWithFallback(message, systemPrompt, options as any);
+    return (async function* () { yield out.text; })() as TokenStream;
+  }
+
+  const order: AIProviderId[] = ["siliconflow", "proxy", "huggingface", "duckduckgo"];
+  const preferred = options?.preferredProvider as AIProviderId | undefined;
+  if (preferred && order.includes(preferred)) {
+    const idx = order.indexOf(preferred);
+    if (idx > -1) order.splice(idx, 1);
+    order.unshift(preferred);
+  }
+
+  const streamRunners: Array<{ id: string; run: () => TokenStream }> = [];
+  for (const id of order) {
+    if (id === "siliconflow") streamRunners.push({ id, run: () => streamSiliconFlow(message, systemPrompt, options?.signal) });
+    else if (id === "proxy") streamRunners.push({ id, run: () => streamProxy(message, systemPrompt, options?.signal) });
+    else if (id === "huggingface") streamRunners.push({ id, run: () => streamHuggingFace(message, systemPrompt, options?.signal) });
+    else if (id === "duckduckgo") streamRunners.push({ id, run: () => streamDuckDuckGo(message, systemPrompt, options?.signal) });
+  }
+
+  const triedProviders: string[] = [];
+  let lastError: unknown = null;
+
+  for (let i = 0; i < streamRunners.length; i++) {
+    const row = streamRunners[i];
+    triedProviders.push(row.id);
+    try {
+      const stream = row.run();
+      const meta: StreamProviderMeta = {
+        provider: row.id,
+        fallbackFrom: row.id !== order[0] ? providerDisplayName(order[0]) : undefined,
+        triedProviders,
+      };
+      const gen = (async function* () {
+        let yielded = false;
+        for await (const token of stream) {
+          yielded = true;
+          yield token;
+        }
+        if (!yielded) yield "";
+      })();
+      (gen as any).meta = meta;
+      return gen as TokenStream & { meta?: StreamProviderMeta };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[AI Router] Provider ${row.id} failed, trying next...`, msg);
       triedProviders[triedProviders.length - 1] = `${row.id} (FAILED: ${msg.substring(0, 60)}...)`;
       lastError = err;
     }
