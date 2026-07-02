@@ -64,6 +64,20 @@ Reference Knowledge: First Aid for the USMLE Step 1 and Step 2 CK, UWorld patter
 Focus: High-yield exam facts, classic presentations (buzzwords), mnemonics, and "next best step" reasoning.`,
 };
 
+export const PDF_CLASSIFIER_PROMPT = `You are a classifier for a medical lecture assistant.
+You will be given a lecture title, a summary, and a student's question.
+
+Decide if the question can be answered using ONLY the summary and conversation history.
+- Answer "NO" if the summary is sufficient.
+- Answer "YES" if the question requires details from the lecture notes or attached PDF file.
+
+Lecture title: {title}
+Lecture summary: {summary}
+
+Student question: {question}
+
+Reply ONLY with one word: "YES" or "NO"`;
+
 export function buildMedicalSystemPrompt(extra?: string, specializedModel?: string): string {
   let base = MEDICAL_TUTOR_SYSTEM_PREFIX;
 

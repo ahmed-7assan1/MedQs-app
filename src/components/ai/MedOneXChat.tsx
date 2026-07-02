@@ -99,15 +99,22 @@ export function MedOneXChat({
     prevLectureIdRef.current = lectureId ?? null;
   }, [lectureId, lectureTitle, switchToLectureThread, restoreGlobalThread]);
 
-  // Restore global thread on unmount (e.g. when sidebar closes on navigation away)
+  // Restore global thread + clear server-side session cache on unmount
   useEffect(() => {
     return () => {
-      if (prevLectureIdRef.current) {
+      const lastLectureId = prevLectureIdRef.current;
+      if (lastLectureId) {
         restoreGlobalThread();
+        // Clear server-side PDF + thread caches
+        fetch("/api/v1/ai/chat/clear-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lectureId: lastLectureId }),
+        }).catch(() => {});
         prevLectureIdRef.current = null;
       }
     };
-  }, [restoreGlobalThread]);
+  }, [restoreGlobalThread, activeThreadId]);
 
   const [mobileFocused, setMobileFocused] = useState(false);
   const [files, setFiles] = useState<FileAttachment[]>([]);

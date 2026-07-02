@@ -419,6 +419,31 @@ function findFirstAvailableProvider(byokKeys: BYOKKeys): AIProvider | null {
   return null;
 }
 
+function estimateTokens(text: string): number {
+  if (!text) return 0;
+  let arabicChars = 0, latinChars = 0;
+  for (const ch of text) {
+    if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(ch)) {
+      arabicChars++;
+    } else if (ch !== " ") {
+      latinChars++;
+    }
+  }
+  return Math.ceil(arabicChars * 0.5 + latinChars * 0.25 + (text.length - arabicChars - latinChars) * 0.05);
+}
+
+function needsHistory(content: string): boolean {
+  const trimmed = content.trim().toLowerCase();
+  const independentPatterns = [
+    /^(hi|hello|hey|thanks|thx|شكرا|هلا|مرحبا|تمام|ok|okay|good|great|nice|ko|k|yes|no|yep|nope|👍|✅|😊|🙏)$/i,
+    /^(what can you do|who are you|help|\?|how does this work|what is this)/i,
+  ];
+  for (const p of independentPatterns) {
+    if (p.test(trimmed)) return false;
+  }
+  return true;
+}
+
 function migrateSettings(parsed: any): DrQSettings {
   // Migrate old single-key format → new array format
   const bk = parsed.byokKeys || {};
@@ -1426,12 +1451,28 @@ ${systemPrompt}`;
         } else {
           // ─── NORMAL MODE ───
           if (!apiKey) {
+            // Build context history with 1500 token budget
+            let contextHistory: { role: string; content: string }[] | undefined;
+            if (needsHistory(content)) {
+              contextHistory = [];
+              let budget = 1500;
+              const prevMsgs = currentMessages.slice(-10);
+              for (let i = prevMsgs.length - 1; i >= 0; i--) {
+                const msg = prevMsgs[i];
+                const tokens = estimateTokens(msg.content);
+                if (budget - tokens < 0 && contextHistory.length > 0) break;
+                if (budget - tokens < 0) continue;
+                budget -= tokens;
+                contextHistory.unshift({ role: msg.role, content: msg.content });
+              }
+            }
             const res = await fetch(getAIEndpoint("/api/v1/ai/chat"), {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 message: content,
-                conversationHistory: historyForAPI.slice(0, -1),
+                lectureId: lectureContext?.lectureId,
+                contextHistory,
                 images: files.filter(f => f.mimeType.startsWith("image/")),
                 pdfs: files.filter(f => f.mimeType === "application/pdf"),
                 provider: effectiveProvider,

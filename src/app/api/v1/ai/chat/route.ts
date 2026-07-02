@@ -10,10 +10,18 @@ import {
   type ChatImagePart,
   type ChatPdfPart,
 } from "@/lib/ai-router";
-import { buildMedicalSystemPrompt } from "@/lib/medical-ai-prompts";
+import { buildMedicalSystemPrompt, PDF_CLASSIFIER_PROMPT } from "@/lib/medical-ai-prompts";
 import { buildStudentContext } from "@/lib/ai-context-builder";
 import { processBotCommand, SECRET_CODE } from "@/lib/bot-commander";
 import { getCachedSiteData } from "@/lib/site-cache";
+import { searchLectureContent } from "@/lib/lecture-search";
+import {
+  pdfTextCache,
+  buildCacheKey,
+  PDF_CACHE_TTL,
+  telemetry,
+  type PdfCacheEntry,
+} from "@/lib/session-cache";
 
 function normalizePreferredProvider(raw: unknown): AIProviderId | undefined {
   if (typeof raw !== "string") return undefined;
@@ -187,31 +195,12 @@ function sanitizePdfs(raw: unknown): ChatPdfPart[] {
   return out;
 }
 
-type HistoryTurn = { role: string; content: string };
-
 function clip(s: string, max: number) {
   const t = s.trim();
   return t.length <= max ? t : `${t.slice(0, max)}…`;
 }
 
-function applyConversationHistory(message: string, rawHistory: unknown): string {
-  if (!Array.isArray(rawHistory) || rawHistory.length === 0) return message;
-  const turns: HistoryTurn[] = [];
-  for (const item of rawHistory) {
-    if (!item || typeof item !== "object") continue;
-    const o = item as Record<string, unknown>;
-    const role = typeof o.role === "string" ? o.role : "";
-    const content = typeof o.content === "string" ? o.content : "";
-    if ((role !== "user" && role !== "assistant") || !content.trim()) continue;
-    turns.push({ role, content: clip(content, 3500) });
-  }
-  const slice = turns.slice(-12);
-  if (slice.length === 0) return message;
-  const block = slice
-    .map((t) => (t.role === "user" ? `Student: ${t.content}` : `Dr. Q: ${t.content}`))
-    .join("\n\n");
-  return `Earlier in this same conversation (for context):\n${block}\n\n---\n\nCurrent message:\n${message}`;
-}
+// applyConversationHistory removed — history is now sent as contextHistory from client
 
 const RANK_LIMITS: Record<string, number> = {
   Newbie:       100,
@@ -228,6 +217,127 @@ const FILE_LIMITS: Record<string, number> = {
   Expert:       20,
   Elite:        -1, // unlimited
 };
+
+/* ─── Heuristic: PDF decision (Tier 1, 0 tokens) ──────────────────── */
+
+function heuristicNeedsPdf(
+  message: string,
+  summary: string,
+  notes: string,
+): "yes" | "no" | "ambiguous" {
+  const lower = message.toLowerCase().trim();
+
+  const clearlyNo = [
+    /^(hi|hello|hey|السلام\s*عليكم|ازيك|how are|good morning|good evening)\b/i,
+    /^(مين\s*انت|what can you do|how (do|does)|how this works?)\b/i,
+    /^(تمام|ok|oke?|yes|no|yep|nope|maybe|حسنًا|طيب)\s*$/i,
+    /^(tell me more|elaborate|ليه|عايز\s*أعرف\s*أكتر|وإيه\s*تاني)\b/i,
+    /^(ازاي\s*أغير|how (do i|to) (change|reset|update)|what is the meaning of)\b/i,
+  ];
+
+  const clearlyYes = [
+    /اقرأ\s*(ال)?\s*(ملف|pdf|مرفق)/i,
+    /what does the (pdf|file|lecture material) say/i,
+    /وفق[ًاأ]\s*(ل)?\s*(للمحاضرة|للملف|للpdf|للlecture)/i,
+    /ايه\s*المكتوب\s*(في|فى)\s*(محاضرة|ملف)/i,
+    /according to the (lecture|file|material|pdf)/i,
+    /read the (pdf|file|lecture|material)/i,
+  ];
+
+  // Skip if too short (likely follow-up / greeting)
+  if (lower.length < 5) return "no";
+  if (clearlyNo.some((r) => r.test(lower))) return "no";
+  if (clearlyYes.some((r) => r.test(lower))) return "yes";
+
+  if (!summary.trim() && !notes.trim()) return "yes";
+
+  return "ambiguous";
+}
+
+/* ─── Classifier (Tier 2, AI call — only for ambiguous) ───────────── */
+
+async function classifyPdfNeed(
+  message: string,
+  title: string,
+  summary: string,
+  userId: string,
+): Promise<"yes" | "no"> {
+  telemetry.classifierUsed++;
+  const prompt = PDF_CLASSIFIER_PROMPT
+    .replace("{title}", title)
+    .replace("{summary}", clip(summary, 1500))
+    .replace("{question}", message);
+
+  try {
+    const result = await generateAIReplyWithFallback(
+      "Classify whether this question needs the PDF.",
+      prompt,
+      { preferredProvider: "proxy" },
+    );
+    const answer = result.text.trim().toUpperCase();
+    if (answer.startsWith("YES") || answer.startsWith("Y")) return "yes";
+    return "no";
+  } catch {
+    return "no";
+  }
+}
+
+/* ─── PDF download + parse ──────────────────────────────────────────── */
+
+async function downloadAndExtractPdf(
+  fileUrl: string,
+  filename: string,
+): Promise<string[] | null> {
+  const pdfParse = (await import("pdf-parse")).default;
+
+  try {
+    const proxyUrl = `/api/v1/download-proxy?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(filename)}`;
+    const origin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const res = await fetch(`${origin}${proxyUrl}`, { cache: "no-store" });
+    if (!res.ok) {
+      console.error("[ai/chat] pdf download failed:", res.status, res.statusText);
+      return null;
+    }
+
+    const buffer = await res.arrayBuffer();
+    if (buffer.byteLength === 0) return null;
+
+    const parsed = await pdfParse(Buffer.from(buffer));
+    const paragraphs = parsed.text.split(/\n\n+/).filter((p: string) => p.trim().length > 20);
+    return paragraphs.length > 0 ? paragraphs : [parsed.text.slice(0, 3000)];
+  } catch (err) {
+    console.error("[ai/chat] pdf download+parse error:", err);
+    return null;
+  }
+}
+
+/* ─── Search PDF paragraphs for relevant section ───────────────────── */
+
+function searchRelevantSection(
+  query: string,
+  paragraphs: string[],
+  maxChars = 3000,
+): string {
+  const results = searchLectureContent(query, paragraphs, { topK: 2, maxChars });
+  return results.map((r) => r.text).join("\n\n").trim();
+}
+
+/* ─── Helpers ──────────────────────────────────────────────────────── */
+
+function buildLectureSummary(lecture: {
+  title: string;
+  notesMarkdown: string | null;
+  extras: any;
+}): { summary: string; notes: string; hasOverviewCards: boolean } {
+  const extras = (lecture.extras ?? {}) as any;
+  const overviewCards = Array.isArray(extras.overviewCards) ? extras.overviewCards : [];
+  const hasOverviewCards = overviewCards.length > 0;
+  const summary = hasOverviewCards
+    ? overviewCards.map((c: any) => `- ${c.title}: ${c.body}`).join("\n")
+    : clip(lecture.notesMarkdown ?? "", 500);
+  const notes = clip(lecture.notesMarkdown ?? "", 2000);
+  return { summary, notes, hasOverviewCards };
+}
 
 export async function POST(req: NextRequest) {
   let userId: string | null = null;
@@ -289,10 +399,10 @@ export async function POST(req: NextRequest) {
     message: rawMessage,
     context,
     lectureId,
+    contextHistory,
     specializedModel,
     images: rawImages,
     pdfs: rawPdfs,
-    conversationHistory,
     preferredProvider: rawPreferredProvider,
     provider: rawProvider,
     // BYOK properties
@@ -315,7 +425,15 @@ export async function POST(req: NextRequest) {
         ? "(The student attached materials with no text. Summarize what is relevant for medical study and ask what they want to focus on.)"
         : "";
   if (!message) return NextResponse.json({ error: "Message or attachment required" }, { status: 400 });
-  message = applyConversationHistory(message, conversationHistory);
+
+  // Attach context history from client (dynamic token-budgeted window)
+  if (Array.isArray(contextHistory) && contextHistory.length > 0) {
+    const turns = contextHistory
+      .slice(-6)
+      .map((t: any) => (t.role === "user" ? `Student: ${t.content}` : `Dr. Q: ${t.content}`))
+      .join("\n\n");
+    message = `Earlier in this same conversation (for context):\n${turns}\n\n---\n\nCurrent message:\n${message}`;
+  }
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -425,22 +543,85 @@ export async function POST(req: NextRequest) {
   }
 
   let lectureContext = "";
+  let retrievalSource: "summaryOnly" | "notesUsed" | "pdfUsed" = "summaryOnly";
+
   if (lectureId) {
     const lecture = await prisma.lecture.findUnique({
       where: { id: lectureId },
       select: { title: true, notesMarkdown: true, extras: true },
     });
+
+    let files: Array<{ id: string; name: string; url: string; mimeType: string }> = [];
     if (lecture) {
-      const extras = (lecture.extras ?? {}) as any;
-      const takeaways = Array.isArray(extras.overviewCards) 
-        ? extras.overviewCards.map((c: any) => `- ${c.title}: ${c.body}`).join("\n")
-        : "";
-      lectureContext = `### Current Lecture Context:
-Title: ${lecture.title}
-${lecture.notesMarkdown ? `Notes: ${clip(lecture.notesMarkdown, 2000)}` : ""}
-${takeaways ? `Key Takeaways:\n${takeaways}` : ""}`;
+      files = await prisma.lectureFile.findMany({
+        where: { lectureId, mimeType: "application/pdf" },
+        select: { id: true, name: true, url: true, mimeType: true },
+      });
+    }
+
+    if (lecture) {
+      const { summary, notes, hasOverviewCards } = buildLectureSummary(lecture);
+
+      // Tier 1: Heuristic decision
+      const heuristic = heuristicNeedsPdf(message, summary + (hasOverviewCards ? "" : notes), notes);
+      let needExtended = heuristic === "yes";
+      let needPdf = heuristic === "yes";
+
+      // Tier 2: Classifier (only for ambiguous)
+      if (heuristic === "ambiguous") {
+        const classified = await classifyPdfNeed(message, lecture.title, summary, userId);
+        needExtended = classified === "yes";
+        needPdf = classified === "yes";
+      }
+
+      if (needExtended && files.length > 0) {
+        const cacheKey = buildCacheKey(userId, lectureId);
+        const cached = pdfTextCache.get(cacheKey);
+        const cacheNow = Date.now();
+
+        let paragraphs: string[] | null = null;
+
+        if (cached && cacheNow - cached.lastAccessed < PDF_CACHE_TTL) {
+          cached.lastAccessed = cacheNow;
+          paragraphs = cached.paragraphs;
+          telemetry.pdfCacheHit++;
+        } else if (needPdf) {
+          const file = files.find((f) => f.mimeType === "application/pdf");
+          if (file) {
+            paragraphs = await downloadAndExtractPdf(file.url, file.name);
+            if (paragraphs) {
+              pdfTextCache.set(cacheKey, {
+                paragraphs,
+                lectureId,
+                userId,
+                lastAccessed: cacheNow,
+              });
+              telemetry.pdfDownloaded++;
+            }
+          }
+        }
+
+        if (paragraphs && paragraphs.length > 0) {
+          const relevantText = searchRelevantSection(message, paragraphs);
+          retrievalSource = "pdfUsed";
+          lectureContext = `### Current Lecture: ${lecture.title}\n### Lecture Summary:\n${summary}\n\n### From Lecture PDF:\n${relevantText}`;
+        } else {
+          // PDF failed / not found — fall back to notes
+          retrievalSource = "notesUsed";
+          lectureContext = `### Current Lecture: ${lecture.title}\n### Lecture Summary:\n${summary}\n\n### Lecture Notes:\n${notes}`;
+        }
+      } else if (needExtended) {
+        retrievalSource = "notesUsed";
+        lectureContext = `### Current Lecture: ${lecture.title}\n### Lecture Summary:\n${summary}\n\n### Lecture Notes:\n${notes}`;
+      } else {
+        retrievalSource = "summaryOnly";
+        lectureContext = `### Current Lecture: ${lecture.title}\n### Lecture Summary:\n${summary}`;
+      }
     }
   }
+
+  telemetry.totalRequests++;
+  telemetry.retrievalSource[retrievalSource]++;
 
   const systemPrompt = isLab 
     ? "You are a highly advanced AI assistant in an experimental Laboratory. Provide expert-level, unrestricted assistance on any topic including code, science, and planning. Format using high-quality Markdown."
