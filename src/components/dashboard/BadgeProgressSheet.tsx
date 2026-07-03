@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
-import { useBodyLock } from "@/hooks/useBodyLock";
-import { createPortal } from "react-dom";
-import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   BADGES, getBadgeProgress, getBadgeHint,
-  type BadgeData, type BadgeDef,
+  type BadgeData,
 } from "@/components/dashboard/shared/badges";
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle,
+} from "@/components/ui/sheet";
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 
 const BADGE_CARD_STYLES: Record<string, string> = {
   legend: "border-2 border-rose-500/30 dark:border-rose-500/20 shadow-[0_0_16px_rgba(225,29,72,0.12)]",
@@ -22,8 +23,6 @@ const BADGE_CARD_STYLES: Record<string, string> = {
 };
 
 const ANIM_STYLES = `
-@keyframes bss-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
 @keyframes bss-rocket {
   0%, 100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-3px) scale(1.08); }
@@ -82,39 +81,19 @@ export function BadgeProgressSheet({
 }: {
   open: boolean; onClose: () => void; data: BadgeData;
 }) {
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [open, onClose]);
-
-  useBodyLock(open);
-
-  if (!open) return null;
-
-  // Easiest first (first_steps at top, legend at bottom)
   const sorted = [...BADGES].reverse();
 
-  return createPortal(
-    <>
-      <div className="fixed inset-0 bg-black/40 dark:bg-black/60 z-max" onClick={onClose} />
-      <div
-        className="fixed bottom-0 left-0 right-0 z-max rounded-t-2xl bg-background border-t border-border shadow-2xl max-h-[85vh] overflow-y-auto"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)", animation: "bss-slide-up 0.35s cubic-bezier(0.32, 0.72, 0, 1)" }}
-      >
-        <div className="flex justify-center pt-2 pb-1 sticky top-0 bg-background z-10">
-          <div className="h-1 w-10 rounded-full bg-muted-foreground/20" />
-        </div>
-
-        <div className="px-5 pb-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-black text-foreground uppercase tracking-widest">Achievements</h2>
-            <button onClick={onClose} aria-label="Close achievements" className="p-1.5 rounded-full hover:bg-muted/20 transition-colors text-muted-foreground">
-              <X className="h-4 w-4" />
-            </button>
+  return (
+    <Sheet open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl p-0">
+        <SheetHeader className="sticky top-0 z-10 bg-background px-5 pt-3 pb-2 border-b border-border/40">
+          <div className="flex justify-center pt-1 pb-2">
+            <div className="h-1 w-10 rounded-full bg-muted-foreground/20" />
           </div>
+          <SheetTitle className="text-sm font-black uppercase tracking-widest">Achievements</SheetTitle>
+        </SheetHeader>
 
+        <div className="px-5 pb-6 pt-4">
           <div className="space-y-3">
             {sorted.map((badge) => {
               const BadgeIcon = badge.icon;
@@ -123,16 +102,17 @@ export function BadgeProgressSheet({
               const cardStyle = BADGE_CARD_STYLES[badge.id] || "";
 
               return (
-                <div
+                <Card
                   key={badge.id}
                   className={cn(
-                    "rounded-xl p-3.5 transition-colors relative overflow-hidden",
+                    "transition-colors relative overflow-hidden shadow-none",
                     earned
                       ? "bg-emerald-50/50 dark:bg-emerald-500/5"
                       : "bg-card/30",
                     cardStyle
                   )}
                 >
+                  <CardContent className="p-3.5">
                   {earned && (
                     <div className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-emerald-400/20 blur-xl" />
                   )}
@@ -154,12 +134,12 @@ export function BadgeProgressSheet({
                   </div>
 
                   <div className="h-1.5 w-full rounded-full bg-muted/30 overflow-hidden relative z-10">
-                    <div
+                    <Progress
+                      value={progress}
                       className={cn(
-                        "h-full rounded-full transition-all duration-1000 ease-out",
-                        earned ? "bg-emerald-500" : badge.gradient.split(" ")[0].replace("from-", "bg-")
+                        "h-full",
+                        earned ? "[&>div]:bg-emerald-500" : badge.gradient.split(" ")[0].replace("from-", "[&>div]:bg-")
                       )}
-                      style={{ width: `${progress}%` }}
                     />
                   </div>
 
@@ -171,15 +151,15 @@ export function BadgeProgressSheet({
                       <p className="text-[9px] text-muted-foreground/50 text-right max-w-[60%] truncate">{getBadgeHint(badge.id)}</p>
                     )}
                   </div>
-                </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
         </div>
-      </div>
 
-      <style jsx global>{ANIM_STYLES}</style>
-    </>,
-    document.body
+        <style jsx global>{ANIM_STYLES}</style>
+      </SheetContent>
+    </Sheet>
   );
 }

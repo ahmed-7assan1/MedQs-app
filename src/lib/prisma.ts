@@ -51,4 +51,4 @@ export async function withRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T
   throw new Error("Unreachable");
 }
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+globalForPrisma.prisma = prisma;

@@ -1,8 +1,7 @@
 ﻿"use client";
 
-import { motion } from "framer-motion";
+import React from "react";
 import { Zap } from "lucide-react";
-import { fadeUp } from "@/components/dashboard/shared/animations";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 import { QuickActionCard } from "@/components/dashboard/RedesignedComponents";
 
@@ -17,9 +16,9 @@ const ACTIONS = [
   { label: "Browse Podcasts", iconName: "Mic", color: "bg-purple-500 text-white", href: "/podcasts" },
 ];
 
-export function QuickActionsHub() {
+export const QuickActionsHub = React.memo(function QuickActionsHub() {
   return (
-    <motion.div variants={fadeUp}>
+    <div>
       <SectionHeader icon={Zap} title="Quick Actions" />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -27,6 +26,6 @@ export function QuickActionsHub() {
           <QuickActionCard key={i} {...action} />
         ))}
       </div>
-    </motion.div>
+    </div>
   );
-}
+});

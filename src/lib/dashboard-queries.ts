@@ -231,7 +231,9 @@ export async function fetchDashboardData(
             select: {
               id: true,
               title: true,
+              videoUrl: true,
               subject: { select: { moduleId: true, name: true } },
+              team: { select: { name: true, imageUrl: true } },
             },
           },
         },

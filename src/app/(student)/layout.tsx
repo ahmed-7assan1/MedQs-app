@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import dynamic from "next/dynamic";
 const Sidebar = dynamic(() => import("@/components/layout/Sidebar").then(m => m.Sidebar), { ssr: false });
-const AmbientGlow = dynamic(() => import("@/components/ui/AmbientGlow").then(m => m.AmbientGlow), { ssr: false });
+const AmbientGlow = dynamic(() => import("@/components/ui/AmbientGlowStatic").then(m => m.AmbientGlowStatic), { ssr: false });
 const FirebaseProvider = dynamic(() => import("@/components/providers/FirebaseProvider").then(m => m.FirebaseProvider), { ssr: false });
 import { NotificationsLoader } from "@/components/notifications/NotificationsLoader";
 import { AdBannerModal } from "@/components/ads/AdBannerModal";

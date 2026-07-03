@@ -1,11 +1,9 @@
 ﻿"use client";
 
 import { useMemo } from "react";
-import { motion } from "framer-motion";
 import { Lightbulb, TrendingUp, Target, AlertCircle, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fadeUp, EASE } from "@/components/dashboard/shared/animations";
-import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
+import { Card, CardContent } from "@/components/ui/card";
 import type { DashboardData } from "@/types/dashboard";
 
 interface Recommendation {
@@ -87,31 +85,28 @@ export function AIRecommendations({ data }: { data: DashboardData }) {
   const recommendations = useMemo(() => generateRecommendations(data), [data]);
 
   return (
-    <motion.div variants={fadeUp}>
-      <SectionHeader icon={Lightbulb} title="AI Insights" />
+    <div>
 
       <div className="grid gap-3">
         {recommendations.map((rec, i) => {
           const Icon = rec.icon;
           return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: -8 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.1, ease: EASE }}
-              viewport={{ once: true }}
-              className="group relative flex items-start gap-3 p-4 rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-primary/20 hover:shadow-sm hover:-translate-y-0.5"
-            >
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
-              <Icon className={cn("h-5 w-5 shrink-0 mt-0.5 transition-all duration-300 group-hover:scale-110", rec.textColor)} />
-              <div className="min-w-0 relative">
-                <p className="text-xs font-bold text-foreground">{rec.title}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{rec.desc}</p>
-              </div>
-            </motion.div>
-          );
-        })}
+            <Card
+                key={rec.title}
+                className="group shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
+             >
+               <CardContent className="flex items-start gap-3 p-4 relative">
+               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
+               <Icon className={cn("h-5 w-5 shrink-0 mt-0.5 transition-transform duration-300 group-hover:scale-110", rec.textColor)} />
+               <div className="min-w-0 relative">
+                 <p className="text-xs font-bold text-foreground">{rec.title}</p>
+                 <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{rec.desc}</p>
+         </div>
+               </CardContent>
+       </Card>
+     );
+          })}
+        </div>
       </div>
-    </motion.div>
   );
 }

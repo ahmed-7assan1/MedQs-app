@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Play, Pause, RotateCcw, Timer } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type TimerState = "idle" | "running" | "paused";
 
@@ -71,30 +73,32 @@ export const StudyTimer = () => {
   const offset = circ - (circ * progress) / 100;
 
   return (
-    <div className="dash-sidebar-card relative">
+    <Card className="relative">
+      <CardContent className="p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-1.5">
           <Timer size={14} className="text-primary" />
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Study Timer</span>
         </div>
-        <button onClick={() => setShowMenu(!showMenu)} className="text-[10px] font-bold text-foreground/40 hover:text-foreground uppercase tracking-wider">
-          {mode}
-        </button>
-      </div>
-
-      {showMenu && (
-        <div className="absolute top-10 right-3 z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden text-xs">
-          {(["focus", "short", "long"] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => { switchMode(m); setShowMenu(false); }}
-              className={cn("px-4 py-2 text-left font-bold uppercase tracking-wider hover:bg-muted transition-colors", mode === m ? "text-primary" : "text-foreground/60")}
-            >
-              {m === "focus" ? "Focus (25m)" : m === "short" ? "Short (5m)" : "Long (15m)"}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="text-[10px] font-bold text-foreground/40 hover:text-foreground uppercase tracking-wider">
+              {mode}
             </button>
-          ))}
-        </div>
-      )}
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-36 p-1">
+            {(["focus", "short", "long"] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => { switchMode(m); }}
+                className={cn("w-full px-3 py-2 text-left text-xs font-bold uppercase tracking-wider hover:bg-muted rounded-md transition-colors", mode === m ? "text-primary" : "text-foreground/60")}
+              >
+                {m === "focus" ? "Focus (25m)" : m === "short" ? "Short (5m)" : "Long (15m)"}
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
+      </div>
 
       <div className="flex flex-col items-center gap-3">
         <div className="relative">
@@ -137,6 +141,7 @@ export const StudyTimer = () => {
           {sessions} session{sessions !== 1 ? "s" : ""} today
         </p>
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

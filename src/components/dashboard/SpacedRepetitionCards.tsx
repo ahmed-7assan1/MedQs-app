@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion, animate } from "framer-motion";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw, X, Bookmark, CheckCircle, XCircle } from "lucide-react";
 
 interface ReviewedCard {
@@ -147,10 +149,10 @@ export function SpacedRepetitionCards() {
     return (
       <div>
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-4 w-4 rounded-full bg-muted/30 animate-pulse" />
-          <div className="h-3 w-24 rounded bg-muted/30 animate-pulse" />
+          <Skeleton className="h-4 w-4 rounded-full" />
+          <Skeleton className="h-3 w-24" />
         </div>
-        <div className="h-[200px] rounded-2xl bg-muted/20 animate-pulse" />
+        <Skeleton className="h-[200px] rounded-2xl" />
       </div>
     );
   }
@@ -169,9 +171,11 @@ export function SpacedRepetitionCards() {
             Show
           </button>
         </div>
-        <div className="h-[60px] rounded-2xl border border-dashed border-border bg-card/20 flex items-center justify-center">
+        <Card className="bg-card/20 border-dashed">
+          <CardContent className="h-[60px] flex items-center justify-center">
           <p className="text-[11px] font-bold text-muted-foreground/50">Dismissed. Tap Show to reveal.</p>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -181,9 +185,9 @@ export function SpacedRepetitionCards() {
     <div className="relative">
       {/* Cards behind */}
       {remainingCards.map((card, i) => (
-        <div
+        <Card
           key={card.id}
-          className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden mb-1"
+          className="bg-card/60 backdrop-blur-sm overflow-hidden mb-1"
           style={{
             marginTop: i === 0 ? 0 : -8,
             transform: `scale(${1 - (i + 1) * 0.04})`,
@@ -192,10 +196,10 @@ export function SpacedRepetitionCards() {
             pointerEvents: "none",
           }}
         >
-          <div className="p-4 min-h-[56px]">
+          <CardContent className="p-4 min-h-[56px]">
             <p className="text-xs font-bold text-foreground/40 line-clamp-1">{card.front}</p>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ))}
 
       {/* Current card */}
@@ -232,13 +236,14 @@ export function SpacedRepetitionCards() {
               style={{ transformStyle: "preserve-3d" }}
             >
               {/* ─── FRONT ─── */}
-              <div
+              <Card
                 className={cn(
-                  "rounded-2xl border border-border bg-card shadow-lg",
+                  "shadow-lg",
                   flipped ? "hidden" : ""
                 )}
                 style={{ backfaceVisibility: "hidden" }}
               >
+                <CardContent className="p-0">
                 <div className="flex items-center justify-between px-4 pt-3 pb-1">
                   <div className="flex items-center gap-1.5">
                     {current.wrong && <XCircle className="h-3.5 w-3.5 text-rose-500" />}
@@ -256,16 +261,18 @@ export function SpacedRepetitionCards() {
                   </p>
                   <p className="text-[9px] text-muted-foreground/40 mt-3">Tap to reveal</p>
                 </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* ─── BACK ─── */}
-              <div
+              <Card
                 className={cn(
-                  "rounded-2xl border border-border bg-card shadow-lg",
+                  "shadow-lg",
                   !flipped ? "hidden" : ""
                 )}
                 style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
               >
+                <CardContent className="p-0">
                 <div className="flex items-center justify-between px-4 pt-3 pb-1">
                   <div className="flex items-center gap-1.5">
                     <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
@@ -283,7 +290,8 @@ export function SpacedRepetitionCards() {
                     {current.lectureTitle}
                   </p>
                 </div>
-              </div>
+                </CardContent>
+              </Card>
             </motion.div>
           </div>
         </div>
@@ -355,13 +363,14 @@ export function SpacedRepetitionCards() {
               className="relative w-full"
               style={{ transformStyle: "preserve-3d" }}
             >
-              <div
+              <Card
                 className={cn(
-                  "rounded-2xl p-5 min-h-[160px] flex flex-col items-center justify-center text-center border border-border bg-card shadow-lg",
+                  "shadow-lg",
                   flipped ? "hidden" : ""
                 )}
                 style={{ backfaceVisibility: "hidden" }}
               >
+                <CardContent className="p-5 min-h-[160px] flex flex-col items-center justify-center text-center">
                 <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-3 shadow-lg shadow-indigo-500/20">
                   <span className="text-white font-black text-lg">M</span>
                 </div>
@@ -372,14 +381,16 @@ export function SpacedRepetitionCards() {
                   Your AI Medical Companion
                 </p>
                 <p className="text-[10px] text-muted-foreground/40 mt-3">Tap to discover</p>
-              </div>
-              <div
+                </CardContent>
+              </Card>
+              <Card
                 className={cn(
-                  "rounded-2xl p-5 min-h-[160px] flex flex-col border border-border bg-card shadow-lg",
+                  "shadow-lg",
                   !flipped ? "hidden" : ""
                 )}
                 style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
               >
+                <CardContent className="p-5 min-h-[160px] flex flex-col">
                 <p className="text-xs font-bold text-foreground leading-relaxed flex-1">
                   MedOnex is an AI-powered medical education platform that helps students master medical knowledge through spaced repetition, interactive flashcards, and personalized learning paths.
                 </p>
@@ -389,7 +400,8 @@ export function SpacedRepetitionCards() {
                 >
                   Start Learning
                 </Link>
-              </div>
+                </CardContent>
+              </Card>
             </motion.div>
           </div>
         </div>

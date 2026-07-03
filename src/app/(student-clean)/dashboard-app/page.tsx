@@ -78,10 +78,11 @@ export default async function DashboardPage() {
     console.warn("[dashboard-app] DB error:", err instanceof Error ? err.message : err);
   }
 
-  const { stats, moduleProgress, activity: activityArr } = dashData || {
+  const { stats, moduleProgress, activity: activityArr, lastLectureActivity } = dashData || {
     stats: { totalQuestions: 0, totalCorrect: 0, todayItemCount: 0, currentStreak: 0 },
     moduleProgress: [],
     activity: [],
+    lastLectureActivity: null,
   };
 
   const safeStats = stats || { totalQuestions: 0, totalCorrect: 0, todayItemCount: 0, currentStreak: 0 };
@@ -135,6 +136,16 @@ export default async function DashboardPage() {
     }
   }
 
+  const lastLecture = lastLectureActivity?.lecture ? {
+    lectureId: lastLectureActivity.lecture.id,
+    lectureTitle: lastLectureActivity.lecture.title,
+    videoUrl: lastLectureActivity.lecture.videoUrl,
+    moduleId: lastLectureActivity.lecture.subject.moduleId,
+    subjectName: lastLectureActivity.lecture.subject.name,
+    channelName: lastLectureActivity.lecture.team?.name || "MedOneX",
+    channelAvatar: lastLectureActivity.lecture.team?.imageUrl || null,
+  } : null;
+
   const dashboardData: DashboardData = {
     firstName,
     greeting,
@@ -152,6 +163,7 @@ export default async function DashboardPage() {
     isProfileIncomplete,
     ads: ads.length ? ads : undefined,
     userImage,
+    lastLecture,
   };
 
   return <DashboardShell data={dashboardData} />;

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Flame, Trophy, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createConfettiPieces, STREAK_MILESTONES, type ConfettiPiece } from "@/components/dashboard/shared/confetti";
+import { Card, CardContent } from "@/components/ui/card";
+import { STREAK_MILESTONES } from "@/components/dashboard/shared/confetti";
 
 export const StreakCelebration = ({ currentStreak }: { currentStreak: number }) => {
   const [celebrated, setCelebrated] = useState<number[]>(() => {
@@ -13,27 +14,18 @@ export const StreakCelebration = ({ currentStreak }: { currentStreak: number }) 
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
-  const [pieces, setPieces] = useState<ConfettiPiece[]>([]);
-  const [show, setShow] = useState(false);
 
   const saveMilestones = useCallback((arr: number[]) => {
     setCelebrated(arr);
     try { localStorage.setItem("streak-milestones", JSON.stringify(arr)); } catch {}
   }, []);
 
-  const trigger = useCallback((streak: number) => {
-    setPieces(createConfettiPieces(8));
-    setShow(true);
-    setTimeout(() => setShow(false), 2500);
-    saveMilestones([...celebrated, streak]);
-  }, [celebrated, saveMilestones]);
-
   useEffect(() => {
     if (currentStreak < 1) return;
     if (celebrated.includes(currentStreak)) return;
     const isMilestone = STREAK_MILESTONES.includes(currentStreak);
-    if (isMilestone) trigger(currentStreak);
-  }, [currentStreak, celebrated, trigger]);
+    if (isMilestone) saveMilestones([...celebrated, currentStreak]);
+  }, [currentStreak, celebrated, saveMilestones]);
 
   const nextMilestone = STREAK_MILESTONES.find((m) => m > currentStreak);
   const progress = nextMilestone ? (currentStreak / nextMilestone) * 100 : 100;
@@ -47,36 +39,8 @@ export const StreakCelebration = ({ currentStreak }: { currentStreak: number }) 
 
   return (
     <>
-      <AnimatePresence>
-        {show && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 pointer-events-none z-50"
-          >
-            {pieces.map((p) => (
-              <motion.div
-                key={p.id}
-                initial={{ y: -20, x: `${p.x}vw`, opacity: 1, rotate: 0 }}
-                animate={{ y: "100vh", opacity: 0, rotate: 720 }}
-                transition={{ duration: 2.5 + p.delay, ease: "easeIn" }}
-                className="confetti-piece"
-                style={{
-                  left: `${p.x}%`,
-                  width: p.size,
-                  height: p.size,
-                  background: p.color,
-                  borderRadius: p.shape === "circle" ? "50%" : p.shape === "triangle" ? "0" : "2px",
-                  clipPath: p.shape === "triangle" ? "polygon(50% 0%, 0% 100%, 100% 100%)" : undefined,
-                }}
-              />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="dash-sidebar-card">
+      <Card>
+        <CardContent className="p-4">
         <div className="flex items-center gap-3">
           <div className={cn("p-2 rounded-xl", currentStreak >= 30 ? "bg-amber-500/20" : currentStreak >= 7 ? "bg-orange-500/20" : "bg-rose-500/20")}>
             <Icon size={18} className={emoji.color} />
@@ -103,6 +67,8 @@ export const StreakCelebration = ({ currentStreak }: { currentStreak: number }) 
           </div>
         )}
       </div>
+      </CardContent>
+     </Card>
     </>
   );
 };

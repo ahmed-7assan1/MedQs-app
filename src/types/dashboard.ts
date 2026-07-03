@@ -15,6 +15,16 @@ export interface DashboardAd {
   linkUrl?: string | null;
 }
 
+export interface LastLectureInfo {
+  lectureId: string;
+  lectureTitle: string;
+  videoUrl: string | null;
+  moduleId: string;
+  subjectName: string;
+  channelName: string;
+  channelAvatar: string | null;
+}
+
 export interface DashboardData {
   firstName: string;
   greeting: string;
@@ -32,4 +42,5 @@ export interface DashboardData {
   isProfileIncomplete: boolean;
   userImage?: string | null;
   ads?: DashboardAd[];
+  lastLecture?: LastLectureInfo | null;
 }

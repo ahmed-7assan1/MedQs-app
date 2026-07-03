@@ -18,7 +18,7 @@ interface Props {
 }
 
 export function AmbientGlow({
-  orbCount = 3,
+  orbCount = 2,
   colors = ["rgba(124, 92, 252, 0.12)", "rgba(236, 72, 153, 0.08)", "rgba(79, 95, 255, 0.10)"],
   className = "",
   zIndex = -1,
@@ -33,6 +33,7 @@ export function AmbientGlow({
 
     let animId = 0;
     let w = 0, h = 0;
+    let hidden = false;
     const orbs: Orb[] = [];
 
     const resize = () => {
@@ -56,7 +57,18 @@ export function AmbientGlow({
     resize();
     window.addEventListener("resize", resize);
 
+    const onVisibilityChange = () => {
+      hidden = document.hidden;
+      if (hidden) {
+        cancelAnimationFrame(animId);
+      } else {
+        animate();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     const animate = () => {
+      if (hidden) return;
       animId = requestAnimationFrame(animate);
       ctx!.clearRect(0, 0, w, h);
 
@@ -82,8 +94,10 @@ export function AmbientGlow({
     animate();
 
     return () => {
+      hidden = true;
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [orbCount, colors]);
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Flame, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
 import { BadgeProgressSheet } from "@/components/dashboard/BadgeProgressSheet";
 import { getEarnedBadge, type BadgeData } from "@/components/dashboard/shared/badges";
 
@@ -43,7 +44,8 @@ export function MobileDashboardHero({
   return (
     <div className="px-4 pt-6 space-y-3">
       {/* ── Name card (full width) ── */}
-      <div className="relative overflow-hidden rounded-xl border border-border bg-card">
+      <Card className="relative overflow-hidden">
+        <CardContent className="p-0">
         <ShimmerOverlay delay={0.5} />
         <div className="relative z-10 flex items-center gap-3 px-4 py-3.5">
           <div className="flex-1 min-w-0">
@@ -72,7 +74,8 @@ export function MobileDashboardHero({
             <span className="text-[7px] font-black uppercase tracking-wider relative z-10">{earned.label}</span>
           </button>
         </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* ── Badge progress sheet ── */}
       <BadgeProgressSheet
@@ -83,10 +86,11 @@ export function MobileDashboardHero({
 
       {/* ── Streak + Points row ── */}
       <div className="flex gap-2.5">
-        <div className="relative flex-1 overflow-hidden rounded-xl border border-border bg-card">
+        <Card className="relative flex-1 overflow-hidden">
+          <CardContent className="p-0">
           <ShimmerOverlay delay={1.5} />
           <div className={cn(
-            "relative z-10 flex items-center gap-2.5 px-3.5 py-3 rounded-xl",
+            "relative z-10 flex items-center gap-2.5 px-3.5 py-3",
             currentStreak > 0
               ? "bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-500/10 dark:to-amber-500/5"
               : ""
@@ -97,11 +101,13 @@ export function MobileDashboardHero({
               <p className="text-[10px] font-semibold text-muted-foreground leading-none mt-0.5">streak</p>
             </div>
           </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="relative flex-1 overflow-hidden rounded-xl border border-border bg-card">
+        <Card className="relative flex-1 overflow-hidden">
+          <CardContent className="p-0">
           <ShimmerOverlay delay={1.5} />
-          <div className="relative z-10 flex items-center gap-2.5 px-3.5 py-3 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-500/10 dark:to-yellow-500/5">
+          <div className="relative z-10 flex items-center gap-2.5 px-3.5 py-3 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-500/10 dark:to-yellow-500/5">
             <span className="relative inline-flex items-center justify-center shrink-0">
               <span className="absolute inset-0 rounded-full bg-amber-400/20 blur-sm animate-trophy-glow" />
               <Trophy className="h-5 w-5 relative text-amber-500 animate-trophy" />
@@ -111,7 +117,8 @@ export function MobileDashboardHero({
               <p className="text-[10px] font-semibold text-muted-foreground leading-none mt-0.5">pts</p>
             </div>
           </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

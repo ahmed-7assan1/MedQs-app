@@ -1964,6 +1964,16 @@ export default function OneXCommunity({
     }
   }, [searchParams, setSharedQuestion]);
 
+  const targetPostId = useMemo(() => searchParams.get("post"), [searchParams]);
+
+  useEffect(() => {
+    if (!targetPostId || posts.length === 0 || loading) return;
+    const found = posts.find((p: any) => p.id === targetPostId);
+    if (found) {
+      setModalPost(found);
+    }
+  }, [targetPostId, posts, loading]);
+
   // ─── Groups + Suggested Users ──────────────────────────────────────────────
 
   useEffect(() => {
