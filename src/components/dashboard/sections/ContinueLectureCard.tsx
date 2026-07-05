@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getYouTubeId, getYouTubeThumbnail } from "@/lib/video-utils";
+import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 import type { LastLectureInfo } from "@/types/dashboard";
 
 const HQ_FALLBACK = "hqdefault.jpg";
@@ -26,6 +27,8 @@ export function ContinueLectureCard({ lecture }: { lecture: LastLectureInfo | nu
     : null;
 
   return (
+    <>
+    <SectionHeader icon={Play} title="Continue Lecture" />
     <Card className="overflow-hidden border-border/40 shadow-sm">
       <div className="relative mx-2 mt-2 aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
         {thumbnailUrl ? (
@@ -81,5 +84,6 @@ export function ContinueLectureCard({ lecture }: { lecture: LastLectureInfo | nu
         </Button>
       </CardContent>
     </Card>
+    </>
   );
 }

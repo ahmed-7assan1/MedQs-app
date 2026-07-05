@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 
 interface LeaderboardUser {
   id: string;
@@ -32,7 +34,7 @@ export function LeaderboardSidebar() {
 
   return (
     <div>
-      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Top Students</span>
+      <SectionHeader icon={Trophy} title="Top Students" />
       <div className="flex gap-3 mt-2">
         {users.map((u, i) => (
           <Link

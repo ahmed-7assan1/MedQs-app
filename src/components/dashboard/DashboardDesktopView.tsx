@@ -42,7 +42,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
               transition: "width .3s cubic-bezier(.2,0,0,1)",
             }}
           >
-            <aside className="flex flex-col gap-3 -mt-24 pt-6 lg:pt-8">
+            <aside className="flex flex-col gap-6 md:gap-8 -mt-24 pt-6 lg:pt-8">
               <SearchableSidebar>
                 <ActiveRoomsSidebar />
                 <LeaderboardSidebar />

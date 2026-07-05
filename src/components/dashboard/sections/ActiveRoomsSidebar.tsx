@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { DoorOpen } from "lucide-react";
+import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 
 interface RoomData {
   id: string;
@@ -24,7 +25,7 @@ export function ActiveRoomsSidebar() {
 
   return (
     <div>
-      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Rooms</span>
+      <SectionHeader icon={DoorOpen} title="Rooms" />
       <div className="flex gap-3 overflow-x-auto mt-2 pb-1 snap-x snap-mandatory scroll-smooth [-webkit-scrollbar]:hidden">
         {visible.map((room) => (
           <Link

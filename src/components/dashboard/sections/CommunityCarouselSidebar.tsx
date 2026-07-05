@@ -10,7 +10,8 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { Play, Paperclip, Heart, MessageSquare, ArrowRight, Users } from "lucide-react";
+import { Play, Paperclip, Heart, MessageSquare, ArrowRight, MessageCircle } from "lucide-react";
+import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 
 interface PostAuthor {
   id: string;
@@ -300,12 +301,7 @@ export function CommunityCarouselSidebar() {
 
   return (
     <div className="w-full h-[420px]">
-      <div className="flex items-center gap-2 mb-3">
-        <Users className="h-4 w-4 text-indigo-500" />
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-          Social
-        </span>
-      </div>
+      <SectionHeader icon={MessageCircle} title="Social" />
 
       <Carousel
         opts={{ loop: true, align: "start" }}
