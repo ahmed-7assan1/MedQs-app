@@ -2208,6 +2208,99 @@ select,
   z-index: 1;
 }
 
+/* ── Animated counter (number roll-up on mount) ── */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-counter {
+  animation: count-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Staggered children entrance ── */
+.stagger-children > * {
+  opacity: 0;
+  animation: fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.03s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.07s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.11s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.19s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.23s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.27s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.31s; }
+
+/* ── Light glass card (for dashboard sections) ── */
+.glass-card-light {
+  background: hsl(var(--card) / 0.7);
+  backdrop-filter: blur(16px) saturate(1.1);
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: 0 2px 8px hsl(var(--shadow-clr, 0 0% 0%) / 0.04);
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.glass-card-light:hover {
+  background: hsl(var(--card) / 0.85);
+  border-color: hsl(var(--border) / 0.7);
+  box-shadow: 0 8px 24px hsl(var(--shadow-clr, 0 0% 0%) / 0.06);
+}
+
+/* ── Badge glow ring ── */
+.badge-glow {
+  position: relative;
+}
+.badge-glow::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: inherit;
+  opacity: 0.3;
+  filter: blur(6px);
+  z-index: -1;
+}
+
+/* ── Border glow on hover ── */
+.hover-border-glow {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-border-glow:hover {
+  border-color: hsl(var(--primary) / 0.3);
+  box-shadow: 0 0 20px hsl(var(--primary) / 0.06);
+}
+
+/* ── Section entrance animation ── */
+.section-entrance {
+  opacity: 0;
+  animation: section-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes section-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Hero mesh gradient for dashboard ── */
+.hero-mesh {
+  position: relative;
+  overflow: hidden;
+}
+.hero-mesh::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 100% 60% at 20% 0%, hsl(var(--primary) / 0.12), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, hsl(var(--primary) / 0.06), transparent 50%),
+    radial-gradient(ellipse 50% 30% at 50% 100%, hsl(var(--primary) / 0.04), transparent 50%);
+  pointer-events: none;
+}
+
 /* ── Notification dot ── */
 .notif-dot {
   width: 8px;

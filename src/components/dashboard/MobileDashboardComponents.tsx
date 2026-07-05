@@ -52,32 +52,35 @@ interface MobileListedStatsProps {
 
 export const MobileListedStats = ({ stats }: MobileListedStatsProps) => {
   return (
-   <Card className="bg-card/40 shadow-sm rounded-[24px]">
-    <CardContent className="p-5 space-y-4">
-   {stats.map((stat, idx) => {
-    const Icon = (Icons as any)[stat.iconName] || Icons.Circle;
-    return (
-     <div key={idx} className="flex items-center justify-between gap-4">
-      {/* Left side Icon */}
-      <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border border-slate-100 dark:border-white/[0.04] bg-slate-50 dark:bg-white/[0.02]", stat.color)}>
-       <Icon size={16} />
-      </div>
+    <Card className="bg-card/40 shadow-sm rounded-[24px]">
+      <CardContent className="p-5 space-y-4">
+        {stats.map((stat, idx) => {
+          const Icon = (Icons as any)[stat.iconName] || Icons.Circle;
+          return (
+            <div key={idx} className="flex items-center justify-between gap-4">
+              {/* Left side Icon */}
+              <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border border-slate-100 dark:border-white/[0.04] bg-slate-50 dark:bg-white/[0.02]", stat.color)}>
+                <Icon size={16} />
+              </div>
 
-      {/* Middle Title & Progress bar */}
-      <div className="flex-1 min-w-0">
-       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[12px] font-extrabold text-slate-700 dark:text-white/80">{stat.label}</span>
-        <span className="text-[10px] font-black text-slate-400 dark:text-white/40">{stat.value}</span>
-       </div>
-       <div className="h-1 w-full bg-slate-100 dark:bg-white/[0.04] rounded-full overflow-hidden">
-        <div 
-         className={cn("h-full rounded-full bg-primary", stat.color.split(" ")[1] || "bg-primary")} 
-         style={{ width: `${stat.progress}%` }}
-        />
-       </div>
-      </div>
-   </CardContent>
-   </Card>
+              {/* Middle Title & Progress bar */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[12px] font-extrabold text-slate-700 dark:text-white/80">{stat.label}</span>
+                  <span className="text-[10px] font-black text-slate-400 dark:text-white/40">{stat.value}</span>
+                </div>
+                <div className="h-1 w-full bg-slate-100 dark:bg-white/[0.04] rounded-full overflow-hidden">
+                  <div
+                    className={cn("h-full rounded-full bg-primary", stat.color.split(" ")[1] || "bg-primary")}
+                    style={{ width: `${stat.progress}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
   );
 };
 

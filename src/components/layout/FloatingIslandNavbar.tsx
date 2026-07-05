@@ -83,14 +83,14 @@ export function FloatingIslandNavbar({
   return () => document.removeEventListener("mousedown", handleClickOutside);
  }, []);
 
- const hideSidebar = pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed"));
+  const hideSidebar = pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed") || pathname.startsWith("/dashboard-app"));
 
  useEffect(() => {
   const offset = hideSidebar ? 0 : sidebarWidth;
   document.documentElement.style.setProperty("--sidebar-offset", `${offset}px`);
  }, [hideSidebar, sidebarWidth, isCompact]);
 
- if (pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed"))) return null;
+  if (pathname && (pathname.startsWith("/ai-chat") || pathname.startsWith("/drawmed") || pathname.startsWith("/dashboard-app"))) return null;
 
  const handleSearchInput = (val: string) => {
   setSearchQuery(val);

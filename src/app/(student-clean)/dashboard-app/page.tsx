@@ -139,7 +139,9 @@ export default async function DashboardPage() {
   const lastLecture = lastLectureActivity?.lecture ? {
     lectureId: lastLectureActivity.lecture.id,
     lectureTitle: lastLectureActivity.lecture.title,
-    videoUrl: lastLectureActivity.lecture.videoUrl,
+    videoUrl: lastLectureActivity.lecture.videoUrl
+      || lastLectureActivity.lecture.videos?.[0]?.url
+      || null,
     moduleId: lastLectureActivity.lecture.subject.moduleId,
     subjectName: lastLectureActivity.lecture.subject.name,
     channelName: lastLectureActivity.lecture.team?.name || "MedOneX",

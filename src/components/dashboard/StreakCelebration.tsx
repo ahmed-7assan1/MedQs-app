@@ -66,7 +66,6 @@ export const StreakCelebration = ({ currentStreak }: { currentStreak: number }) 
             </div>
           </div>
         )}
-      </div>
       </CardContent>
      </Card>
     </>

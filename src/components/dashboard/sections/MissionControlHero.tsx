@@ -1,101 +1,112 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { Flame, Trophy, ArrowRight, Quote, Sparkles, Search, Bell } from "lucide-react";
+import { motion } from "framer-motion";
+import { Flame, Trophy, Sparkles, GraduationCap, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { getDailyQuote } from "@/components/dashboard/shared/quotes";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { DashboardData } from "@/types/dashboard";
 
 export function MissionControlHero({ data }: { data: DashboardData }) {
- const quote = getDailyQuote();
- const missionModule = data.moduleProgress?.[0];
+  return (
+    <div>
+        {/* Top row: avatar + greeting + badges */}
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="relative shrink-0">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary via-accent to-primary blur-md opacity-50 animate-scale-pulse" />
+              <Avatar className="relative h-14 w-14 md:h-16 md:w-16 shrink-0 border-2 border-border/60 ring-2 ring-primary/20">
+                {data.userImage ? (
+                  <AvatarImage src={data.userImage} alt={data.firstName} className="object-cover" />
+                ) : null}
+                <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-lg md:text-xl font-black">
+                  {data.firstName.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              {/* Online indicator */}
+              <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-500 border-2 border-card shadow-sm" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[9px] font-bold text-primary uppercase tracking-[0.2em] bg-primary/10 px-2 py-0.5 rounded-full">{data.greeting}</span>
+                {data.overallPct >= 80 && (
+                  <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-[0.2em] bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Sparkles className="h-2.5 w-2.5" /> Top Performer
+                  </span>
+                )}
+              </div>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter text-foreground leading-none">
+                Dr. {data.firstName}
+              </h1>
+              <p className="mt-1.5 text-xs font-medium text-muted-foreground/70 flex items-center gap-1.5 flex-wrap">
+                <GraduationCap className="h-3.5 w-3.5 text-primary/60" />
+                <span className="text-foreground/80 font-bold">{data.rankLabel}</span>
+              </p>
+            </div>
+          </div>
 
- return (
-  <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-card/90 to-card/60 shadow-[0_0_40px_-10px_hsl(var(--primary)/0.15)]">
-   <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
-   <div className="absolute -left-8 -bottom-8 h-24 w-24 rounded-full bg-accent/10 blur-3xl" />
+          {/* Badges */}
+          <div className="flex gap-2 shrink-0">
+            <div className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border",
+              data.currentStreak > 0
+                ? "bg-gradient-to-br from-orange-500/10 to-amber-500/5 border-orange-500/20 shadow-sm shadow-orange-500/5"
+                : "bg-muted/30 border-border/50"
+            )}>
+              <Flame className={cn("h-3.5 w-3.5", data.currentStreak > 0 ? "text-orange-500" : "text-muted-foreground")} />
+              <span className="text-[10px] font-black tabular-nums text-foreground">{data.currentStreak}d</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border bg-gradient-to-br from-amber-500/10 to-yellow-500/5 border-amber-500/20 shadow-sm shadow-amber-500/5">
+              <Trophy className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-[10px] font-black tabular-nums text-foreground">{(data.rankPoints || 0).toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
 
-   <CardContent className="p-6 md:p-8">
-    <div className="relative flex flex-col md:flex-row gap-6">
-    <div className="flex-1 min-w-0">
-     <div className="flex items-start justify-between gap-4">
-      <div className="min-w-0">
-       <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">{data.greeting}</p>
-       <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground">
-        Dr. {data.firstName}
-       </h1>
-       <p className="mt-1 text-xs font-medium text-muted-foreground">
-        <span className="text-foreground font-bold">{data.overallPct}%</span> overall mastery
-        <span className="mx-2 text-muted-foreground/30">·</span>
-        <span className="text-foreground/60">{data.totalQuestions} questions</span>
-       </p>
-      </div>
-      <div className="flex gap-2 shrink-0">
-       <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full" title="Search">
-        <Search className="h-3.5 w-3.5" />
-       </Button>
-       <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full" title="Notifications">
-        <Bell className="h-3.5 w-3.5" />
-        <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500 border border-background" />
-       </Button>
-       <Badge
-        variant="outline"
-        className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-sm", data.currentStreak > 0 ? "bg-orange-500/10 border-orange-500/20" : "bg-muted/30 border-border")}
-       >
-        <Flame className={cn("h-3.5 w-3.5", data.currentStreak > 0 ? "text-orange-500" : "text-muted-foreground")} />
-        <span className="text-xs font-black">{data.currentStreak}d</span>
-       </Badge>
-       <Badge variant="outline" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border-amber-500/20 shadow-sm">
-        <Trophy className="h-3.5 w-3.5 text-amber-500" />
-        <span className="text-xs font-black">{(data.rankPoints || 0).toLocaleString()}</span>
-       </Badge>
-      </div>
-     </div>
+        {/* Module progress cards */}
+        <div className="mt-6 md:mt-8 flex items-stretch gap-3 md:gap-4 flex-wrap">
+          {(data.moduleProgress?.slice(0, 4) || []).map((mod) => (
+            <Link
+              key={mod.id}
+              href={`/modules/${mod.id}`}
+              className="flex-1 min-w-[120px] p-3.5 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 hover:border-primary/30 transition-all"
+            >
+              <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest block truncate">
+                {mod.name}
+              </span>
+              <span className="text-lg md:text-xl font-black tracking-tighter tabular-nums text-foreground">
+                {mod.pct}%
+              </span>
+              <div className="mt-1.5 h-1 w-full bg-muted/50 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-500"
+                  style={{ width: `${mod.pct}%` }}
+                />
+              </div>
+            </Link>
+          ))}
+        </div>
 
-     <div className="mt-5 p-4 rounded-xl bg-primary/5 border border-primary/10">
-      <div className="flex items-start gap-3">
-       <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-       <div className="flex-1 min-w-0">
-        <p className="text-xs font-bold text-foreground/80">
-         {missionModule
-          ? `Continue ${missionModule.name} — ${missionModule.pct}% complete`
-          : "Start your medical journey"}
-        </p>
-        <p className="text-[10px] font-medium text-muted-foreground mt-0.5">
-         {missionModule
-          ? `${Math.round((100 - missionModule.pct) / 10) * 5 || 5} min remaining`
-          : "Enroll in your first module to begin"}
-        </p>
-       </div>
-       <Button asChild className="rounded-full text-[10px] font-black uppercase tracking-wider shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.6)] shrink-0">
-        <Link href={missionModule ? `/modules/${missionModule.id}` : "/modules"}>
-         Continue <ArrowRight className="h-3 w-3" />
-        </Link>
-       </Button>
-      </div>
-     </div>
+        {/* Daily progress bar */}
+        {data.dailyTarget > 0 && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-[10px] font-bold mb-1.5">
+              <span className="text-muted-foreground/60 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3 text-primary/60" />
+                Daily Target
+              </span>
+              <span className="text-foreground/80">{data.todayItemCount} / {data.dailyTarget}</span>
+            </div>
+            <div className="h-1.5 w-full bg-muted/40 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${data.dailyPct}%` }}
+                transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
+              />
+            </div>
+          </div>
+        )}
     </div>
-
-     <div className="md:w-56 shrink-0 flex items-start">
-      <Card className="rounded-xl bg-muted/30 border border-border/40 shadow-none w-full">
-       <CardContent className="p-4">
-      <div className="flex items-start gap-2">
-       <Quote size={14} className="text-primary shrink-0 mt-0.5" />
-       <p className="text-[11px] leading-relaxed text-foreground/60 italic">
-        &ldquo;{quote.text}&rdquo;
-       </p>
-      </div>
-      <p className="mt-1.5 text-[9px] font-bold text-foreground/30 text-right tracking-wider">
-       &mdash; {quote.author}
-       </p>
-        </CardContent>
-       </Card>
-      </div>
-     </div>
-    </CardContent>
-   </Card>
   );
 }

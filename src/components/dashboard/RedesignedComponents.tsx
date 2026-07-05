@@ -251,6 +251,57 @@ export const AnimatedRing = ({ progress, size = 72, strokeWidth = 6, color = "te
  );
 };
 
+/* ── Animated Counter ── */
+interface AnimatedCounterProps {
+  value: number;
+  suffix?: string;
+  duration?: number;
+  className?: string;
+}
+
+export const AnimatedCounter = ({ value, suffix = "", duration = 800, className }: AnimatedCounterProps) => {
+  const ref = React.useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const [displayed, setDisplayed] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) return;
+    let start = 0;
+    const increment = Math.max(1, Math.floor(value / 30));
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= value) {
+        setDisplayed(value);
+        clearInterval(timer);
+      } else {
+        setDisplayed(start);
+      }
+    }, duration / (value / increment));
+    return () => clearInterval(timer);
+  }, [isInView, value, duration]);
+
+  return <span ref={ref} className={cn("tabular-nums", className)}>{displayed}{suffix}</span>;
+};
+
+/* ── Glass Card Wrapper ── */
+interface GlassCardProps {
+  children: React.ReactNode;
+  className?: string;
+  hover?: boolean;
+}
+
+export const GlassCard = ({ children, className, hover = true }: GlassCardProps) => {
+  return (
+    <div className={cn(
+      "rounded-2xl border border-border/40 bg-card/70 backdrop-blur-sm shadow-sm",
+      hover && "transition-all duration-300 hover:shadow-md hover:border-border/60 hover:-translate-y-0.5",
+      className
+    )}>
+      {children}
+    </div>
+  );
+};
+
 interface ActivityBarProps {
   height: number;
   delay?: number;

@@ -232,6 +232,11 @@ export async function fetchDashboardData(
               id: true,
               title: true,
               videoUrl: true,
+              videos: {
+                take: 1,
+                orderBy: { sortOrder: "asc" },
+                select: { url: true },
+              },
               subject: { select: { moduleId: true, name: true } },
               team: { select: { name: true, imageUrl: true } },
             },

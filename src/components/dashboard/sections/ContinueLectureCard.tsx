@@ -1,37 +1,33 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Play, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getYouTubeId, getYouTubeThumbnail } from "@/lib/video-utils";
 import type { LastLectureInfo } from "@/types/dashboard";
 
-function getYouTubeId(url: string): string | null {
-  const patterns = [
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?(?:.*&)?v=([a-zA-Z0-9_-]{11})/,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:embed|shorts|live)\/([a-zA-Z0-9_-]{11})/,
-    /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
-  ];
-  for (const p of patterns) {
-    const m = url.match(p);
-    if (m) return m[1];
-  }
-  return null;
-}
+const HQ_FALLBACK = "hqdefault.jpg";
 
 export function ContinueLectureCard({ lecture }: { lecture: LastLectureInfo | null }) {
+  const [imgError, setImgError] = useState(false);
+  const [useFallbackImg, setUseFallbackImg] = useState(false);
+
   if (!lecture) return null;
 
   const videoId = lecture.videoUrl ? getYouTubeId(lecture.videoUrl) : null;
-  const thumbnailUrl = videoId
-    ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+  const thumbnailUrl = videoId && !imgError
+    ? (useFallbackImg
+        ? `https://img.youtube.com/vi/${videoId}/${HQ_FALLBACK}`
+        : getYouTubeThumbnail(videoId))
     : null;
 
   return (
     <Card className="overflow-hidden border-border/40 shadow-sm">
-      <div className="relative w-full aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+      <div className="relative mx-2 mt-2 aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
         {thumbnailUrl ? (
           <>
             <Image
@@ -39,6 +35,13 @@ export function ContinueLectureCard({ lecture }: { lecture: LastLectureInfo | nu
               alt={lecture.lectureTitle}
               fill
               className="object-cover"
+              onError={() => {
+                if (!useFallbackImg) {
+                  setUseFallbackImg(true);
+                } else {
+                  setImgError(true);
+                }
+              }}
             />
             <div className="absolute inset-0 bg-black/10" />
           </>
