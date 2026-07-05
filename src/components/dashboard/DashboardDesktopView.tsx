@@ -25,7 +25,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           transition: "max-width .3s cubic-bezier(.2,0,0,1)",
         }}
       >
-        <div className="flex gap-6 xl:gap-8 px-4 sm:px-6 md:px-6 lg:px-10">
+        <div className="flex gap-6 xl:gap-8 px-4 sm:px-8 lg:px-12">
           <div className="flex-1 min-w-0 space-y-8 md:space-y-10 section-entrance pt-6 lg:pt-8">
             <MissionControlHero data={data} />
             <ContinueLearningSection data={data} />
@@ -42,7 +42,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
               transition: "width .3s cubic-bezier(.2,0,0,1)",
             }}
           >
-            <aside className="flex flex-col gap-6 md:gap-8 -mt-24 pt-6 lg:pt-8">
+            <aside className="flex flex-col gap-6 md:gap-8 -mt-20 pt-8 lg:pt-10 pb-8 premium-glass rounded-2xl px-4">
               <SearchableSidebar>
                 <ActiveRoomsSidebar />
                 <LeaderboardSidebar />

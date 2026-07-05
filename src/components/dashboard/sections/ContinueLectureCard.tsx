@@ -29,15 +29,15 @@ export function ContinueLectureCard({ lecture }: { lecture: LastLectureInfo | nu
   return (
     <>
     <SectionHeader icon={Play} title="Continue Lecture" />
-    <Card className="overflow-hidden border-border/40 shadow-sm">
-      <div className="relative mx-2 mt-2 aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+    <Card className="overflow-hidden border-border/40 shadow-sm min-h-[150px]">
+      <div className="relative mx-2 mt-2 aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center group/card">
         {thumbnailUrl ? (
           <>
             <Image
               src={thumbnailUrl}
               alt={lecture.lectureTitle}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-300 group-hover/card:scale-105"
               onError={() => {
                 if (!useFallbackImg) {
                   setUseFallbackImg(true);
@@ -46,7 +46,12 @@ export function ContinueLectureCard({ lecture }: { lecture: LastLectureInfo | nu
                 }
               }}
             />
-            <div className="absolute inset-0 bg-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30">
+                <Play className="h-5 w-5 ml-0.5" />
+              </div>
+            </div>
           </>
         ) : (
           <BookOpen className="h-10 w-10 text-muted-foreground/40" />

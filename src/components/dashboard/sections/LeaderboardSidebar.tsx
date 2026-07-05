@@ -27,13 +27,13 @@ export function LeaderboardSidebar() {
   if (users.length === 0) return null;
 
   const ringColors = [
-    "ring-yellow-500 shadow-[0_0_6px_rgba(234,179,8,0.3)]",
-    "ring-amber-600/60 shadow-[0_0_6px_rgba(217,119,6,0.2)]",
-    "ring-gray-300 dark:ring-gray-500 shadow-[0_0_6px_rgba(156,163,175,0.2)]",
+    "ring-yellow-500 shadow-[0_0_12px_rgba(234,179,8,0.4)]",
+    "ring-amber-600/60 shadow-[0_0_10px_rgba(217,119,6,0.3)]",
+    "ring-gray-300 dark:ring-gray-500 shadow-[0_0_8px_rgba(156,163,175,0.3)]",
   ];
 
   return (
-    <div>
+    <div className="min-h-[100px]">
       <SectionHeader icon={Trophy} title="Top Students" />
       <div className="flex gap-3 mt-2">
         {users.map((u, i) => (
@@ -43,7 +43,7 @@ export function LeaderboardSidebar() {
             className="flex flex-col items-center gap-1 shrink-0 flex-1 min-w-0"
           >
             <div className={cn(
-              "h-10 w-10 rounded-full overflow-hidden bg-muted/30 border border-border/40 ring-2 shrink-0",
+              "h-12 w-12 rounded-full overflow-hidden bg-muted/30 border border-border/40 ring-2 shrink-0 transition-shadow duration-300",
               ringColors[i]
             )}>
               {u.image ? (

@@ -2440,3 +2440,18 @@ select,
     margin: 0 auto;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   DASHBOARD REDESIGN — Premium Ambient Background
+   ═══════════════════════════════════════════════════════════════ */
+
+
+
+
+/* ── Enhanced hero mesh ── */
+.hero-mesh::before {
+  background:
+    radial-gradient(ellipse 80% 50% at 25% 0%, hsl(var(--primary) / 0.15), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 75% 10%, hsl(var(--primary) / 0.08), transparent 50%),
+    radial-gradient(ellipse 60% 30% at 50% 100%, hsl(var(--primary) / 0.06), transparent 50%);
+}

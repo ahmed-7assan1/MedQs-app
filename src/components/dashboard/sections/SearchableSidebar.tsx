@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { Search, X, BookOpen, Folder, HelpCircle, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { SiteSectionsTrigger } from "@/components/dashboard/sections/SiteSectionsModal";
 
 interface SearchResults {
   lectures: { label: string; href: string }[];
@@ -89,10 +90,13 @@ export function SearchableSidebar({ children }: { children: React.ReactNode }) {
             )}
           </>
         ) : (
-          <button onClick={openSearch} className="w-full flex items-center gap-2 h-9 px-2.5 rounded-xl border border-border/40 bg-card/60 text-xs text-muted-foreground/50 hover:text-muted-foreground/70 hover:bg-card/80 transition-all">
-            <Search className="h-3.5 w-3.5 shrink-0" />
-            <span>Search lectures...</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={openSearch} className="flex-1 flex items-center gap-2 h-9 px-2.5 rounded-xl border border-border/40 bg-card/60 text-xs text-muted-foreground/50 hover:text-muted-foreground/70 hover:bg-card/80 transition-all">
+              <Search className="h-3.5 w-3.5 shrink-0" />
+              <span>Search lectures...</span>
+            </button>
+            <SiteSectionsTrigger />
+          </div>
         )}
       </div>
 

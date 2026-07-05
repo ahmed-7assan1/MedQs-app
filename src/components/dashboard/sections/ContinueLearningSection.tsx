@@ -9,11 +9,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 import type { DashboardData } from "@/types/dashboard";
 
-const progressGradients = [
-  "from-primary/20 via-primary/5 to-transparent",
-  "from-emerald-500/20 via-emerald-500/5 to-transparent",
-  "from-violet-500/20 via-violet-500/5 to-transparent",
-  "from-amber-500/20 via-amber-500/5 to-transparent",
+const thumbnailGradients = [
+  "from-primary/30 via-primary/10 to-transparent",
+  "from-emerald-500/30 via-emerald-500/10 to-transparent",
+  "from-violet-500/30 via-violet-500/10 to-transparent",
+  "from-amber-500/30 via-amber-500/10 to-transparent",
+];
+
+const accentBorders = [
+  "border-primary/30 group-hover:border-primary/50",
+  "border-emerald-500/30 group-hover:border-emerald-500/50",
+  "border-violet-500/30 group-hover:border-violet-500/50",
+  "border-amber-500/30 group-hover:border-amber-500/50",
 ];
 
 export function ContinueLearningSection({ data }: { data: DashboardData }) {
@@ -24,10 +31,7 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
       <div>
         <SectionHeader icon={BookOpen} title="Continue Learning" />
         <Button variant="outline" asChild className="w-full p-0 h-auto rounded-2xl border-dashed bg-card/30 hover:bg-card/50">
-          <Link
-            href="/modules"
-            className="flex items-center justify-between p-5"
-          >
+          <Link href="/modules" className="flex items-center justify-between p-5">
             <div className="flex items-center gap-3">
               <GraduationCap className="h-7 w-7 text-muted-foreground/30" />
               <div>
@@ -35,7 +39,7 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
                 <p className="text-xs text-muted-foreground">Enroll to get started</p>
               </div>
             </div>
-            <ArrowRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary transition-colors duration-300" />
+            <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
           </Link>
         </Button>
       </div>
@@ -46,9 +50,10 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
     <div>
       <SectionHeader icon={BookOpen} title="Continue Learning" />
 
-      <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth [-webkit-scrollbar]:hidden">
+      <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth [-webkit-scrollbar]:hidden pr-4">
         {modules.map((mod, i) => {
-          const gradient = progressGradients[i % progressGradients.length];
+          const thumbGrad = thumbnailGradients[i % thumbnailGradients.length];
+          const accentBorder = accentBorders[i % accentBorders.length];
           const timeLeft = Math.round((100 - mod.pct) / 10) * 5 || 5;
 
           return (
@@ -59,51 +64,60 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.06 * i, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Card asChild className="group w-[220px] md:w-[280px] lg:w-[240px] overflow-hidden rounded-2xl border-border/40 bg-card/80 shadow-sm will-change-transform transition-all duration-300 ease-out hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+              <Card asChild className={cn(
+                "group w-[220px] md:w-[280px] lg:w-[260px] overflow-hidden rounded-2xl border-border/40 bg-card/40 backdrop-blur-sm shadow-sm will-change-transform transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg",
+                accentBorder
+              )}>
                 <Link href={`/modules/${mod.id}`}>
-                  <CardContent className="p-5 relative">
-                    {/* Gradient overlay based on progress */}
-                    <div className={cn("absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500", gradient)} />
-
-                    {/* Subtle top accent line */}
-                    <div className="absolute top-0 left-3 right-3 h-0.5 rounded-full bg-gradient-to-r from-primary/40 to-accent/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                    <div className="relative">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className={cn(
-                          "flex items-center justify-center w-9 h-9 rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5",
-                          mod.pct >= 80 ? "bg-emerald-500/15 text-emerald-500" :
-                          mod.pct >= 40 ? "bg-primary/15 text-primary" :
-                          "bg-muted/30 text-muted-foreground"
-                        )}>
-                          <GraduationCap className="h-5 w-5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest truncate">Module</p>
-                          <p className="text-xs font-bold text-foreground truncate">{mod.name}</p>
+                  <CardContent className="p-0 relative">
+                    {/* Thumbnail area */}
+                    <div className={cn(
+                      "relative flex items-center justify-center h-24 md:h-28 bg-gradient-to-br",
+                      thumbGrad
+                    )}>
+                      <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-background/40 backdrop-blur-sm border border-white/10 dark:border-white/10 transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
+                        <GraduationCap className={cn(
+                          "h-6 w-6 transition-colors duration-300",
+                          mod.pct >= 80 ? "text-emerald-500" : mod.pct >= 40 ? "text-primary" : "text-muted-foreground"
+                        )} />
+                      </div>
+                      {/* Play button overlay on hover */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-all duration-300 rounded-t-2xl">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/90 text-primary-foreground opacity-0 group-hover:opacity-100 transition-all duration-300 scale-75 group-hover:scale-100 shadow-lg shadow-primary/30">
+                          <Play className="h-5 w-5 ml-0.5" />
                         </div>
                       </div>
+                    </div>
 
-                      {/* Progress section */}
-                      <div className="mb-3">
-                        <div className="flex justify-between items-center text-[10px] font-bold mb-1.5">
-                          <span className="text-foreground/80">{mod.pct}%</span>
-                          <span className="text-muted-foreground/50 flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {timeLeft} min
-                          </span>
-                        </div>
-                        <div className="h-1.5 w-full bg-muted/40 rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${mod.pct}%` }}
-                            transition={{ duration: 0.8, delay: 0.1 * i, ease: [0.16, 1, 0.3, 1] }}
-                            className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
-                          />
-                        </div>
+                    {/* Content area */}
+                    <div className="p-4 relative">
+                      {/* Accent line */}
+                      <div className="absolute top-0 left-4 right-4 h-0.5 rounded-full bg-gradient-to-r from-primary/30 to-accent/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Module</p>
+                        <span className="text-muted-foreground/50 flex items-center gap-1 text-[9px]">
+                          <Clock className="h-2.5 w-2.5" />
+                          {timeLeft} min
+                        </span>
+                      </div>
+                      <p className="text-xs font-bold text-foreground truncate mb-3">{mod.name}</p>
+
+                      <div className="flex justify-between items-center text-[10px] font-bold mb-1.5">
+                        <span className="text-foreground/80">{mod.pct}%</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-muted/40 rounded-full overflow-hidden relative">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${mod.pct}%` }}
+                          transition={{ duration: 0.8, delay: 0.1 * i, ease: [0.16, 1, 0.3, 1] }}
+                          className="h-full rounded-full bg-gradient-to-r from-primary to-accent relative overflow-hidden"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                        </motion.div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-wider transition-all duration-300 group-hover:translate-x-1">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-wider transition-all duration-300 group-hover:translate-x-1 mt-3">
                         <Play className="h-3 w-3" />
                         Continue
                       </div>

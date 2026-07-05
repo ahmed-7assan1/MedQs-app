@@ -216,7 +216,7 @@ function PostCard({ post }: { post: PostData }) {
               asChild
               variant="ghost"
               size="sm"
-              className="h-7 px-2.5 rounded-md text-[10px] font-bold gap-1 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10"
+              className="h-7 px-2.5 rounded-md text-[10px] font-bold gap-1 text-indigo-500 hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-primary hover:to-accent"
             >
               <Link href={`/social?post=${post.id}`}>
                 Read more

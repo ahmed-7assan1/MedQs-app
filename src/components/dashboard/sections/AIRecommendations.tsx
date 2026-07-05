@@ -134,7 +134,7 @@ export function AIRecommendations({ data }: { data: DashboardData }) {
               transition={{ delay: 0.08 * i, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               <Card className={cn(
-                "group overflow-hidden rounded-2xl border-border/40 bg-card/70 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 border-l-2",
+                "group overflow-hidden rounded-2xl border-border/40 bg-card/40 backdrop-blur-sm shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 border-l-2",
                 rec.borderColor
               )}>
                 <CardContent className="p-4">

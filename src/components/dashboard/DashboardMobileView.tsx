@@ -27,7 +27,7 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
   return (
     <div className="md:hidden scroll-smooth pt-4">
       {/* Sticky tab bar */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl px-4 pb-2 pt-1 mb-2 border-b border-border/30">
+      <div className="sticky top-0 z-10 bg-background/60 backdrop-blur-xl px-4 pb-2 pt-1 mb-2 border-b border-border/20">
         <div className="flex gap-1 rounded-xl bg-muted/40 p-0.5">
           {TABS.map((tab) => (
             <button
