@@ -15,14 +15,14 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
   return (
     <div className="hidden md:block">
       <div
-        className="relative mx-auto pb-32 w-full"
+        className="relative mx-auto w-full h-dvh overflow-hidden"
         style={{
           maxWidth: `calc(1504px - var(--sidebar-offset, 64px))`,
           transition: "max-width .3s cubic-bezier(.2,0,0,1)",
         }}
       >
-        <div className="flex gap-6 xl:gap-8 px-4 sm:px-8 lg:px-12">
-          <div className="flex-1 min-w-0 space-y-8 md:space-y-10 section-entrance pt-6 lg:pt-8">
+        <div className="flex gap-6 xl:gap-8 px-4 sm:px-8 lg:px-12 h-full">
+          <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-32 space-y-8 md:space-y-10 section-entrance scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent">
             <MissionControlHero data={data} />
             <ContinueLearningSection data={data} />
             <CommunityCarouselSidebar />
@@ -30,13 +30,13 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           </div>
 
           <div
-            className="sticky top-24 shrink-0 hidden lg:flex flex-col self-start"
+            className="shrink-0 hidden lg:flex flex-col self-start"
             style={{
               width: `calc(336px - var(--sidebar-offset, 64px) * .25)`,
               transition: "width .3s cubic-bezier(.2,0,0,1)",
             }}
           >
-            <aside className="flex flex-col gap-6 md:gap-8 -mt-20 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4">
+            <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4">
               <SearchableSidebar>
                 <ActiveRoomsSidebar />
                 <LeaderboardSidebar />
