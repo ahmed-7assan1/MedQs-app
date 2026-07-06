@@ -11,7 +11,10 @@ import {
 } from "@/components/ui/carousel";
 import { Play, Video, ArrowRight, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getYouTubeThumbnail } from "@/lib/video-utils";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
+
+const HQ_FALLBACK = "hqdefault.jpg";
 
 interface SuggestedVideo {
   id: string;
@@ -27,16 +30,33 @@ interface SuggestedVideo {
 }
 
 function VideoCard({ video }: { video: SuggestedVideo }) {
+  const [imgError, setImgError] = useState(false);
+  const [useFallbackImg, setUseFallbackImg] = useState(false);
+
+  const videoId = video.videoId;
+  const thumbnailUrl = videoId && !imgError
+    ? (useFallbackImg
+        ? `https://img.youtube.com/vi/${videoId}/${HQ_FALLBACK}`
+        : getYouTubeThumbnail(videoId))
+    : null;
+
   return (
     <Link href={`/modules/${video.moduleId}/lectures/${video.lectureId}`}>
       <Card className="overflow-hidden border-border/40 shadow-sm h-[300px] group cursor-pointer">
         <div className="relative aspect-video bg-muted/20 overflow-hidden">
-          {video.thumbnail ? (
+          {thumbnailUrl ? (
             <img
-              src={video.thumbnail}
+              src={thumbnailUrl}
               alt={video.title}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               loading="lazy"
+              onError={() => {
+                if (!useFallbackImg) {
+                  setUseFallbackImg(true);
+                } else {
+                  setImgError(true);
+                }
+              }}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { getYouTubeId } from "@/lib/video-utils";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -53,10 +54,7 @@ export async function GET(req: NextRequest) {
 
     const vIdList: string[] = [];
     const formattedRaw = videos.map((v: any) => {
-       let videoId = "";
-       const url = v.url || "";
-       if (url.includes("v=")) videoId = url.split("v=")[1].split("&")[0];
-       else if (url.includes("youtu.be/")) videoId = url.split("youtu.be/")[1].split("?")[0];
+       const videoId = getYouTubeId(v.url) || "";
        
        if (videoId) vIdList.push(videoId);
 
@@ -64,7 +62,7 @@ export async function GET(req: NextRequest) {
           id: v.id,
           videoId: videoId,
           title: v.title,
-          thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null,
+          thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null,
           lectureId: v.lecture.id,
           lectureTitle: v.lecture.title,
           moduleId: v.lecture.subject.moduleId,
