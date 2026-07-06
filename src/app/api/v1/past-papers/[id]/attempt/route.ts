@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { loadQuestionAnswerKeysForPastPaper } from "@/lib/past-paper-quiz";
@@ -46,6 +47,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     },
     include: { items: true },
   });
+
+  revalidateTag("dashboard");
 
   if (paper.googleSheetsSyncEnabled) {
     try {

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/get-authenticated-user";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma, withRetry } from "@/lib/prisma";
@@ -14,8 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser();
   if (!user) redirect("/auth?mode=login");
 
   let fullProfile = user ? await prisma.user.findUnique({
