@@ -10,7 +10,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { Play, Paperclip, Heart, MessageSquare, ArrowRight, ArrowLeft, MessageCircle } from "lucide-react";
+import { Play, Heart, MessageSquare, ArrowRight, ArrowLeft, MessageCircle, FileText, FileImage, FileCode, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 
@@ -95,6 +95,13 @@ function detectMediaType(url: string): string {
   return "file";
 }
 
+function FileIcon({ url }: { url: string }) {
+  const ext = url.split("?")[0].toLowerCase();
+  if (ext.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/)) return <FileImage className="h-4 w-4 text-sky-500" />;
+  if (ext.match(/\.pdf$/)) return <FileText className="h-4 w-4 text-red-500" />;
+  return <FileCode className="h-4 w-4 text-muted-foreground" />;
+}
+
 function PostCardBody({ post }: { post: PostData }) {
   const contentSrc = stripMediaUrls(post.content || "");
   const attachments = useMemo(() => parseAttachments(post.attachments), [post.attachments]);
@@ -149,22 +156,22 @@ function PostCardBody({ post }: { post: PostData }) {
       )}
 
       {fileAttachments.length > 0 && (
-        <div className="shrink-0 space-y-1">
+        <div className="shrink-0 space-y-1.5">
           {fileAttachments.slice(0, 2).map((a: any, i: number) => {
-            const fileName = a.name || a.fileName || a.url?.split("/").pop() || `file-${i + 1}`;
+            const url = a.url || a;
+            const fileName = a.name || a.fileName || url.split("/").pop() || `file-${i + 1}`;
             return (
-              <a
-                key={i}
-                href={a.url || a}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 p-2 rounded-lg bg-amber-500/8 border border-amber-500/15 hover:bg-amber-500/15 transition-colors"
-              >
-                <Paperclip className="h-3 w-3 text-amber-500 shrink-0" />
-                <span className="text-[10px] font-medium text-foreground/70 truncate flex-1">
-                  {fileName}
-                </span>
-              </a>
+              <div key={i} className="flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2.5 group hover:bg-muted transition-colors">
+                <FileIcon url={url} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-foreground truncate">{fileName}</p>
+                  <p className="text-[10px] text-muted-foreground">{a.type || "File"}</p>
+                </div>
+                <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors shrink-0">
+                  <Download className="h-3.5 w-3.5" />
+                </a>
+              </div>
             );
           })}
         </div>
