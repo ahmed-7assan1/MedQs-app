@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import type { DashboardData } from "@/types/dashboard";
 import { MissionControlHero } from "@/components/dashboard/sections/MissionControlHero";
 import { ContinueLearningSection } from "@/components/dashboard/sections/ContinueLearningSection";
@@ -11,8 +10,6 @@ import { ActiveRoomsSidebar } from "@/components/dashboard/sections/ActiveRoomsS
 import { LeaderboardSidebar } from "@/components/dashboard/sections/LeaderboardSidebar";
 import { SearchableSidebar } from "@/components/dashboard/sections/SearchableSidebar";
 import { CommunityCarouselSidebar } from "@/components/dashboard/sections/CommunityCarouselSidebar";
-
-const AIRecommendations = dynamic(() => import("@/components/dashboard/sections/AIRecommendations").then(m => m.AIRecommendations), { ssr: false });
 
 export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; hasAds?: boolean }) {
   return (
@@ -31,7 +28,6 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
             <CommunityCarouselSidebar />
             <QuickActionsHub />
             <EcosystemCards />
-            <AIRecommendations data={data} />
           </div>
 
           <div

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 import type { DashboardData } from "@/types/dashboard";
 import { MissionControlHero } from "@/components/dashboard/sections/MissionControlHero";
@@ -9,8 +8,6 @@ import { ContinueLearningSection } from "@/components/dashboard/sections/Continu
 import { QuickActionsHub } from "@/components/dashboard/sections/QuickActionsHub";
 import { EcosystemCards } from "@/components/dashboard/sections/EcosystemCards";
 import { LearningHeatmap } from "@/components/dashboard/sections/LearningHeatmap";
-
-const AIRecommendations = dynamic(() => import("@/components/dashboard/sections/AIRecommendations").then(m => m.AIRecommendations), { ssr: false });
 
 type TabId = "overview" | "learn" | "social";
 
@@ -57,7 +54,6 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
         {activeTab === "learn" && (
           <>
             <ContinueLearningSection data={data} />
-            <AIRecommendations data={data} />
             <EcosystemCards />
           </>
         )}
