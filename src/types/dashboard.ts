@@ -26,6 +26,14 @@ export interface LastLectureInfo {
   channelAvatar: string | null;
 }
 
+export interface QuizCardData {
+  id: string;
+  title: string;
+  moduleName: string;
+  bestScore: number | null;
+  attemptCount: number;
+}
+
 export interface DashboardData {
   firstName: string;
   greeting: string;
@@ -44,4 +52,5 @@ export interface DashboardData {
   userImage?: string | null;
   ads?: DashboardAd[];
   lastLecture?: LastLectureInfo | null;
+  recentQuizzes: QuizCardData[];
 }

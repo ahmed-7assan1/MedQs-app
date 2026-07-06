@@ -31,11 +31,12 @@ export type DashboardData = {
     semester: { name: string } | null;
   } | null;
   rankInfo: Awaited<ReturnType<typeof import("@/lib/engagement").getUserRankInfo>>;
-  recentAttempts: Array<{
+  recentQuizzes: Array<{
     id: string;
-    score: number;
-    createdAt: Date;
-    pastPaper: { title: string };
+    title: string;
+    moduleName: string;
+    bestScore: number | null;
+    attemptCount: number;
   }>;
   todayItemCount: number;
   streak: number;
@@ -195,7 +196,7 @@ export async function fetchDashboardData(
   dayStart.setHours(0, 0, 0, 0);
 
   // Run independent queries in parallel
-  const [user, recentAttempts, todayItemCount, streak, weekCounts, lastLectureActivity] =
+  const [user, recentQuizzes, todayItemCount, streak, weekCounts, lastLectureActivity] =
     await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
@@ -207,15 +208,21 @@ export async function fetchDashboardData(
           semester: { select: { name: true } },
         },
       }),
-      prisma.quizAttempt.findMany({
-        where: { userId },
+      prisma.pastPaper.findMany({
+        where: { attempts: { some: { userId } } },
         orderBy: { createdAt: "desc" },
         take: 4,
         select: {
           id: true,
-          score: true,
-          createdAt: true,
-          pastPaper: { select: { title: true } },
+          title: true,
+          module: { select: { name: true } },
+          attempts: {
+            where: { userId },
+            orderBy: { score: "desc" },
+            take: 1,
+            select: { score: true },
+          },
+          _count: { select: { attempts: { where: { userId } } } },
         },
       }),
       prisma.quizAttemptItem.count({
@@ -265,7 +272,13 @@ export async function fetchDashboardData(
 
   return {
     user,
-    recentAttempts,
+    recentQuizzes: recentQuizzes.map(q => ({
+      id: q.id,
+      title: q.title,
+      moduleName: q.module.name,
+      bestScore: q.attempts[0]?.score ?? null,
+      attemptCount: q._count.attempts,
+    })),
     todayItemCount,
     streak,
     weekCounts,

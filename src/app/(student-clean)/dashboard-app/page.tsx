@@ -78,11 +78,12 @@ export default async function DashboardPage() {
     console.warn("[dashboard-app] DB error:", err instanceof Error ? err.message : err);
   }
 
-  const { stats, moduleProgress, activity: activityArr, lastLectureActivity } = dashData || {
+  const { stats, moduleProgress, activity: activityArr, lastLectureActivity, recentQuizzes } = dashData || {
     stats: { totalQuestions: 0, totalCorrect: 0, todayItemCount: 0, currentStreak: 0 },
     moduleProgress: [],
     activity: [],
     lastLectureActivity: null,
+    recentQuizzes: [],
   };
 
   const safeStats = stats || { totalQuestions: 0, totalCorrect: 0, todayItemCount: 0, currentStreak: 0 };
@@ -166,6 +167,7 @@ export default async function DashboardPage() {
     ads: ads.length ? ads : undefined,
     userImage,
     lastLecture,
+    recentQuizzes: recentQuizzes || [],
   };
 
   return <DashboardShell data={dashboardData} />;

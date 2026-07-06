@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Flame, Trophy, Sparkles, GraduationCap, TrendingUp, Bell, Sun, Moon, Maximize, Minimize } from "lucide-react";
+import { Flame, Trophy, Sparkles, GraduationCap, TrendingUp, Bell, Sun, Moon, Maximize, Minimize, FileText, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useThemeStore, useNotificationStore } from "@/lib/store";
@@ -160,29 +161,33 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
         </div>
       </div>
 
-      <div className="mt-6 md:mt-8 flex items-stretch gap-3 md:gap-4 flex-wrap">
-        {(data.moduleProgress?.slice(0, 4) || []).map((mod) => (
-          <Link
-            key={mod.id}
-            href={`/modules/${mod.id}`}
-            className="flex-1 min-w-[120px] p-3.5 rounded-xl bg-card/40 backdrop-blur-sm border border-white/5 dark:border-white/10 hover:bg-card/60 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all"
-          >
-            <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest block truncate">
-              {mod.name}
-            </span>
-            <span className="text-xl md:text-2xl font-black tracking-tighter tabular-nums text-foreground">
-              {mod.pct}%
-            </span>
-            <div className="mt-1.5 h-1 w-full bg-muted/50 rounded-full overflow-hidden relative">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-500 relative overflow-hidden"
-                style={{ width: `${mod.pct}%` }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
-              </div>
-            </div>
-          </Link>
-        ))}
+      <div className="mt-6 md:mt-8 space-y-3">
+        {data.recentQuizzes.length === 0 ? (
+          <p className="text-xs text-muted-foreground/50 text-center py-8">No quizzes yet</p>
+        ) : (
+          data.recentQuizzes.slice(0, 4).map((quiz) => {
+            const scoreColor = quiz.bestScore !== null
+              ? quiz.bestScore >= 70 ? "text-emerald-500" : quiz.bestScore >= 50 ? "text-amber-500" : "text-red-500"
+              : "text-muted-foreground/40";
+            return (
+              <Link key={quiz.id} href={`/quiz/${quiz.id}`}>
+                <Card className="rounded-2xl bg-card/80 border-border/40 p-4 shadow-sm flex items-center gap-4 transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 shrink-0">
+                    <FileText className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-foreground truncate leading-tight">{quiz.title}</p>
+                    <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-wider mt-0.5">{quiz.moduleName}</p>
+                    {quiz.bestScore !== null && (
+                      <p className={cn("text-[10px] font-bold mt-1", scoreColor)}>Best: {quiz.bestScore}%</p>
+                    )}
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+                </Card>
+              </Link>
+            );
+          })
+        )}
       </div>
 
       {data.dailyTarget > 0 && (
