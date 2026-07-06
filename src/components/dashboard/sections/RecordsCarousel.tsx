@@ -173,7 +173,7 @@ export function RecordsCarousel({ sidebarOpen }: { sidebarOpen?: boolean }) {
       >
         <CarouselContent className="-ml-2 md:-ml-3">
           {records.map((record, idx) => (
-              <CarouselItem key={record.id} className="basis-1/3 lg:basis-[280px] pl-2 md:pl-3">
+              <CarouselItem key={record.id} className="basis-1/3 lg:basis-[300px] pl-2 md:pl-3">
               <div className={cn(
                 "transition-all duration-300",
                 idx === selectedIndex
