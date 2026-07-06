@@ -1,6 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import type { DashboardData } from "@/types/dashboard";
+import { ChevronLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { MissionControlHero } from "@/components/dashboard/sections/MissionControlHero";
 import { ContinueLearningSection } from "@/components/dashboard/sections/ContinueLearningSection";
 import { ContinueLectureCard } from "@/components/dashboard/sections/ContinueLectureCard";
@@ -13,6 +16,16 @@ import { SuggestedVideosCarousel } from "@/components/dashboard/sections/Suggest
 import { DashboardFooter } from "@/components/dashboard/sections/DashboardFooter";
 
 export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; hasAds?: boolean }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1280px)");
+    setSidebarOpen(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setSidebarOpen(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   return (
     <div className="hidden md:block">
       <div
@@ -31,21 +44,30 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
             <DashboardFooter />
           </div>
 
-          <div
-            className="shrink-0 hidden lg:flex flex-col h-full"
-            style={{
-              width: `calc(336px - var(--sidebar-offset, 64px) * .25)`,
-              transition: "width .3s cubic-bezier(.2,0,0,1)",
-            }}
-          >
-            <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4 overflow-y-auto no-scrollbar min-h-0 flex-1">
-              <SearchableSidebar>
-                <div className="shrink-0"><ActiveRoomsSidebar /></div>
-                <div className="shrink-0"><LeaderboardSidebar /></div>
-                <div className="shrink-0"><ContinueLectureCard lecture={data.lastLecture ?? null} /></div>
-                <div className="shrink-0"><QuickAccessLinks /></div>
-              </SearchableSidebar>
-            </aside>
+          <div className="hidden lg:flex shrink-0 h-full">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="flex h-8 w-5 items-center justify-center rounded-md text-muted-foreground/30 hover:text-foreground hover:bg-muted/20 transition-all mt-24 self-start shrink-0"
+            >
+              <ChevronLeft className={cn(
+                "h-3.5 w-3.5 transition-transform duration-500",
+                sidebarOpen && "rotate-180"
+              )} />
+            </button>
+
+            <div className={cn(
+              "overflow-hidden transition-all duration-500 ease-in-out h-full",
+              sidebarOpen ? "w-[calc(336px-var(--sidebar-offset,64px)*.25)]" : "w-0"
+            )}>
+              <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4 overflow-y-auto no-scrollbar min-h-0 h-full w-[calc(336px-var(--sidebar-offset,64px)*.25)]">
+                <SearchableSidebar>
+                  <div className="shrink-0"><ActiveRoomsSidebar /></div>
+                  <div className="shrink-0"><LeaderboardSidebar /></div>
+                  <div className="shrink-0"><ContinueLectureCard lecture={data.lastLecture ?? null} /></div>
+                  <div className="shrink-0"><QuickAccessLinks /></div>
+                </SearchableSidebar>
+              </aside>
+            </div>
           </div>
         </div>
       </div>
