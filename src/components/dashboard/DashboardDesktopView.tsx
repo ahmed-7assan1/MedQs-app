@@ -14,6 +14,7 @@ import { CommunityCarouselSidebar } from "@/components/dashboard/sections/Commun
 import { QuickAccessLinks } from "@/components/dashboard/sections/QuickAccessLinks";
 import { SuggestedVideosCarousel } from "@/components/dashboard/sections/SuggestedVideosCarousel";
 import { DashboardFooter } from "@/components/dashboard/sections/DashboardFooter";
+import { CarouselErrorBoundary } from "@/components/dashboard/CarouselErrorBoundary";
 
 export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; hasAds?: boolean }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -39,9 +40,15 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-0 space-y-8 md:space-y-10 section-entrance no-scrollbar">
             <MissionControlHero data={data} onToggleSidebar={() => setSidebarOpen(o => !o)} sidebarOpen={sidebarOpen} />
             <ContinueLearningSection data={data} />
-            <RecordsCarousel sidebarOpen={sidebarOpen} />
-            <CommunityCarouselSidebar sidebarOpen={sidebarOpen} />
-            <SuggestedVideosCarousel sidebarOpen={sidebarOpen} />
+            <CarouselErrorBoundary title="Records">
+              <RecordsCarousel sidebarOpen={sidebarOpen} />
+            </CarouselErrorBoundary>
+            <CarouselErrorBoundary title="Community">
+              <CommunityCarouselSidebar sidebarOpen={sidebarOpen} />
+            </CarouselErrorBoundary>
+            <CarouselErrorBoundary title="Videos">
+              <SuggestedVideosCarousel sidebarOpen={sidebarOpen} />
+            </CarouselErrorBoundary>
             <DashboardFooter />
           </div>
 
