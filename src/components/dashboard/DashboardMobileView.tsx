@@ -5,8 +5,6 @@ import { cn } from "@/lib/utils";
 import type { DashboardData } from "@/types/dashboard";
 import { MissionControlHero } from "@/components/dashboard/sections/MissionControlHero";
 import { ContinueLearningSection } from "@/components/dashboard/sections/ContinueLearningSection";
-import { QuickActionsHub } from "@/components/dashboard/sections/QuickActionsHub";
-import { EcosystemCards } from "@/components/dashboard/sections/EcosystemCards";
 import { LearningHeatmap } from "@/components/dashboard/sections/LearningHeatmap";
 
 type TabId = "overview" | "learn" | "social";
@@ -46,7 +44,6 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
         {activeTab === "overview" && (
           <>
             <MissionControlHero data={data} />
-            <QuickActionsHub />
             <LearningHeatmap data={data} />
           </>
         )}
@@ -54,7 +51,6 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
         {activeTab === "learn" && (
           <>
             <ContinueLearningSection data={data} />
-            <EcosystemCards />
           </>
         )}
 

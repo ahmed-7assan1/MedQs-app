@@ -3,8 +3,6 @@
 import type { DashboardData } from "@/types/dashboard";
 import { MissionControlHero } from "@/components/dashboard/sections/MissionControlHero";
 import { ContinueLearningSection } from "@/components/dashboard/sections/ContinueLearningSection";
-import { QuickActionsHub } from "@/components/dashboard/sections/QuickActionsHub";
-import { EcosystemCards } from "@/components/dashboard/sections/EcosystemCards";
 import { ContinueLectureCard } from "@/components/dashboard/sections/ContinueLectureCard";
 import { ActiveRoomsSidebar } from "@/components/dashboard/sections/ActiveRoomsSidebar";
 import { LeaderboardSidebar } from "@/components/dashboard/sections/LeaderboardSidebar";
@@ -29,8 +27,6 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
             <ContinueLearningSection data={data} />
             <CommunityCarouselSidebar />
             <SuggestedVideosCarousel />
-            <QuickActionsHub />
-            <EcosystemCards />
           </div>
 
           <div
