@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Flame, Trophy, Sparkles, GraduationCap, TrendingUp, Bell, Sun, Moon, Maximize, Minimize, FileText, ChevronRight } from "lucide-react";
+import { Flame, Trophy, Sparkles, GraduationCap, TrendingUp, Bell, Sun, Moon, Maximize, Minimize, FileText, ChevronRight, PanelLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import type { DashboardData, QuizCardData } from "@/types/dashboard";
 
-export function MissionControlHero({ data }: { data: DashboardData }) {
+export function MissionControlHero({ data, onToggleSidebar, sidebarOpen }: { data: DashboardData; onToggleSidebar?: () => void; sidebarOpen?: boolean }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -161,6 +161,19 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
               </TooltipTrigger>
               <TooltipContent>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</TooltipContent>
             </Tooltip>
+            {onToggleSidebar && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onToggleSidebar}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
+                  >
+                    <PanelLeft className={cn("h-4 w-4 transition-transform duration-500", sidebarOpen && "rotate-180")} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>{sidebarOpen ? "Close sidebar" : "Open sidebar"}</TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </div>
       </div>

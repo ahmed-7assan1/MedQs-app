@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import type { DashboardData } from "@/types/dashboard";
-import { ChevronLeft, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MissionControlHero } from "@/components/dashboard/sections/MissionControlHero";
 import { ContinueLearningSection } from "@/components/dashboard/sections/ContinueLearningSection";
@@ -37,7 +36,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
       >
         <div className="flex gap-6 xl:gap-8 px-4 sm:px-8 lg:px-12 h-full">
           <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-0 space-y-8 md:space-y-10 section-entrance no-scrollbar">
-            <MissionControlHero data={data} />
+            <MissionControlHero data={data} onToggleSidebar={() => setSidebarOpen(o => !o)} sidebarOpen={sidebarOpen} />
             <ContinueLearningSection data={data} />
             <CommunityCarouselSidebar />
             <SuggestedVideosCarousel />
@@ -45,27 +44,11 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           </div>
 
           <div className="hidden lg:flex shrink-0 h-full">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="flex h-8 w-5 items-center justify-center rounded-md text-muted-foreground/30 hover:text-foreground hover:bg-muted/20 transition-all mt-24 self-start shrink-0"
-            >
-              <ChevronLeft className={cn(
-                "h-3.5 w-3.5 transition-transform duration-500",
-                sidebarOpen && "rotate-180"
-              )} />
-            </button>
-
             <div className={cn(
               "overflow-hidden transition-all duration-500 ease-in-out h-full",
               sidebarOpen ? "w-[calc(336px-var(--sidebar-offset,64px)*.25)]" : "w-0"
             )}>
-              <aside className="relative flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4 overflow-y-auto no-scrollbar min-h-0 h-full w-[calc(336px-var(--sidebar-offset,64px)*.25)]">
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="absolute top-3 right-3 z-10 flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground/30 hover:text-foreground hover:bg-muted/20 transition-all"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+              <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4 overflow-y-auto no-scrollbar min-h-0 h-full w-[calc(336px-var(--sidebar-offset,64px)*.25)]">
                 <SearchableSidebar>
                   <div className="shrink-0"><ActiveRoomsSidebar /></div>
                   <div className="shrink-0"><LeaderboardSidebar /></div>
