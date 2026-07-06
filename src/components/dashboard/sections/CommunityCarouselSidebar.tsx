@@ -266,7 +266,7 @@ function CarouselSkeleton() {
   );
 }
 
-export function CommunityCarouselSidebar() {
+export function CommunityCarouselSidebar({ sidebarOpen }: { sidebarOpen?: boolean }) {
   const [posts, setPosts] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -278,6 +278,12 @@ export function CommunityCarouselSidebar() {
     setSelectedIndex(api.selectedScrollSnap());
     api.on("select", () => setSelectedIndex(api.selectedScrollSnap()));
   }, [api]);
+
+  useEffect(() => {
+    if (!api) return;
+    const timer = setTimeout(() => api.reInit(), 500);
+    return () => clearTimeout(timer);
+  }, [sidebarOpen, api]);
 
   useEffect(() => {
     if (!api) return;

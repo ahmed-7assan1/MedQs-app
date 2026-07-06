@@ -123,7 +123,7 @@ function CarouselSkeleton() {
   );
 }
 
-export function SuggestedVideosCarousel() {
+export function SuggestedVideosCarousel({ sidebarOpen }: { sidebarOpen?: boolean }) {
   const [videos, setVideos] = useState<SuggestedVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -135,6 +135,12 @@ export function SuggestedVideosCarousel() {
     setSelectedIndex(api.selectedScrollSnap());
     api.on("select", () => setSelectedIndex(api.selectedScrollSnap()));
   }, [api]);
+
+  useEffect(() => {
+    if (!api) return;
+    const timer = setTimeout(() => api.reInit(), 500);
+    return () => clearTimeout(timer);
+  }, [sidebarOpen, api]);
 
   useEffect(() => {
     if (!api) return;

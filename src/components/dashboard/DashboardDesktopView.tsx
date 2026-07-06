@@ -39,9 +39,9 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-0 space-y-8 md:space-y-10 section-entrance no-scrollbar">
             <MissionControlHero data={data} onToggleSidebar={() => setSidebarOpen(o => !o)} sidebarOpen={sidebarOpen} />
             <ContinueLearningSection data={data} />
-            <RecordsCarousel />
-            <CommunityCarouselSidebar />
-            <SuggestedVideosCarousel />
+            <RecordsCarousel sidebarOpen={sidebarOpen} />
+            <CommunityCarouselSidebar sidebarOpen={sidebarOpen} />
+            <SuggestedVideosCarousel sidebarOpen={sidebarOpen} />
             <DashboardFooter />
           </div>
 
