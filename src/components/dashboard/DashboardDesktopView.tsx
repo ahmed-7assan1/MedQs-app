@@ -11,6 +11,7 @@ import { LeaderboardSidebar } from "@/components/dashboard/sections/LeaderboardS
 import { SearchableSidebar } from "@/components/dashboard/sections/SearchableSidebar";
 import { CommunityCarouselSidebar } from "@/components/dashboard/sections/CommunityCarouselSidebar";
 import { QuickAccessLinks } from "@/components/dashboard/sections/QuickAccessLinks";
+import { SuggestedVideosCarousel } from "@/components/dashboard/sections/SuggestedVideosCarousel";
 
 export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; hasAds?: boolean }) {
   return (
@@ -27,6 +28,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
             <MissionControlHero data={data} />
             <ContinueLearningSection data={data} />
             <CommunityCarouselSidebar />
+            <SuggestedVideosCarousel />
             <QuickActionsHub />
             <EcosystemCards />
           </div>
