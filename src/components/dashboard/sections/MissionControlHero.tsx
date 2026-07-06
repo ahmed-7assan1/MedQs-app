@@ -55,15 +55,34 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4 min-w-0">
           <div className="relative shrink-0">
-            <Avatar className="h-16 w-16 md:h-20 md:w-20 shrink-0 shadow-lg shadow-primary/20">
-              {data.userImage ? (
-                <AvatarImage src={data.userImage} alt={data.firstName} className="object-cover" />
-              ) : null}
-              <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xl md:text-2xl font-black">
-                {data.firstName.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-500 border-2 border-background shadow-lg shadow-emerald-500/30" />
+            <div className="relative h-16 w-16 md:h-20 md:w-20">
+              <svg className="absolute -inset-1 h-[calc(100%+8px)] w-[calc(100%+8px)] -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="44" fill="none" strokeWidth="6" className="stroke-slate-200 dark:stroke-white/5" />
+                <motion.circle
+                  cx="50" cy="50" r="44" fill="none" strokeWidth="6" strokeLinecap="round"
+                  strokeDasharray={Math.PI * 88}
+                  initial={{ strokeDashoffset: Math.PI * 88 }}
+                  animate={{ strokeDashoffset: Math.PI * 88 - (Math.PI * 88 * data.progressToNext) / 100 }}
+                  transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+                  className={cn(
+                    data.rankLabel === "Elite" ? "stroke-amber-500" :
+                    data.rankLabel === "Expert" ? "stroke-purple-500" :
+                    data.rankLabel === "Contributor" ? "stroke-blue-500" :
+                    data.rankLabel === "Active" ? "stroke-emerald-500" :
+                    "stroke-slate-400"
+                  )}
+                />
+              </svg>
+              <Avatar className="h-full w-full shrink-0 shadow-lg shadow-primary/20">
+                {data.userImage ? (
+                  <AvatarImage src={data.userImage} alt={data.firstName} className="object-cover" />
+                ) : null}
+                <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xl md:text-2xl font-black">
+                  {data.firstName.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-500 border-2 border-background shadow-lg shadow-emerald-500/30" />
+            </div>
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">

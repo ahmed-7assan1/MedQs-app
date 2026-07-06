@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { AnimatedRing } from "@/components/dashboard/RedesignedComponents";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 import { STREAK_MILESTONES } from "@/components/dashboard/shared/confetti";
 import { Q_MILESTONES } from "@/components/dashboard/shared/badges";
@@ -128,10 +127,12 @@ export function AchievementsShelf({ data }: { data: DashboardData }) {
           </Card>
         </motion.div>
 
-        {/* Rank / Prestige Card */}
+        {/* Rank Card */}
         <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
           <Card className="rounded-2xl bg-card/80 border-border/40 p-5 shadow-sm flex items-center gap-4 transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5">
-            <AnimatedRing progress={data.progressToNext} size={56} color="text-amber-500" />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-500/15">
+              <Trophy className="h-5 w-5 text-amber-500" />
+            </div>
             <div className="flex-1 min-w-0">
               <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-500/70">Rank</p>
               <h3 className="text-base font-black text-foreground truncate">{data.rankLabel}</h3>
