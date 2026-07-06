@@ -34,9 +34,9 @@ export async function POST(
   const boundary = await assertSemester(w.scope, semesterId);
   if (boundary) return boundary;
 
-  const { name } = await req.json();
+  const { name, imageUrl } = await req.json();
   const createdModule = await prisma.module.create({
-    data: { name, semesterId },
+    data: { name, imageUrl: imageUrl || null, semesterId },
   });
   return NextResponse.json(createdModule, { status: 201 });
 }

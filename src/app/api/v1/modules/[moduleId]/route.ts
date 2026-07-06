@@ -19,6 +19,7 @@ export async function PUT(
   const data: Record<string, any> = {};
   if (body.name?.trim()) data.name = body.name.trim();
   if (body.icon !== undefined) data.icon = body.icon || null;
+  if (body.imageUrl !== undefined) data.imageUrl = body.imageUrl || null;
 
   const updatedModule = await prisma.module.update({
     where: { id: moduleId },

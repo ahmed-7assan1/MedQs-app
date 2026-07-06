@@ -2,6 +2,7 @@ export interface ModuleProgressItem {
   id: string;
   name: string;
   pct: number;
+  imageUrl?: string | null;
 }
 
 export interface ActivityItem {

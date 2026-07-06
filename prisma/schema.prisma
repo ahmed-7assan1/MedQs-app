@@ -172,6 +172,7 @@ model Module {
   id         String      @id @default(uuid())
   name       String
   icon       String?
+  imageUrl   String?
   semesterId String
   semester   Semester    @relation(fields: [semesterId], references: [id], onDelete: Cascade)
   pastPapers PastPaper[]

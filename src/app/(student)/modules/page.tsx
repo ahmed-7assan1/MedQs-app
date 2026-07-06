@@ -141,6 +141,7 @@ export default async function ModulesPage() {
       id: mod.id,
       name: mod.name,
       icon: mod.icon,
+      imageUrl: mod.imageUrl,
       subjectsCount: mod.subjects.length,
       lecturesCount: lecturesFlat.length,
       questionsCount: allQCount,

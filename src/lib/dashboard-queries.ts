@@ -19,6 +19,7 @@ export type ModuleProgressItem = {
   correct: number;
   pct: number;
   lectures: number;
+  imageUrl?: string | null;
 };
 
 export type DashboardData = {
@@ -176,7 +177,7 @@ async function getModuleProgress(userId: string, semesterId: string): Promise<Mo
     const correct = correctByModule.get(mod.id) ?? 0;
     const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
     const lectures = mod.subjects.reduce((a, s) => a + s.lectures.length, 0);
-    return { id: mod.id, name: mod.name, total, correct, pct, lectures };
+    return { id: mod.id, name: mod.name, total, correct, pct, lectures, imageUrl: mod.imageUrl };
   });
 }
 

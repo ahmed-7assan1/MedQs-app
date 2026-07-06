@@ -71,6 +71,17 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
                 <Link href={`/modules/${mod.id}`}>
                   <CardContent className="p-0 relative">
                     {/* Thumbnail area */}
+                    {mod.imageUrl ? (
+                      <div className="relative h-24 md:h-28 overflow-hidden">
+                        <img src={mod.imageUrl} alt={mod.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30">
+                            <Play className="h-5 w-5 ml-0.5" />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
                     <div className={cn(
                       "relative flex items-center justify-center h-24 md:h-28 bg-gradient-to-br",
                       thumbGrad
@@ -88,6 +99,7 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
                         </div>
                       </div>
                     </div>
+                    )}
 
                     {/* Content area */}
                     <div className="p-4 relative">

@@ -12,11 +12,13 @@ import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
 import ColorPicker from "@/components/ui/ColorPicker";
+import { ImageUploadWithCrop } from "@/components/ui/ImageUploadWithCrop";
 
 export interface ModuleWithStats {
   id: string;
   name: string;
   icon: string | null;
+  imageUrl?: string | null;
   subjectsCount: number;
   lecturesCount: number;
   questionsCount: number;
@@ -135,6 +137,7 @@ export default function ModulesGrid({ modules, isGuest, isAdmin }: ModulesGridPr
   const [editGradientTo, setEditGradientTo] = useState("#0f3460");
   const [editOpacity, setEditOpacity] = useState(85);
   const [editCardBg, setEditCardBg] = useState("");
+  const [editImageUrl, setEditImageUrl] = useState("");
 
   const visibleModules = useMemo(() => localModules.slice(0, visibleCount), [localModules, visibleCount]);
   const hasMore = visibleCount < localModules.length;
@@ -142,6 +145,7 @@ export default function ModulesGrid({ modules, isGuest, isAdmin }: ModulesGridPr
   const openEditor = useCallback((mod: ModuleWithStats) => {
     setEditTarget(mod);
     setEditName(mod.name);
+    setEditImageUrl(mod.imageUrl || "");
     const custom = parseCustomIcon(mod.icon);
     if (custom) {
       setEditMode("custom");
@@ -166,6 +170,7 @@ export default function ModulesGrid({ modules, isGuest, isAdmin }: ModulesGridPr
     setEditTarget(null);
     setEditName("");
     setEditIcon("");
+    setEditImageUrl("");
     setEditMode("preset");
     setEditBgColor("#1a1a2e");
     setEditGradientFrom("#16213e");
@@ -183,6 +188,7 @@ export default function ModulesGrid({ modules, isGuest, isAdmin }: ModulesGridPr
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editName.trim(),
+          imageUrl: editImageUrl || null,
           icon: editMode === "custom"
             ? JSON.stringify({
                 icon: editIcon,
@@ -203,7 +209,7 @@ export default function ModulesGrid({ modules, isGuest, isAdmin }: ModulesGridPr
       setLocalModules((prev) =>
         prev.map((m) =>
           m.id === editTarget.id
-            ? { ...m, name: updated.name, icon: updated.icon }
+            ? { ...m, name: updated.name, icon: updated.icon, imageUrl: updated.imageUrl }
             : m
         )
       );
@@ -260,7 +266,17 @@ export default function ModulesGrid({ modules, isGuest, isAdmin }: ModulesGridPr
                         (modStyle as any).cardBg ? "" : "bg-card/40",
                         modStyle.theme,
                       )} style={(modStyle as any).cardBg ? { backgroundColor: (modStyle as any).cardBg } : undefined}>
-                        {/* Themed Gradient Header */}
+                        {/* Themed Gradient Header or Image */}
+                        {mod.imageUrl ? (
+                          <div className="relative h-28 md:h-32 overflow-hidden">
+                            <img src={mod.imageUrl} alt={mod.name} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
+                              <h3 className="text-sm md:text-[17px] font-black text-white truncate">{mod.name}</h3>
+                              <ChevronRight className="h-4 w-4 text-white/50 shrink-0 ml-2" />
+                            </div>
+                          </div>
+                        ) : (
                         <div className={cn(
                           "px-4 md:px-5 py-3 md:py-4 flex items-center justify-between",
                           !(modStyle as any).isCustom && modStyle.header
@@ -281,6 +297,7 @@ export default function ModulesGrid({ modules, isGuest, isAdmin }: ModulesGridPr
                           </div>
                           <ChevronRight className="h-4 w-4 text-white/50 shrink-0 ml-2" />
                         </div>
+                        )}
 
                         {/* Card Body */}
                         <div className="px-4 md:px-5 py-2.5 md:py-4 space-y-2 md:space-y-2.5">
@@ -395,6 +412,26 @@ export default function ModulesGrid({ modules, isGuest, isAdmin }: ModulesGridPr
                     className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
                     onKeyDown={(e) => { if (e.key === "Enter") void saveModule(); if (e.key === "Escape") closeEditor(); }}
                   />
+                </div>
+
+                {/* Module Image */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Card Image</label>
+                  <ImageUploadWithCrop
+                    label="Upload module card image"
+                    value={editImageUrl}
+                    onChange={(url) => setEditImageUrl(url)}
+                    cropShape="rect"
+                    aspect={16/9}
+                  />
+                  {editImageUrl && (
+                    <button
+                      onClick={() => setEditImageUrl("")}
+                      className="text-[10px] font-bold text-rose-500 hover:text-rose-400 transition-colors mt-1"
+                    >
+                      Remove image
+                    </button>
+                  )}
                 </div>
 
                 {/* Preset / Custom Toggle */}
