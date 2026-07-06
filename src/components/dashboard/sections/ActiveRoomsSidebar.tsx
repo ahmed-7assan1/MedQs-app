@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { DoorOpen, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { normalizeImageUrl } from "@/lib/markdown-helpers";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 
 interface ActiveSession {
@@ -79,7 +80,7 @@ export function ActiveRoomsSidebar() {
                 <div className={cn("h-2 w-2 rounded-full shrink-0", cfg.dot, cfg.pulse && "animate-pulse")} />
                 <div className="h-7 w-7 rounded-full overflow-hidden bg-muted/30 border border-border/40 shrink-0">
                   {s.room.image ? (
-                    <img src={s.room.image} alt={s.room.name} className="h-full w-full object-cover" />
+                    <img src={normalizeImageUrl(s.room.image)} alt={s.room.name} className="h-full w-full object-cover" />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center text-[9px] font-bold text-muted-foreground">
                       {s.room.name.charAt(0)}
@@ -113,7 +114,7 @@ export function ActiveRoomsSidebar() {
             >
               <div className="h-10 w-10 rounded-full overflow-hidden bg-muted/30 border border-border/40 ring-1 ring-border/20 shrink-0">
                 {room.image ? (
-                  <img src={room.image} alt={room.name} className="h-full w-full object-cover" />
+                  <img src={normalizeImageUrl(room.image)} alt={room.name} className="h-full w-full object-cover" />
                 ) : (
                   <div className="h-full w-full flex items-center justify-center text-xs font-bold text-muted-foreground">
                     {room.name.charAt(0)}

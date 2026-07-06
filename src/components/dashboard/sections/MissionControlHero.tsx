@@ -13,10 +13,7 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4 min-w-0">
           <div className="relative shrink-0">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary via-accent to-primary blur-2xl opacity-40 animate-scale-pulse" />
-            <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary/30 to-accent/20 blur-xl opacity-30 animate-float-up" style={{ animationDelay: "0.5s", animationDuration: "4s" }} />
-            <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-primary/15 to-transparent blur-2xl opacity-20" style={{ animation: "glow-pulse 3s ease-in-out infinite", animationDelay: "1s" }} />
-            <Avatar className="relative h-16 w-16 md:h-20 md:w-20 shrink-0 border-2 border-white/10 dark:border-white/10 ring-2 ring-primary/30">
+            <Avatar className="h-16 w-16 md:h-20 md:w-20 shrink-0 shadow-lg shadow-primary/20">
               {data.userImage ? (
                 <AvatarImage src={data.userImage} alt={data.firstName} className="object-cover" />
               ) : null}
