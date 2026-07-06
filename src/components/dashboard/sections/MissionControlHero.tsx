@@ -1,13 +1,36 @@
 ﻿"use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Flame, Trophy, Sparkles, GraduationCap, TrendingUp } from "lucide-react";
+import { Flame, Trophy, Sparkles, GraduationCap, TrendingUp, Bell, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useThemeStore, useNotificationStore } from "@/lib/store";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { DashboardData } from "@/types/dashboard";
 
 export function MissionControlHero({ data }: { data: DashboardData }) {
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useThemeStore();
+  const { notifications, unread, setNotifications, markRead, markAllRead } = useNotificationStore();
+
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (notifOpen && notifications.length === 0) {
+      fetch("/api/v1/notifications")
+        .then((r) => r.json())
+        .then((data) => setNotifications(Array.isArray(data) ? data : []))
+        .catch(() => {});
+    }
+  }, [notifOpen]);
+
   return (
     <div className="hero-mesh">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -57,6 +80,25 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
             <Trophy className="h-4 w-4 text-amber-500" />
             <span className="text-base font-black tabular-nums leading-none text-foreground">{(data.rankPoints || 0).toLocaleString()}</span>
             <span className="text-[9px] font-medium text-muted-foreground/60">XP</span>
+          </div>
+          <div className="flex gap-1.5 items-center">
+            <button
+              onClick={() => setNotifOpen(true)}
+              className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
+              title="Notifications"
+            >
+              <Bell className="h-4 w-4" />
+              {unread > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
+              )}
+            </button>
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
+              title="Toggle theme"
+            >
+              {mounted && theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
           </div>
         </div>
       </div>
@@ -112,6 +154,64 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
           </div>
         </div>
       )}
+
+      {/* Notifications Dialog */}
+      <Dialog open={notifOpen} onOpenChange={setNotifOpen}>
+        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogTitle className="sr-only">Notifications</DialogTitle>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Bell className="h-4 w-4 text-primary" />
+              <span className="text-sm font-black uppercase tracking-wider text-foreground/60">Notifications</span>
+              {unread > 0 && (
+                <span className="text-[10px] font-bold text-white bg-primary px-1.5 py-0.5 rounded-full">{unread}</span>
+              )}
+            </div>
+            {unread > 0 && (
+              <button
+                onClick={markAllRead}
+                className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
+              >
+                Mark all read
+              </button>
+            )}
+          </div>
+          {notifications.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <Bell className="h-10 w-10 mb-3 opacity-30" />
+              <p className="text-sm font-medium">No notifications yet</p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {notifications.map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => markRead(n.id)}
+                  className={cn(
+                    "flex w-full items-start gap-3 p-3.5 rounded-xl text-left transition-all",
+                    !n.read
+                      ? "bg-primary/5 border border-primary/15"
+                      : "hover:bg-muted/30 border border-transparent"
+                  )}
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className={cn("text-sm font-semibold", !n.read ? "text-foreground" : "text-muted-foreground/70")}>
+                      {n.title}
+                    </p>
+                    <p className={cn("mt-0.5 text-xs leading-relaxed line-clamp-2", !n.read ? "text-muted-foreground/80" : "text-muted-foreground/50")}>
+                      {n.body}
+                    </p>
+                    <p className="mt-1 text-[10px] font-medium text-muted-foreground/40">
+                      {new Date(n.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
