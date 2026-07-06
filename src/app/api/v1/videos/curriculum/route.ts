@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { getYouTubeId } from "@/lib/video-utils";
+import { getCachedYouTubeData } from "@/lib/youtube-cache";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
   const semesterId = (session?.user as any)?.semesterId;
-  const apiKey = process.env.YOUTUBE_API_KEY;
 
   if (!semesterId) {
     return NextResponse.json({ message: "Please complete onboarding to see curriculum videos." }, { status: 400 });
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
           id: v.id,
           videoId: videoId,
           title: v.title,
-          thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null,
+          thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null,
           lectureId: v.lecture.id,
           lectureTitle: v.lecture.title,
           moduleId: v.lecture.subject.moduleId,
@@ -71,27 +71,14 @@ export async function GET(req: NextRequest) {
        };
     });
 
-    // Resolve Channel Avatars & Titles from YouTube (Only for this page's videos)
-    let channelMetadata: any = {};
-    if (apiKey && vIdList.length > 0) {
-       const idsStr = [...new Set(vIdList)].join(",");
-       const vRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${idsStr}&key=${apiKey}`);
-       const vData = await vRes.json();
-       
-       const channelIds = [...new Set((vData.items || []).map((i: any) => i.snippet.channelId))];
-       
-       if (channelIds.length > 0) {
-          const cRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelIds.join(",")}&key=${apiKey}`);
-          const cData = await cRes.json();
-          
-          const chanMap = new Map((cData.items || []).map((i: any) => [i.id, { 
-             title: i.snippet.title, 
-             thumbnail: i.snippet.thumbnails.default.url 
-          }]));
-
-          const videoToChanMap = new Map((vData.items || []).map((i: any) => [i.id, chanMap.get(i.snippet.channelId)]));
-          channelMetadata = Object.fromEntries(videoToChanMap);
-       }
+    // Resolve Channel Avatars & Titles via server-side cache (3600s TTL)
+    let channelMetadata: Record<string, { title: string; thumbnail: string } | undefined> = {};
+    if (vIdList.length > 0) {
+      try {
+        channelMetadata = await getCachedYouTubeData(vIdList);
+      } catch {
+        // Cache miss or YouTube unavailable — fall through with empty metadata
+      }
     }
 
     const final = formattedRaw.map((v: any) => ({
