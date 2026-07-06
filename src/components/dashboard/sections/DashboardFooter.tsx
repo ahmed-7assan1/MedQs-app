@@ -39,7 +39,7 @@ const footerGroups = [
 
 export function DashboardFooter() {
   return (
-    <div className="pt-24 pb-8">
+    <div className="pt-24 pb-0">
       <div className="h-px bg-border/10 mb-16" />
 
       <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
