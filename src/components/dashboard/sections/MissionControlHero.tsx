@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Flame, Trophy, Sparkles, GraduationCap, TrendingUp, Bell, Sun, Moon } from "lucide-react";
+import { Flame, Trophy, Sparkles, GraduationCap, TrendingUp, Bell, Sun, Moon, Maximize, Minimize } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useThemeStore, useNotificationStore } from "@/lib/store";
 import {
   Dialog,
@@ -17,10 +18,27 @@ import type { DashboardData } from "@/types/dashboard";
 export function MissionControlHero({ data }: { data: DashboardData }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { theme, setTheme } = useThemeStore();
   const { notifications, unread, setNotifications, markRead, markAllRead } = useNotificationStore();
 
   useEffect(() => { setMounted(true); }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
 
   useEffect(() => {
     if (notifOpen && notifications.length === 0) {
@@ -32,7 +50,8 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
   }, [notifOpen]);
 
   return (
-    <div className="hero-mesh">
+    <TooltipProvider>
+      <div className="hero-mesh">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4 min-w-0">
           <div className="relative shrink-0">
@@ -82,23 +101,42 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
             <span className="text-[9px] font-medium text-muted-foreground/60">XP</span>
           </div>
           <div className="flex gap-1.5 items-center">
-            <button
-              onClick={() => setNotifOpen(true)}
-              className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
-              title="Notifications"
-            >
-              <Bell className="h-4 w-4" />
-              {unread > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
-              )}
-            </button>
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
-              title="Toggle theme"
-            >
-              {mounted && theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setNotifOpen(true)}
+                  className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
+                >
+                  <Bell className="h-4 w-4" />
+                  {unread > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Notifications</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
+                >
+                  {mounted && theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>{theme === "dark" ? "Light mode" : "Dark mode"}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={toggleFullscreen}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
+                >
+                  {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>
@@ -212,6 +250,7 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
