@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertModule, requireAdminWriter } from "@/lib/admin-scope";
 import { deleteModuleCascade } from "@/lib/admin-delete-structure";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export async function PUT(
   req: NextRequest,
@@ -26,7 +27,7 @@ export async function PUT(
     where: { id: moduleId },
     data,
   });
-  revalidateTag("dashboard");
+  revalidateTag(CACHE_TAGS.DASHBOARD);
   return NextResponse.json(updatedModule);
 }
 
