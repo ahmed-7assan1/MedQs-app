@@ -15,7 +15,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
   return (
     <div className="hidden md:block">
       <div
-        className="relative mx-auto w-full h-dvh overflow-hidden"
+        className="relative mx-auto w-full h-screen overflow-hidden"
         style={{
           maxWidth: `calc(1504px - var(--sidebar-offset, 64px))`,
           transition: "max-width .3s cubic-bezier(.2,0,0,1)",
@@ -30,13 +30,13 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           </div>
 
           <div
-            className="shrink-0 hidden lg:flex flex-col self-start h-full"
+            className="shrink-0 hidden lg:flex flex-col h-full"
             style={{
               width: `calc(336px - var(--sidebar-offset, 64px) * .25)`,
               transition: "width .3s cubic-bezier(.2,0,0,1)",
             }}
           >
-            <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4 overflow-y-auto no-scrollbar">
+            <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4 overflow-y-auto no-scrollbar min-h-0">
               <SearchableSidebar>
                 <ActiveRoomsSidebar />
                 <LeaderboardSidebar />
