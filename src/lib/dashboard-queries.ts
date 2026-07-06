@@ -196,7 +196,7 @@ export async function fetchDashboardData(
   dayStart.setHours(0, 0, 0, 0);
 
   // Run independent queries in parallel
-  const [user, recentQuizzes, todayItemCount, streak, weekCounts, lastLectureActivity] =
+  const [user, todayItemCount, streak, weekCounts, lastLectureActivity] =
     await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
@@ -206,23 +206,6 @@ export async function fetchDashboardData(
           semesterId: true,
           university: { select: { name: true } },
           semester: { select: { name: true } },
-        },
-      }),
-      prisma.pastPaper.findMany({
-        where: { attempts: { some: { userId } } },
-        orderBy: { createdAt: "desc" },
-        take: 4,
-        select: {
-          id: true,
-          title: true,
-          module: { select: { name: true } },
-          attempts: {
-            where: { userId },
-            orderBy: { score: "desc" },
-            take: 1,
-            select: { score: true },
-          },
-          _count: { select: { attempts: { where: { userId } } } },
         },
       }),
       prisma.quizAttemptItem.count({
@@ -254,7 +237,7 @@ export async function fetchDashboardData(
     ]);
 
   // Module progress needs semesterId — skip if not set
-  const [moduleProgress, quickPaper] = await Promise.all([
+  const [moduleProgress, quickPaper, recentQuizzesRaw] = await Promise.all([
     user?.semesterId
       ? getModuleProgress(userId, user.semesterId)
       : Promise.resolve([] as ModuleProgressItem[]),
@@ -265,6 +248,25 @@ export async function fetchDashboardData(
           select: { id: true, title: true },
         })
       : Promise.resolve(null),
+    user?.semesterId
+      ? prisma.pastPaper.findMany({
+          where: { semesterId: user.semesterId },
+          orderBy: { createdAt: "desc" },
+          take: 4,
+          select: {
+            id: true,
+            title: true,
+            module: { select: { name: true } },
+            attempts: {
+              where: { userId },
+              orderBy: { score: "desc" },
+              take: 1,
+              select: { score: true },
+            },
+            _count: { select: { attempts: { where: { userId } } } },
+          },
+        })
+      : Promise.resolve([]),
   ]);
 
   const totalQuestions = moduleProgress.reduce((a, m) => a + m.total, 0);
@@ -272,7 +274,7 @@ export async function fetchDashboardData(
 
   return {
     user,
-    recentQuizzes: recentQuizzes.map(q => ({
+    recentQuizzes: recentQuizzesRaw.map(q => ({
       id: q.id,
       title: q.title,
       moduleName: q.module.name,

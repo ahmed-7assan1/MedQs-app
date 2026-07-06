@@ -161,28 +161,28 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
         </div>
       </div>
 
-      <div className="mt-6 md:mt-8 space-y-3">
+      <div className="mt-6 md:mt-8 flex gap-2 md:gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth [-webkit-scrollbar]:hidden">
         {data.recentQuizzes.length === 0 ? (
-          <p className="text-xs text-muted-foreground/50 text-center py-8">No quizzes yet</p>
+          <p className="text-xs text-muted-foreground/50 text-center py-8 w-full">No quizzes yet</p>
         ) : (
           data.recentQuizzes.slice(0, 4).map((quiz) => {
             const scoreColor = quiz.bestScore !== null
               ? quiz.bestScore >= 70 ? "text-emerald-500" : quiz.bestScore >= 50 ? "text-amber-500" : "text-red-500"
               : "text-muted-foreground/40";
             return (
-              <Link key={quiz.id} href={`/quiz/${quiz.id}`}>
-                <Card className="rounded-2xl bg-card/80 border-border/40 p-4 shadow-sm flex items-center gap-4 transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 shrink-0">
-                    <FileText className="h-5 w-5 text-primary" />
+              <Link key={quiz.id} href={`/quiz/${quiz.id}`} className="snap-start shrink-0">
+                <Card className="group w-[220px] md:w-[280px] lg:w-[260px] rounded-xl bg-card/80 border-border/40 p-3 shadow-sm flex items-center gap-2.5 transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 shrink-0">
+                    <FileText className="h-3.5 w-3.5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-foreground truncate leading-tight">{quiz.title}</p>
-                    <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-wider mt-0.5">{quiz.moduleName}</p>
+                    <p className="text-[11px] font-black text-foreground truncate leading-tight">{quiz.title}</p>
+                    <p className="text-[8px] font-bold text-foreground/40 uppercase tracking-wider">{quiz.moduleName}</p>
                     {quiz.bestScore !== null && (
-                      <p className={cn("text-[10px] font-bold mt-1", scoreColor)}>Best: {quiz.bestScore}%</p>
+                      <p className={cn("text-[9px] font-bold mt-0.5", scoreColor)}>Best: {quiz.bestScore}%</p>
                     )}
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+                  <ChevronRight className="h-3 w-3 text-muted-foreground/50 shrink-0" />
                 </Card>
               </Link>
             );
