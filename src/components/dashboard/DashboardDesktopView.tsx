@@ -13,7 +13,6 @@ import { SearchableSidebar } from "@/components/dashboard/sections/SearchableSid
 import { CommunityCarouselSidebar } from "@/components/dashboard/sections/CommunityCarouselSidebar";
 
 const AIRecommendations = dynamic(() => import("@/components/dashboard/sections/AIRecommendations").then(m => m.AIRecommendations), { ssr: false });
-const AchievementsShelf = dynamic(() => import("@/components/dashboard/sections/AchievementsShelf").then(m => m.AchievementsShelf), { ssr: false });
 
 export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; hasAds?: boolean }) {
   return (
@@ -32,7 +31,6 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
             <QuickActionsHub />
             <EcosystemCards />
             <AIRecommendations data={data} />
-            <AchievementsShelf data={data} />
           </div>
 
           <div

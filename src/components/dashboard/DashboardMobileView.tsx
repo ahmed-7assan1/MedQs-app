@@ -11,7 +11,6 @@ import { EcosystemCards } from "@/components/dashboard/sections/EcosystemCards";
 import { LearningHeatmap } from "@/components/dashboard/sections/LearningHeatmap";
 
 const AIRecommendations = dynamic(() => import("@/components/dashboard/sections/AIRecommendations").then(m => m.AIRecommendations), { ssr: false });
-const AchievementsShelf = dynamic(() => import("@/components/dashboard/sections/AchievementsShelf").then(m => m.AchievementsShelf), { ssr: false });
 
 type TabId = "overview" | "learn" | "social";
 
@@ -52,7 +51,6 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
             <MissionControlHero data={data} />
             <QuickActionsHub />
             <LearningHeatmap data={data} />
-            <AchievementsShelf data={data} />
           </>
         )}
 
