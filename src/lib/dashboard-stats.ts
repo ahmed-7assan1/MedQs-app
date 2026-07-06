@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 /** Local calendar date YYYY-MM-DD */
 export function localYmd(d: Date): string {
   const y = d.getFullYear();
@@ -29,7 +31,7 @@ export function computeStreak(activeDays: Set<string>): number {
 }
 
 /** Last 7 days from today, oldest first — for chart labels + bucket keys */
-export function last7DayKeys(): { key: string; shortLabel: string }[] {
+export const last7DayKeys = cache((): { key: string; shortLabel: string }[] => {
   const out: { key: string; shortLabel: string }[] = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
@@ -41,7 +43,7 @@ export function last7DayKeys(): { key: string; shortLabel: string }[] {
     });
   }
   return out;
-}
+});
 
 export function bucketItemsByLocalDay(
   attemptCreatedAts: Date[],
