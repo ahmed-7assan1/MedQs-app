@@ -9,6 +9,7 @@ import { ContinueLectureCard } from "@/components/dashboard/sections/ContinueLec
 import { ActiveRoomsSidebar } from "@/components/dashboard/sections/ActiveRoomsSidebar";
 import { LeaderboardSidebar } from "@/components/dashboard/sections/LeaderboardSidebar";
 import { SearchableSidebar } from "@/components/dashboard/sections/SearchableSidebar";
+import { RecordsCarousel } from "@/components/dashboard/sections/RecordsCarousel";
 import { CommunityCarouselSidebar } from "@/components/dashboard/sections/CommunityCarouselSidebar";
 import { QuickAccessLinks } from "@/components/dashboard/sections/QuickAccessLinks";
 import { SuggestedVideosCarousel } from "@/components/dashboard/sections/SuggestedVideosCarousel";
@@ -38,6 +39,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-0 space-y-8 md:space-y-10 section-entrance no-scrollbar">
             <MissionControlHero data={data} onToggleSidebar={() => setSidebarOpen(o => !o)} sidebarOpen={sidebarOpen} />
             <ContinueLearningSection data={data} />
+            <RecordsCarousel />
             <CommunityCarouselSidebar />
             <SuggestedVideosCarousel />
             <DashboardFooter />
@@ -48,7 +50,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
               "overflow-hidden transition-all duration-500 ease-in-out h-full",
               sidebarOpen ? "w-[calc(336px-var(--sidebar-offset,64px)*.25)]" : "w-0"
             )}>
-              <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4 overflow-y-auto no-scrollbar min-h-0 h-full w-[calc(336px-var(--sidebar-offset,64px)*.25)]">
+              <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl pl-4 pr-3 overflow-y-auto no-scrollbar min-h-0 h-full w-[calc(336px-var(--sidebar-offset,64px)*.25)]">
                 <SearchableSidebar>
                   <div className="shrink-0"><ActiveRoomsSidebar /></div>
                   <div className="shrink-0"><LeaderboardSidebar /></div>

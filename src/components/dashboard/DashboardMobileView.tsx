@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { DashboardData } from "@/types/dashboard";
+import { RecordsCarousel } from "@/components/dashboard/sections/RecordsCarousel";
 import { MissionControlHero } from "@/components/dashboard/sections/MissionControlHero";
 import { ContinueLearningSection } from "@/components/dashboard/sections/ContinueLearningSection";
 import { LearningHeatmap } from "@/components/dashboard/sections/LearningHeatmap";
@@ -51,6 +52,7 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
         {activeTab === "learn" && (
           <>
             <ContinueLearningSection data={data} />
+            <RecordsCarousel />
           </>
         )}
 

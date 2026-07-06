@@ -110,7 +110,7 @@ export function MissionControlHero({ data, onToggleSidebar, sidebarOpen }: { dat
           </div>
         </div>
 
-        <div className="flex gap-2 shrink-0">
+          <div className="flex gap-1.5 shrink-0">
           <div className={cn(
             "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/40 bg-card/40",
             data.currentStreak > 0 && "border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-amber-500/0"
