@@ -10,6 +10,7 @@ import { SearchableSidebar } from "@/components/dashboard/sections/SearchableSid
 import { CommunityCarouselSidebar } from "@/components/dashboard/sections/CommunityCarouselSidebar";
 import { QuickAccessLinks } from "@/components/dashboard/sections/QuickAccessLinks";
 import { SuggestedVideosCarousel } from "@/components/dashboard/sections/SuggestedVideosCarousel";
+import { DashboardFooter } from "@/components/dashboard/sections/DashboardFooter";
 
 export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; hasAds?: boolean }) {
   return (
@@ -27,6 +28,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
             <ContinueLearningSection data={data} />
             <CommunityCarouselSidebar />
             <SuggestedVideosCarousel />
+            <DashboardFooter />
           </div>
 
           <div
