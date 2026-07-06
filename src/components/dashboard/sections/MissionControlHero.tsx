@@ -1,11 +1,13 @@
 ﻿"use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Flame, Trophy, Sparkles, GraduationCap, TrendingUp, Bell, Sun, Moon, Maximize, Minimize, FileText, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useThemeStore, useNotificationStore } from "@/lib/store";
@@ -14,12 +16,14 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { DashboardData } from "@/types/dashboard";
+import type { DashboardData, QuizCardData } from "@/types/dashboard";
 
 export function MissionControlHero({ data }: { data: DashboardData }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedQuiz, setSelectedQuiz] = useState<QuizCardData | null>(null);
+  const router = useRouter();
   const { theme, setTheme } = useThemeStore();
   const { notifications, unread, setNotifications, markRead, markAllRead } = useNotificationStore();
 
@@ -170,8 +174,8 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
               ? quiz.bestScore >= 70 ? "text-emerald-500" : quiz.bestScore >= 50 ? "text-amber-500" : "text-red-500"
               : "text-muted-foreground/40";
             return (
-              <Link key={quiz.id} href={`/quiz/${quiz.id}`} className="snap-start shrink-0">
-                <Card className="group w-[220px] md:w-[280px] lg:w-[260px] rounded-xl bg-card/80 border-border/40 p-3 shadow-sm flex items-center gap-2.5 transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5">
+              <button key={quiz.id} onClick={() => setSelectedQuiz(quiz)} className="snap-start shrink-0 text-left">
+                <Card className="group w-[220px] md:w-[280px] lg:w-[260px] rounded-xl bg-card/80 border-border/40 p-3 shadow-sm flex items-center gap-2.5 transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5 cursor-pointer">
                   <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 shrink-0">
                     <FileText className="h-3.5 w-3.5 text-primary" />
                   </div>
@@ -184,7 +188,7 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
                   </div>
                   <ChevronRight className="h-3 w-3 text-muted-foreground/50 shrink-0" />
                 </Card>
-              </Link>
+              </button>
             );
           })
         )}
@@ -272,6 +276,31 @@ export function MissionControlHero({ data }: { data: DashboardData }) {
               ))}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Quiz confirmation dialog */}
+      <Dialog open={!!selectedQuiz} onOpenChange={(open) => { if (!open) setSelectedQuiz(null); }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogTitle className="sr-only">Start Quiz</DialogTitle>
+          <div className="py-4 text-center">
+            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 mx-auto mb-4">
+              <FileText className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="text-lg font-black text-foreground mb-1">{selectedQuiz?.title}</h3>
+            <p className="text-sm font-medium text-muted-foreground mb-1">{selectedQuiz?.moduleName}</p>
+            {selectedQuiz?.bestScore !== null && (
+              <p className={cn("text-xs font-bold mt-2", selectedQuiz && (
+                selectedQuiz.bestScore >= 70 ? "text-emerald-500" : selectedQuiz.bestScore >= 50 ? "text-amber-500" : "text-red-500"
+              ))}>Previous best: {selectedQuiz?.bestScore}%</p>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setSelectedQuiz(null)} className="flex-1">Cancel</Button>
+            <Button onClick={() => { router.push(`/quiz/${selectedQuiz?.id}`); setSelectedQuiz(null); }} className="flex-1 bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold shadow-lg shadow-primary/20">
+              Start Quiz
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
       </div>
