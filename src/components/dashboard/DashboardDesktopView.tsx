@@ -23,7 +23,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
         }}
       >
         <div className="flex gap-6 xl:gap-8 px-4 sm:px-8 lg:px-12 h-full">
-          <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-12 space-y-8 md:space-y-10 section-entrance no-scrollbar">
+          <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-0 space-y-8 md:space-y-10 section-entrance no-scrollbar">
             <MissionControlHero data={data} />
             <ContinueLearningSection data={data} />
             <CommunityCarouselSidebar />
