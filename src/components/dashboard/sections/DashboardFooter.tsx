@@ -45,7 +45,7 @@ export function DashboardFooter() {
       <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
         <div className="lg:w-[300px] shrink-0">
           <div className="flex items-center gap-3">
-            <img src="/medonex-logo.svg" alt="MedOneX" className="h-7 w-7" />
+            <div className="h-7 w-7 bg-foreground [mask-image:url(/medonex-logo.svg)] [mask-size:contain] [mask-repeat:no-repeat]" />
             <span className="text-sm font-bold">MedOneX</span>
           </div>
           <p className="text-xs text-muted-foreground/50 mt-3 leading-relaxed max-w-xs">
