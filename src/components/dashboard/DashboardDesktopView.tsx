@@ -10,6 +10,7 @@ import { ActiveRoomsSidebar } from "@/components/dashboard/sections/ActiveRoomsS
 import { LeaderboardSidebar } from "@/components/dashboard/sections/LeaderboardSidebar";
 import { SearchableSidebar } from "@/components/dashboard/sections/SearchableSidebar";
 import { CommunityCarouselSidebar } from "@/components/dashboard/sections/CommunityCarouselSidebar";
+import { QuickAccessLinks } from "@/components/dashboard/sections/QuickAccessLinks";
 
 export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; hasAds?: boolean }) {
   return (
@@ -42,6 +43,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
                 <ActiveRoomsSidebar />
                 <LeaderboardSidebar />
                 <ContinueLectureCard lecture={data.lastLecture ?? null} />
+                <QuickAccessLinks />
               </SearchableSidebar>
             </aside>
           </div>
