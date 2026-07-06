@@ -22,7 +22,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
         }}
       >
         <div className="flex gap-6 xl:gap-8 px-4 sm:px-8 lg:px-12 h-full">
-          <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-32 space-y-8 md:space-y-10 section-entrance scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent">
+          <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-32 space-y-8 md:space-y-10 section-entrance no-scrollbar">
             <MissionControlHero data={data} />
             <ContinueLearningSection data={data} />
             <CommunityCarouselSidebar />
@@ -30,13 +30,13 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           </div>
 
           <div
-            className="shrink-0 hidden lg:flex flex-col self-start"
+            className="shrink-0 hidden lg:flex flex-col self-start h-full"
             style={{
               width: `calc(336px - var(--sidebar-offset, 64px) * .25)`,
               transition: "width .3s cubic-bezier(.2,0,0,1)",
             }}
           >
-            <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4">
+            <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4 overflow-y-auto no-scrollbar">
               <SearchableSidebar>
                 <ActiveRoomsSidebar />
                 <LeaderboardSidebar />
