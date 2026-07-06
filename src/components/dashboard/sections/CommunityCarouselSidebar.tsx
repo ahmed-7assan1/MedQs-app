@@ -343,7 +343,7 @@ export function CommunityCarouselSidebar({ sidebarOpen }: { sidebarOpen?: boolea
       >
         <CarouselContent className="-ml-2 md:-ml-3">
           {posts.map((post, idx) => (
-            <CarouselItem key={post.id} className="basis-1/3 pl-2 md:pl-3">
+              <CarouselItem key={post.id} className="basis-1/3 lg:basis-[280px] pl-2 md:pl-3">
               <div className={cn(
                 "transition-all duration-300",
                 idx === selectedIndex
