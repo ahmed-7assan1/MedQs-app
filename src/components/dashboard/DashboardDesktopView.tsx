@@ -38,10 +38,10 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           >
             <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl px-4 overflow-y-auto no-scrollbar min-h-0 flex-1">
               <SearchableSidebar>
-                <ActiveRoomsSidebar />
-                <LeaderboardSidebar />
-                <ContinueLectureCard lecture={data.lastLecture ?? null} />
-                <QuickAccessLinks />
+                <div className="shrink-0"><ActiveRoomsSidebar /></div>
+                <div className="shrink-0"><LeaderboardSidebar /></div>
+                <div className="shrink-0"><ContinueLectureCard lecture={data.lastLecture ?? null} /></div>
+                <div className="shrink-0"><QuickAccessLinks /></div>
               </SearchableSidebar>
             </aside>
           </div>
