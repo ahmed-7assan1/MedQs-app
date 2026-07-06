@@ -1,5 +1,16 @@
 
+// Simple in-memory cache for Spotify access token (1 hour TTL)
+let cachedToken: string | null = null;
+let tokenExpiry = 0;
+const CACHE_TTL = 55 * 60 * 1000; // 55 min (tokens last 1h, refresh before expiry)
+
+// In-memory cache for Spotify metadata by URL
+const metadataCache = new Map<string, { data: any; expiry: number }>();
+const METADATA_TTL = 24 * 60 * 60 * 1000; // 24 hours — record art doesn't change often
+
 export async function getSpotifyAccessToken() {
+  if (cachedToken && Date.now() < tokenExpiry) return cachedToken;
+
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
@@ -25,7 +36,9 @@ export async function getSpotifyAccessToken() {
     }
 
     const data = await res.json();
-    return data.access_token;
+    cachedToken = data.access_token;
+    tokenExpiry = Date.now() + CACHE_TTL;
+    return cachedToken;
   } catch (error) {
     console.error("Error getting Spotify access token:", error);
     return null;
@@ -33,6 +46,10 @@ export async function getSpotifyAccessToken() {
 }
 
 export async function getSpotifyMetadata(url: string) {
+  // Check cache first
+  const cached = metadataCache.get(url);
+  if (cached && Date.now() < cached.expiry) return cached.data;
+
   const token = await getSpotifyAccessToken();
   if (!token) return null;
 
@@ -53,8 +70,10 @@ export async function getSpotifyMetadata(url: string) {
     if (!res.ok) return null;
     const data = await res.json();
 
+    let result: any = null;
+
     if (type === "track") {
-      return {
+      result = {
         title: data.name,
         artist: data.artists.map((a: any) => a.name).join(", "),
         image: data.album.images[0]?.url,
@@ -62,10 +81,8 @@ export async function getSpotifyMetadata(url: string) {
         preview_url: data.preview_url,
         type: "track",
       };
-    }
-
-    if (type === "episode") {
-      return {
+    } else if (type === "episode") {
+      result = {
         title: data.name,
         artist: data.show.name,
         image: data.images[0]?.url,
@@ -73,28 +90,22 @@ export async function getSpotifyMetadata(url: string) {
         preview_url: data.audio_preview_url,
         type: "episode",
       };
-    }
-
-    if (type === "show") {
-      return {
+    } else if (type === "show") {
+      result = {
         title: data.name,
         artist: data.publisher,
         image: data.images[0]?.url,
         type: "show",
       };
-    }
-
-    if (type === "album") {
-      return {
+    } else if (type === "album") {
+      result = {
         title: data.name,
         artist: data.artists.map((a: any) => a.name).join(", "),
         image: data.images[0]?.url,
         type: "album",
       };
-    }
-
-    if (type === "playlist") {
-      return {
+    } else if (type === "playlist") {
+      result = {
         title: data.name,
         artist: `Curated by ${data.owner.display_name}`,
         image: data.images[0]?.url,
@@ -102,7 +113,11 @@ export async function getSpotifyMetadata(url: string) {
       };
     }
 
-    return null;
+    if (result) {
+      metadataCache.set(url, { data: result, expiry: Date.now() + METADATA_TTL });
+    }
+
+    return result;
   } catch (error) {
     console.error("Error fetching Spotify metadata:", error);
     return null;

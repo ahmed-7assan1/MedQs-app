@@ -13,6 +13,7 @@ import {
 import { Play, Heart, MessageSquare, ArrowRight, ArrowLeft, MessageCircle, FileText, FileImage, FileCode, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
+import { useCommunityPosts } from "@/lib/dashboard-fetch";
 
 interface PostAuthor {
   id: string;
@@ -267,9 +268,7 @@ function CarouselSkeleton() {
 }
 
 export function CommunityCarouselSidebar({ sidebarOpen }: { sidebarOpen?: boolean }) {
-  const [posts, setPosts] = useState<PostData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { data: raw, error, isLoading } = useCommunityPosts();
   const [api, setApi] = useState<any>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -287,38 +286,16 @@ export function CommunityCarouselSidebar({ sidebarOpen }: { sidebarOpen?: boolea
 
   useEffect(() => {
     if (!api) return;
-    const interval = setInterval(() => {
-      api.scrollNext();
-    }, 30000);
+    const interval = setInterval(() => api.scrollNext(), 30000);
     return () => clearInterval(interval);
   }, [api]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const forumRes = await fetch("/api/v1/forums?type=GLOBAL");
-        if (!forumRes.ok) throw new Error();
-        const forums = await forumRes.json();
-        const gf = Array.isArray(forums) ? forums.find((f: any) => f.type === "GLOBAL") : null;
-        if (!gf) throw new Error();
+  if (isLoading) return <div className="h-80"><CarouselSkeleton /></div>;
+  if (error) return null;
 
-        const postsRes = await fetch(`/api/v1/forums/${gf.id}/posts?page=1&limit=6`);
-        if (!postsRes.ok) throw new Error();
-        const data = await postsRes.json();
-        const raw = data.posts || data || [];
-        if (!cancelled) setPosts(Array.isArray(raw) ? raw : []);
-      } catch {
-        if (!cancelled) setError(true);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
-  if (loading) return <div className="h-80"><CarouselSkeleton /></div>;
-  if (error || posts.length === 0) return null;
+  const rawPosts = raw?.posts || raw?.items || raw || [];
+  const posts: PostData[] = Array.isArray(rawPosts) ? rawPosts : [];
+  if (posts.length === 0) return null;
 
   return (
     <div>

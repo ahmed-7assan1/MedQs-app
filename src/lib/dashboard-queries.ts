@@ -190,7 +190,6 @@ export async function fetchDashboardData(
   userId: string,
   chartDayKeys: string[]
 ): Promise<Omit<DashboardData, "rankInfo">> {
-  const { getUserRankInfo } = await import("@/lib/engagement");
 
   const dayStart = new Date();
   dayStart.setHours(0, 0, 0, 0);
@@ -297,5 +296,14 @@ export const getCachedDashboardData = unstable_cache(
     return fetchDashboardData(userId, chartDayKeys);
   },
   ["dashboard-data"],
+  { revalidate: 60, tags: ["dashboard"] }
+);
+
+export const getCachedRankInfo = unstable_cache(
+  async (userId: string) => {
+    const { getUserRankInfo } = await import("@/lib/engagement");
+    return getUserRankInfo(userId);
+  },
+  ["rank-info"],
   { revalidate: 60, tags: ["dashboard"] }
 );

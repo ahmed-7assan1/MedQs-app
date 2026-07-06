@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Carousel,
   CarouselContent,
@@ -12,20 +12,9 @@ import {
 import { Headphones, Music, ArrowRight, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
+import { useRecords } from "@/lib/dashboard-fetch";
 
-interface SuggestedRecord {
-  id: string;
-  url: string;
-  title: string;
-  image: string | null;
-  artist: string;
-  lectureId: string;
-  lectureTitle: string;
-  moduleId: string;
-  subjectName: string;
-}
-
-function RecordCard({ record }: { record: SuggestedRecord }) {
+function RecordCard({ record }: { record: import("@/lib/dashboard-fetch").SuggestedRecord }) {
   const [imgError, setImgError] = useState(false);
 
   return (
@@ -75,7 +64,7 @@ function RecordCard({ record }: { record: SuggestedRecord }) {
   );
 }
 
-function CarouselSkeleton() {
+export function CarouselSkeleton() {
   return (
     <div className="w-full animate-pulse">
       <div className="flex items-center gap-2 mb-3">
@@ -103,9 +92,7 @@ function CarouselSkeleton() {
 }
 
 export function RecordsCarousel({ sidebarOpen }: { sidebarOpen?: boolean }) {
-  const [records, setRecords] = useState<SuggestedRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { data, error, isLoading } = useRecords();
   const [api, setApi] = useState<any>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -123,32 +110,14 @@ export function RecordsCarousel({ sidebarOpen }: { sidebarOpen?: boolean }) {
 
   useEffect(() => {
     if (!api) return;
-    const interval = setInterval(() => {
-      api.scrollNext();
-    }, 30000);
+    const interval = setInterval(() => api.scrollNext(), 30000);
     return () => clearInterval(interval);
   }, [api]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/v1/records?page=1&limit=6");
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        const items = data.items || [];
-        if (!cancelled) setRecords(Array.isArray(items) ? items : []);
-      } catch {
-        if (!cancelled) setError(true);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
+  if (isLoading) return <div className="h-80"><CarouselSkeleton /></div>;
+  if (error || !data?.items?.length) return null;
 
-  if (loading) return <div className="h-80"><CarouselSkeleton /></div>;
-  if (error || records.length === 0) return null;
+  const records = data.items;
 
   return (
     <div>
@@ -172,8 +141,8 @@ export function RecordsCarousel({ sidebarOpen }: { sidebarOpen?: boolean }) {
         setApi={setApi}
       >
         <CarouselContent className="-ml-2 md:-ml-3">
-          {records.map((record, idx) => (
-              <CarouselItem key={record.id} className="basis-1/3 lg:basis-[300px] pl-2 md:pl-3">
+          {records.map((record: any, idx: number) => (
+            <CarouselItem key={record.id} className="basis-1/3 lg:basis-[300px] pl-2 md:pl-3">
               <div className={cn(
                 "transition-all duration-300",
                 idx === selectedIndex

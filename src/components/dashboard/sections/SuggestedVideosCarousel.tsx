@@ -13,6 +13,7 @@ import { Play, Video, ArrowRight, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getYouTubeThumbnail } from "@/lib/video-utils";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
+import { useCurriculumVideos } from "@/lib/dashboard-fetch";
 
 const HQ_FALLBACK = "hqdefault.jpg";
 
@@ -96,7 +97,7 @@ function VideoCard({ video }: { video: SuggestedVideo }) {
   );
 }
 
-function CarouselSkeleton() {
+export function CarouselSkeleton() {
   return (
     <div className="w-full animate-pulse">
       <div className="flex items-center gap-2 mb-3">
@@ -124,9 +125,7 @@ function CarouselSkeleton() {
 }
 
 export function SuggestedVideosCarousel({ sidebarOpen }: { sidebarOpen?: boolean }) {
-  const [videos, setVideos] = useState<SuggestedVideo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { data, error, isLoading } = useCurriculumVideos();
   const [api, setApi] = useState<any>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -150,26 +149,10 @@ export function SuggestedVideosCarousel({ sidebarOpen }: { sidebarOpen?: boolean
     return () => clearInterval(interval);
   }, [api]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/v1/videos/curriculum?page=1&limit=6");
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        const items = data.items || [];
-        if (!cancelled) setVideos(Array.isArray(items) ? items : []);
-      } catch {
-        if (!cancelled) setError(true);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
+  if (isLoading) return <div className="h-80"><CarouselSkeleton /></div>;
+  if (error || !data?.items?.length) return null;
 
-  if (loading) return <div className="h-80"><CarouselSkeleton /></div>;
-  if (error || videos.length === 0) return null;
+  const videos = data.items;
 
   return (
     <div>
@@ -193,8 +176,8 @@ export function SuggestedVideosCarousel({ sidebarOpen }: { sidebarOpen?: boolean
         setApi={setApi}
       >
         <CarouselContent className="-ml-2 md:-ml-3">
-          {videos.map((video, idx) => (
-              <CarouselItem key={video.id} className="basis-1/3 lg:basis-[300px] pl-2 md:pl-3">
+          {videos.map((video: any, idx: number) => (
+            <CarouselItem key={video.id} className="basis-1/3 lg:basis-[300px] pl-2 md:pl-3">
               <div className={cn(
                 "transition-all duration-300",
                 idx === selectedIndex
