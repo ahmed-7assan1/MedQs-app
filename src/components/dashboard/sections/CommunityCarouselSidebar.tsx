@@ -10,7 +10,8 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { Play, Paperclip, Heart, MessageSquare, ArrowRight, MessageCircle } from "lucide-react";
+import { Play, Paperclip, Heart, MessageSquare, ArrowRight, ArrowLeft, MessageCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 
 interface PostAuthor {
@@ -174,7 +175,7 @@ function PostCardBody({ post }: { post: PostData }) {
 
 function PostCard({ post }: { post: PostData }) {
   return (
-    <Card className="overflow-hidden border-border/40 shadow-sm h-[390px]">
+    <Card className="overflow-hidden border-border/40 shadow-sm h-[300px]">
       <div className="flex flex-col h-full">
         <div className="flex items-center gap-2.5 px-3.5 pt-3 pb-2.5 border-b border-border/10 shrink-0">
           <Avatar className="h-7 w-7 shrink-0">
@@ -263,6 +264,13 @@ export function CommunityCarouselSidebar() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [api, setApi] = useState<any>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+    setSelectedIndex(api.selectedScrollSnap());
+    api.on("select", () => setSelectedIndex(api.selectedScrollSnap()));
+  }, [api]);
 
   useEffect(() => {
     if (!api) return;
@@ -296,21 +304,41 @@ export function CommunityCarouselSidebar() {
     return () => { cancelled = true; };
   }, []);
 
-  if (loading) return <div className="h-[420px]"><CarouselSkeleton /></div>;
-  if (error || posts.length === 0) return <div className="h-[420px]" />;
+  if (loading) return <div className="h-80"><CarouselSkeleton /></div>;
+  if (error || posts.length === 0) return null;
 
   return (
-    <div className="w-full h-[420px]">
-      <SectionHeader icon={MessageCircle} title="Social" />
+    <div>
+      <SectionHeader
+        icon={MessageCircle}
+        title="Social"
+        right={
+          <div className="flex items-center gap-1">
+            <button onClick={() => api?.scrollPrev()} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border/40 bg-card/40 text-muted-foreground hover:bg-card/60 hover:text-primary transition-all">
+              <ArrowLeft className="h-3.5 w-3.5" />
+            </button>
+            <button onClick={() => api?.scrollNext()} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border/40 bg-card/40 text-muted-foreground hover:bg-card/60 hover:text-primary transition-all">
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        }
+      />
 
       <Carousel
-        opts={{ loop: true, align: "start" }}
+        opts={{ loop: true, align: "center", slidesToScroll: 1, containScroll: false }}
         setApi={setApi}
       >
-        <CarouselContent>
-          {posts.map((post) => (
-            <CarouselItem key={post.id}>
-              <PostCard post={post} />
+        <CarouselContent className="-ml-2 md:-ml-3">
+          {posts.map((post, idx) => (
+            <CarouselItem key={post.id} className="basis-1/3 pl-2 md:pl-3">
+              <div className={cn(
+                "transition-all duration-300",
+                idx === selectedIndex
+                  ? "opacity-100 scale-100"
+                  : "opacity-40 scale-[0.92] blur-[1px] pointer-events-none"
+              )}>
+                <PostCard post={post} />
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>

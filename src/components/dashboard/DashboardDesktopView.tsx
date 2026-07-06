@@ -28,6 +28,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           <div className="flex-1 min-w-0 space-y-8 md:space-y-10 section-entrance pt-6 lg:pt-8">
             <MissionControlHero data={data} />
             <ContinueLearningSection data={data} />
+            <CommunityCarouselSidebar />
             <QuickActionsHub />
             <EcosystemCards />
             <AIRecommendations data={data} />
@@ -45,7 +46,6 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
                 <ActiveRoomsSidebar />
                 <LeaderboardSidebar />
                 <ContinueLectureCard lecture={data.lastLecture ?? null} />
-                <CommunityCarouselSidebar />
               </SearchableSidebar>
             </aside>
           </div>
