@@ -140,8 +140,8 @@ async function getModuleProgress(userId: string, semesterId: string): Promise<Mo
         COUNT(DISTINCT q.id) AS total,
         COUNT(DISTINCT l.id) AS lectures
       FROM "Module" m
-      JOIN "Subject" s ON s."moduleId" = m.id
-      JOIN "Lecture" l ON l."subjectId" = s.id
+      LEFT JOIN "Subject" s ON s."moduleId" = m.id
+      LEFT JOIN "Lecture" l ON l."subjectId" = s.id
       LEFT JOIN "Question" q ON q."lectureId" = l.id
       WHERE m."semesterId" = ${semesterId}
       GROUP BY m.id
