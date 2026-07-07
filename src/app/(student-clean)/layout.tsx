@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/get-authenticated-user";
 import dynamic from "next/dynamic";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { NavbarWrapper } from "@/components/layout/NavbarWrapper";
@@ -27,8 +27,7 @@ const getCachedSiteConfig = unstable_cache(
 );
 
 export default async function CleanStudentLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createClient();
-  const { data: { user: authUser } } = await supabase.auth.getUser();
+  const authUser = await getAuthenticatedUser();
   const isGuest = !authUser;
 
   const sessionUserId = authUser?.id ?? "";
