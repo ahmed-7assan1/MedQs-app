@@ -1,5 +1,4 @@
 import useSWR from "swr";
-import useSWRImmutable from "swr/immutable";
 
 // ── Shared fetcher ──
 
@@ -80,15 +79,8 @@ export function useCurriculumVideos() {
 }
 
 export function useCommunityPosts() {
-  const { data: forums } = useSWRImmutable<{ id: string; type: string }[]>(
-    "/api/v1/forums?type=GLOBAL",
-    fetcher
-  );
-  const globalForum = Array.isArray(forums) ? forums.find((f) => f.type === "GLOBAL") : null;
-  const forumId = globalForum?.id;
-
-  return useSWR<{ posts?: PostData[] } & PaginatedResponse<PostData>>(
-    forumId ? `/api/v1/forums/${forumId}/posts?page=1&limit=6` : null,
+  return useSWR<PaginatedResponse<PostData>>(
+    "/api/v1/community/posts?limit=6",
     fetcher,
     SWR_OPTIONS
   );

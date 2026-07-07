@@ -293,7 +293,7 @@ export function CommunityCarouselSidebar({ sidebarOpen }: { sidebarOpen?: boolea
   if (isLoading) return <div className="h-80"><CarouselSkeleton /></div>;
   if (error) return null;
 
-  const rawPosts = raw?.posts || raw?.items || raw || [];
+  const rawPosts = raw?.items || raw || [];
   const posts: PostData[] = Array.isArray(rawPosts) ? rawPosts : [];
   if (posts.length === 0) return null;
 

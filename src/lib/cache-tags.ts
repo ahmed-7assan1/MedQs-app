@@ -5,6 +5,7 @@ export const CACHE_TAGS = {
   ADS: "ads",
   YOUTUBE: "youtube",
   USER_PROFILE: "user-profile",
+  COMMUNITY: "community",
 } as const;
 
 export const CACHE_TTL = {
@@ -14,4 +15,5 @@ export const CACHE_TTL = {
   ADS: 300,
   YOUTUBE: 3600,
   USER_PROFILE: 60,
+  COMMUNITY: 30,
 } as const;
