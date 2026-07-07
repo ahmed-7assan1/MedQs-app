@@ -24,7 +24,7 @@ model SiteConfig {
   fontArabic              String?
   fontSans                String?
   aiPreferredProvider     String   @default("auto")
-  /// Square icon for PWA ‚ÄúAdd to Home Screen‚Äù / maskable (512√ó512). Falls back to faviconUrl then defaults.
+  /// Square icon for PWA G«£Add to Home ScreenG«• / maskable (512+˘512). Falls back to faviconUrl then defaults.
   pwaIconUrl              String?
   logoUrlDark             String?
   facebookUrl             String?
@@ -96,7 +96,7 @@ model University {
   originatedResources LibraryResource[]
 }
 
-/// Faculty (ŸÉŸÑŸäŸá) ‚Äî optional sub-division of a University.
+/// Faculty (+‚+‰+Ë+Á) G«ˆ optional sub-division of a University.
 /// When present, AcademicYears are grouped under a Faculty.
 /// If a University has no Faculties, the old flat structure is preserved (facultyId = null).
 model Faculty {
@@ -114,6 +114,8 @@ model Faculty {
   sourceBooks    SourceBook[]
 
   @@index([universityId])
+  @@index([active, semesterId])
+  @@index([active, universityId])
   @@index([category])
 }
 
@@ -247,9 +249,26 @@ model Flashcard {
   lecture   Lecture                 @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   progress  UserFlashcardProgress[]
 
-  @@index([lectureId, createdAt])
+  @@index([lectureId])
 }
 
+model UserFlashcardProgress {
+  id             String    @id @default(uuid())
+  userId         String
+  flashcardId    String
+  interval       Int       @default(0)
+  repetitions    Int       @default(0)
+  easeFactor     Float     @default(2.5)
+  nextReviewAt   DateTime  @default(now())
+  lastReviewedAt DateTime?
+  lastRating     Int?
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, flashcardId])
+  @@index([userId, nextReviewAt])
+}
 
 model LectureFile {
   id                String  @id @default(uuid())
@@ -311,7 +330,7 @@ model LectureRecord {
   telegramChatId    String?
   lecture           Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
 
-  @@index([lectureId])
+  @@index([lectureId, createdAt])
 }
 
 model LectureVideoComment {
@@ -328,6 +347,7 @@ model LectureVideoComment {
 
   @@index([videoId, createdAt])
   @@index([userId])
+  @@index([userId, createdAt])
   @@index([parentId])
 }
 
@@ -340,6 +360,7 @@ model LectureVideoLike {
 
   @@unique([videoId, userId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model Question {
@@ -675,6 +696,7 @@ model Note {
   @@unique([userId, lectureId])
   @@index([lectureId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model UserLectureActivity {
@@ -872,6 +894,7 @@ model PostReaction {
 
   @@unique([postId, userId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model Notification {
@@ -925,6 +948,7 @@ model GroupMember {
 
   @@unique([groupId, userId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model GroupJoinRequest {
@@ -939,6 +963,7 @@ model GroupJoinRequest {
   @@unique([groupId, userId])
   @@index([groupId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model Rank {
@@ -958,6 +983,7 @@ model EngagementLog {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model AIUsageLog {
@@ -970,6 +996,7 @@ model AIUsageLog {
 
   @@unique([userId, type, date])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model AdBanner {
@@ -1006,6 +1033,7 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model DocumentTemplate {
@@ -1019,6 +1047,7 @@ model DocumentTemplate {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model Session {
@@ -1081,6 +1110,8 @@ model MedicalTeam {
 
   @@index([facultyId])
   @@index([universityId])
+  @@index([active, semesterId])
+  @@index([active, universityId])
 }
 
 model TeamMember {
@@ -1094,6 +1125,7 @@ model TeamMember {
 
   @@unique([teamId, userId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model TeamFollower {
@@ -1106,6 +1138,7 @@ model TeamFollower {
 
   @@unique([teamId, userId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model PlatformMember {
@@ -1146,6 +1179,7 @@ model PushSubscription {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model Poll {
@@ -1179,6 +1213,7 @@ model PollVote {
   @@unique([pollOptionId, userId])
   @@index([pollOptionId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model TeamTask {
@@ -1219,6 +1254,8 @@ model StudyRoom {
   sessions        StudySession[]
 
   @@index([universityId])
+  @@index([active, semesterId])
+  @@index([active, universityId])
   @@index([inviteCode])
 }
 
@@ -1234,6 +1271,7 @@ model StudyRoomMember {
 
   @@unique([roomId, userId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model StudyRoomPost {
@@ -1284,6 +1322,7 @@ model StudyRoomTaskCompletion {
   @@unique([taskId, userId])
   @@index([taskId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model SavedPost {
@@ -1389,6 +1428,7 @@ model StudySessionParticipant {
   @@unique([sessionId, userId])
   @@index([sessionId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model UserPointsTransaction {
@@ -1470,6 +1510,7 @@ model BlockedUser {
 
   @@unique([userId, blockedId])
   @@index([userId])
+  @@index([userId, createdAt])
   @@index([blockedId])
 }
 
@@ -1763,6 +1804,7 @@ model IdentityProvider {
 
   @@unique([provider, providerUid])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model TeacherProfile {
@@ -2244,6 +2286,7 @@ model V2Reaction {
 
   @@unique([postId, userId, type])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model V2Group {
@@ -2266,6 +2309,7 @@ model V2GroupMembership {
   @@unique([groupId, userId])
   @@index([groupId])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model V2Message {
@@ -2425,6 +2469,7 @@ model SavedQuiz {
   updatedAt   DateTime @updatedAt
 
   @@index([userId])
+  @@index([userId, createdAt])
   @@index([shareCode])
 }
 
@@ -2474,6 +2519,7 @@ model SavedFlashcardSet {
   updatedAt  DateTime @updatedAt
 
   @@index([userId])
+  @@index([userId, createdAt])
   @@index([shareCode])
 }
 
@@ -2561,6 +2607,7 @@ model Testimonial {
 
   @@index([status])
   @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model Warning {
@@ -2636,6 +2683,7 @@ model SecurityEvent {
   @@index([type, status])
   @@index([severity])
   @@index([userId])
+  @@index([userId, createdAt])
   @@index([createdAt])
   @@index([ipAddress])
   @@index([status, severity, createdAt])
@@ -2770,6 +2818,7 @@ model ChannelFollow {
 
   @@unique([userId, channelId])
   @@index([userId])
+  @@index([userId, createdAt])
   @@index([channelId])
 }
 
@@ -2789,6 +2838,7 @@ model VideoViewTracking {
 
   @@index([videoId, createdAt])
   @@index([userId])
+  @@index([userId, createdAt])
   @@index([lectureId])
 }
 
