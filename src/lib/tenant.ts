@@ -11,7 +11,7 @@ export type SessionScope = {
   isLeader: boolean;
 };
 
-const SCOPE_CACHE_TTL = 60; // 1 minute — reduced from 300 for faster role/semester change propagation
+const SCOPE_CACHE_TTL = 300; // 5 minutes
 
 export async function getSessionScope(session: Session | null): Promise<SessionScope | null> {
   const userId = session?.user?.id;
