@@ -18,7 +18,7 @@ export default async function DashboardPage() {
   const user = await getAuthenticatedUser();
   if (!user) redirect("/auth?mode=login");
 
-  let fullProfile = user ? await prisma.user.findUnique({
+  const fullProfile = user ? await prisma.user.findUnique({
     where: { id: user.id },
     select: { id: true, universityId: true, facultyId: true, semesterId: true }
   }) : null;
