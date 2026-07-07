@@ -860,22 +860,29 @@ Wrap each carousel section in a React Error Boundary so one failing section does
 - Failure recovery mechanisms
 
 **Files Expected to Change:**
-- \src/app/api/v1/health/route.ts\ — enhance health check
-- New: \src/lib/logger.ts\ — structured logging utility
-- \src/lib/prisma.ts\ — review \withRetry\ implementation
-- All API routes — consistent error response format
+- \src/app/api/v1/health/route.ts\ — enhance health check (add Supabase Auth connectivity, structured logging)
+- \src/lib/logger.ts\ — upgrade to JSON-structured log entries with context metadata
+- New: \src/lib/api-response.ts\ — standardized API response helpers (\apiError\, \apiSuccess\, \apiUnauthorized\, \apiNotFound\, \apiServerError\)
+- \src/app/api/v1/community/posts/route.ts\ — adopt \api-response\ helpers (representative pattern for future routes)
 
 **Implementation Strategy:**
 
-#### Step 9a: Standardized Error Response Format
+#### Step 9a: Standardized API Response Format
 
-All API routes should return errors in a consistent format: \{ error: string, message: string, details?: unknown }\.
+Create a shared helper at \src/lib/api-response.ts\ with:
+- \apiError(status, error, message?, details?, headers?)\ — returns \NextResponse\ with \ApiErrorBody\ shape
+- \apiSuccess(data, status?, headers?)\ — returns \NextResponse\ with \ApiSuccessBody\ shape
+- Convenience wrappers: \apiUnauthorized()\, \apiNotFound()\, \apiServerError()\
 
 HTTP status code conventions: 401 (unauthorized), 403 (forbidden), 400 (bad request), 404 (not found), 422 (validation error), 429 (rate limited), 500 (internal error), 503 (service unavailable).
 
+Apply to \src/app/api/v1/community/posts/route.ts\ as a representative target. Remaining API routes can adopt the pattern incrementally in follow-up work.
+
 #### Step 9b: Structured Logging
 
-Create a simple logging utility that outputs JSON-structured log entries with context (module, timestamp, level, message, error details). Do NOT log PII, secrets, or full database row contents.
+Upgrade \src/lib/logger.ts\ to output JSON-structured log entries with context:
+- Each entry: \{"timestamp": "...", "level": "info|warn|error|debug", "module": "...", "message": "...", "requestId"?: "...", "durationMs"?: ..., "error"?: "..." }\}
+- Backward compatible — existing callers using \createLogger(prefix).info(msg)\ continue to work
 
 #### Step 9c: Health Check Enhancement
 
@@ -898,6 +905,19 @@ Rule: **serve degraded content, not errors.**
 **Estimated Implementation Time:** 4-5 hours  
 **Risk Level:** Low (all changes are additive — logging, health checks, error format)  
 **Success Criteria:** Health endpoint is available and accurate; Dashboard survives Redis, Spotify, and YouTube outages without breaking; Logged output is parseable JSON with structured context
+
+**Verification Checklist:**
+- [static] `src/lib/api-response.ts` exists with `apiError`, `apiSuccess`, `apiUnauthorized`, `apiNotFound`, `apiServerError` exports
+- [static] `src/lib/logger.ts` outputs JSON-structured entries with `timestamp`, `level`, `module`, `message` fields
+- [static] `src/app/api/v1/community/posts/route.ts` uses `apiSuccess`/`apiError`/`apiUnauthorized` from `api-response.ts` instead of raw `NextResponse.json()`
+- [static] Community posts route logs structured error via `createLogger("community-posts").error()`
+- [static] Health endpoint checks Supabase Auth connectivity (verifies `SUPABASE_URL` env var, attempts HEAD request)
+- [static] Health endpoint uses `createLogger("health")` for degraded/unhealthy state logging
+- [runtime] `tsc --noEmit`: 16 errors (baseline) — no new type errors introduced
+- [runtime] `next build`: compiled successfully
+- [runtime] `withRetry` helper in `prisma.ts` already exists with connection-drop detection and exponential backoff — unchanged
+- [staging only] Health endpoint returns accurate status for all 3 checks (DB, Redis, Supabase Auth)
+- [staging only] Community posts endpoint error response uses `apiError` format (`{ error, message }`)
 
 ---
 
@@ -1888,6 +1908,7 @@ These findings have been implemented and verified by code inspection (or locally
 | Finding ID | What's Pending | Why Local Verification Was Insufficient | Staging Test |
 |---|---|---|---|
 | P0-3 | Quiz completion triggers `revalidateTag("dashboard")` — dashboard should reflect updated scores/streak within ~2s | Local dev DB has no seeded past-paper questions; quiz flow cannot be completed end-to-end | 1. Log in as a student on staging. 2. Complete any past-paper quiz. 3. Navigate to dashboard. 4. Verify streak, today's count, and module progress scores reflect the just-completed attempt. |
+| P2-4 | Error boundary isolation — forcing one carousel (e.g., Community) to fail must leave the other two carousels (Records, Videos) rendering normally, with only the failing section showing "temporarily unavailable" | Vitest cannot import `.tsx` files (project's `jsx: "preserve"` + node environment); no `@testing-library/react` or `jsdom` installed; test infrastructure limitation acknowledged | 1. Log in as a student on staging. 2. Open DevTools → Network → block the `/api/v1/community/posts` endpoint or induce a 500 by editing the response. 3. Refresh dashboard. 4. Verify: Community carousel area shows "This section is temporarily unavailable". 5. Verify: Records and Videos carousels still render with real content. |
 
 **Note:** This list should be reviewed before the final Phase 10 merge. All items must be confirmed on staging (or explicitly waived) before marking the remediation rollout as complete.
 

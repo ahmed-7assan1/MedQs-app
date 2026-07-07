@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
+import { createLogger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
 type HealthStatus = "healthy" | "degraded" | "unhealthy";
+
+const log = createLogger("health");
 
 export async function GET() {
   const checks: Record<string, { status: HealthStatus; latencyMs?: number; error?: string }> = {};
@@ -35,18 +38,51 @@ export async function GET() {
     };
   }
 
-  const allHealthy = Object.values(checks).every((c) => c.status === "healthy");
-  const anyUnhealthy = Object.values(checks).some((c) => c.status === "unhealthy");
+  // Supabase Auth check (resolve URL without making an external HTTP call)
+  const authStart = Date.now();
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const hasAnonKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl) {
+      checks.supabaseAuth = { status: "degraded", latencyMs: Date.now() - authStart, error: "SUPABASE_URL not configured" };
+    } else {
+      // Lightweight DNS/connectivity check — attempt a HEAD to supabase URL
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const resp = await fetch(supabaseUrl, { method: "HEAD", signal: controller.signal });
+      clearTimeout(timeoutId);
+      checks.supabaseAuth = {
+        status: resp.ok ? "healthy" : "degraded",
+        latencyMs: Date.now() - authStart,
+        ...(hasAnonKey ? {} : { error: "NEXT_PUBLIC_SUPABASE_ANON_KEY not configured" }),
+        ...(hasServiceKey ? {} : { warning: "SUPABASE_SERVICE_ROLE_KEY not configured" }),
+      };
+    }
+  } catch (err) {
+    checks.supabaseAuth = {
+      status: "degraded",
+      latencyMs: Date.now() - authStart,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
+  }
+
+  const statuses = Object.values(checks).map((c) => c.status);
+  const allHealthy = statuses.every((s) => s === "healthy");
+  const anyUnhealthy = statuses.some((s) => s === "unhealthy");
   const overall: HealthStatus = allHealthy ? "healthy" : anyUnhealthy ? "unhealthy" : "degraded";
   const statusCode = overall === "unhealthy" ? 503 : 200;
 
-  return NextResponse.json(
-    {
-      status: overall,
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      checks,
-    },
-    { status: statusCode }
-  );
+  const response = {
+    status: overall,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    checks,
+  };
+
+  if (overall !== "healthy") {
+    log.warn("Health check degraded", { overall, unhealthyChecks: Object.entries(checks).filter(([,c]) => c.status !== "healthy").map(([k]) => k) });
+  }
+
+  return NextResponse.json(response, { status: statusCode });
 }
