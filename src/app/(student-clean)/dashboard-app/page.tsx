@@ -8,6 +8,7 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import type { DashboardData } from "@/types/dashboard";
 import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
+import { CACHE_TAGS, CACHE_TTL } from "@/lib/cache-tags";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -95,7 +96,7 @@ export default async function DashboardPage() {
       });
     },
     ["ads"],
-    { revalidate: 300, tags: ["ads"] }
+    { revalidate: CACHE_TTL.ADS, tags: [CACHE_TAGS.ADS] }
   );
 
   let ads: { id: string; imageUrl: string; linkUrl: string | null }[] = [];
