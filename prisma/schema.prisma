@@ -247,26 +247,9 @@ model Flashcard {
   lecture   Lecture                 @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   progress  UserFlashcardProgress[]
 
-  @@index([lectureId])
+  @@index([lectureId, createdAt])
 }
 
-model UserFlashcardProgress {
-  id             String    @id @default(uuid())
-  userId         String
-  flashcardId    String
-  interval       Int       @default(0)
-  repetitions    Int       @default(0)
-  easeFactor     Float     @default(2.5)
-  nextReviewAt   DateTime  @default(now())
-  lastReviewedAt DateTime?
-  lastRating     Int?
-
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, flashcardId])
-  @@index([userId, nextReviewAt])
-}
 
 model LectureFile {
   id                String  @id @default(uuid())
@@ -313,6 +296,7 @@ model LectureVideo {
   telegramMigrationTasks TelegramMigrationTask[]
 
   @@index([lectureId, sortOrder])
+  @@index([lectureId, createdAt])
 }
 
 model LectureRecord {
@@ -478,6 +462,7 @@ model QuizAttempt {
   items           QuizAttemptItem[]
 
   @@index([userId])
+  @@index([userId, createdAt])
   @@index([guestQuizUserId])
   @@index([pastPaperId])
 }
@@ -1000,6 +985,8 @@ model AdBanner {
 
   @@index([semesterId])
   @@index([universityId])
+  @@index([active, semesterId])
+  @@index([active, universityId])
 }
 
 model Account {

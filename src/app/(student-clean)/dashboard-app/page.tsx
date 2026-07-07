@@ -7,6 +7,7 @@ import { last7DayKeys } from "@/lib/dashboard-stats";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import type { DashboardData } from "@/types/dashboard";
 import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -21,32 +22,6 @@ export default async function DashboardPage() {
     where: { id: user.id },
     select: { id: true, universityId: true, facultyId: true, semesterId: true }
   }) : null;
-
-  try {
-    if (user && (!fullProfile || !fullProfile.universityId || !fullProfile.semesterId)) {
-      const meta = user.user_metadata;
-      if (meta?.universityId) {
-         fullProfile = await prisma.user.upsert({
-           where: { id: user.id },
-           create: {
-              id: user.id,
-              email: user.email!,
-              name: meta.name || user.email?.split('@')[0] || "Student",
-              universityId: meta.universityId,
-              facultyId: meta.facultyId,
-              semesterId: meta.semesterId,
-           },
-           update: {
-              universityId: meta.universityId,
-              facultyId: meta.facultyId,
-              semesterId: meta.semesterId,
-           }
-         });
-      }
-    }
-  } catch (syncErr) {
-    console.error("[dashboard-app] Profile sync error:", syncErr);
-  }
 
   const isProfileIncomplete = user && (!fullProfile?.universityId || !fullProfile?.semesterId);
 
@@ -102,22 +77,30 @@ export default async function DashboardPage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
-  let ads: { id: string; imageUrl: string; linkUrl: string | null }[] = [];
-  try {
-    const siteConfig = await prisma.siteConfig.findFirst({ select: { enableAds: true } });
-    if (siteConfig?.enableAds !== false) {
-      ads = await prisma.adBanner.findMany({
+  const getCachedAds = unstable_cache(
+    async (semesterId: string | undefined) => {
+      const siteConfig = await prisma.siteConfig.findFirst({ select: { enableAds: true } });
+      const adsEnabled = siteConfig?.enableAds !== false;
+      if (!adsEnabled) return [];
+      return prisma.adBanner.findMany({
         where: {
           active: true,
           OR: [
-            { semesterId: fullProfile?.semesterId ?? undefined },
+            { semesterId: semesterId ?? undefined },
             { semesterId: null, universityId: null },
           ],
         },
         select: { id: true, imageUrl: true, linkUrl: true },
         orderBy: { createdAt: "desc" },
       });
-    }
+    },
+    ["ads"],
+    { revalidate: 300, tags: ["ads"] }
+  );
+
+  let ads: { id: string; imageUrl: string; linkUrl: string | null }[] = [];
+  try {
+    ads = await getCachedAds(fullProfile?.semesterId ?? undefined);
   } catch (_) {}
 
   // Optimise profile image URL for display quality
