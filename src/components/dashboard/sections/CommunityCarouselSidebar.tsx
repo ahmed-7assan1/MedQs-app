@@ -291,7 +291,7 @@ export function CommunityCarouselSidebar({ sidebarOpen }: { sidebarOpen?: boolea
   }, [api]);
 
   if (isLoading) return <div className="h-80"><CarouselSkeleton /></div>;
-  if (error) return null;
+  if (error) throw new Error("Failed to load community posts");
 
   const rawPosts = raw?.items || raw || [];
   const posts: PostData[] = Array.isArray(rawPosts) ? rawPosts : [];

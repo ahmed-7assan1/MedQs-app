@@ -150,7 +150,8 @@ export function SuggestedVideosCarousel({ sidebarOpen }: { sidebarOpen?: boolean
   }, [api]);
 
   if (isLoading) return <div className="h-80"><CarouselSkeleton /></div>;
-  if (error || !data?.items?.length) return null;
+  if (error) throw new Error("Failed to load suggested videos");
+  if (!data?.items?.length) return null;
 
   const videos = data.items;
 
