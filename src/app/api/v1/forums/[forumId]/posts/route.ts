@@ -5,7 +5,6 @@ import { z } from "zod";
 import { redisIncrWithExpire } from "@/lib/redis";
 import { defer } from "@/lib/defer";
 import { loadForumPostsForUser } from "@/lib/forum-posts";
-import { unstable_cache } from "next/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,13 +14,6 @@ export const dynamic = "force-dynamic";
 // Real-time NEW posts come instantly via Firestore WebSockets (no DB needed).
 const getCachedPosts = (forumId: string, userId: string, page: number, limit: number) =>
   loadForumPostsForUser({ forumId, userId, page, limit });
-/*
-  unstable_cache(
-    () => loadForumPostsForUser({ forumId, userId, page, limit: 20 }),
-    [`forum-posts-${forumId}-${page}`],
-    { revalidate: 30, tags: [`forum-${forumId}`] }
-  )();
-*/
 
 const POST_SCHEMA = z
   .object({

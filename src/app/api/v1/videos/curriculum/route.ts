@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     };
 
     const [videos, total] = await Promise.all([
-      (prisma as any).lectureVideo.findMany({
+      prisma.lectureVideo.findMany({
         where,
         include: {
           lecture: {
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit
       }),
-      (prisma as any).lectureVideo.count({ where })
+      prisma.lectureVideo.count({ where })
     ]);
 
     const vIdList: string[] = [];

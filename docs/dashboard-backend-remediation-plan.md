@@ -6,6 +6,12 @@
 **Target System:** MedOneX (medqs-app)  
 **Infrastructure:** Vercel Free, Supabase Free, BYOK AI, Telegram Storage, Redis (Upstash)
 
+### Changelog
+
+| Date | Version | Change |
+|------|---------|--------|
+| July 2026 | 1.1 | Connection pool figure corrected from an initially-assumed 15 to the runtime-verified actual value of 30 (from DATABASE_URL's `connection_limit` parameter), after discovering `DATABASE_CONNECTION_LIMIT=15` in `.env` was dead configuration. An earlier unfounded claim of "4" during investigation was retracted — no evidence ever supported it. |
+
 ---
 
 ## Executive Summary
@@ -167,7 +173,7 @@ Every issue identified during the audit, categorized by severity.
 - **Description:** The layout already queries `siteConfig` via `unstable_cache` (300s revalidation) for feature flags. The page independently queries `prisma.siteConfig.findFirst()` at line 108 with NO caching.
 - **File:** `src/app/(student-clean)/dashboard-app/page.tsx` lines 107-108
 - **Root Cause:** Feature isolation — the ads check (`enableAds`) needed site config but didn't reuse the layout's cached version.
-- **Business Impact:** One extra DB query per dashboard load. On Supabase free tier with 15 connection pool slots, each wasted query increases pool contention.
+- **Business Impact:** One extra DB query per dashboard load. On Supabase free tier with 30 connection pool slots (via pooler), each wasted query increases pool contention.
 - **Technical Impact:** Minor but unnecessary DB load.
 - **Priority Justification:** Trivial fix. Combine with P1-7 (AdBanner caching) for cumulative gain.
 
@@ -818,13 +824,13 @@ Wrap each carousel section in a React Error Boundary so one failing section does
 
 #### 500 Concurrent Users
 
-**Bottlenecks:** Supabase Auth rate limit (3,000 API calls/min @ 3x multiplier = near 50 req/s limit). Prisma connection pool (15) starts queueing requests.
+**Bottlenecks:** Supabase Auth rate limit (3,000 API calls/min @ 3x multiplier = near 50 req/s limit). Prisma connection pool (30) starts queueing requests.
 
 **Fixes:** Phase 2 (reduce to 1 auth call per load = 1,000 calls/min, well within limits). Phase 3 (reduce DB queries per load from 16 to 8, effectively doubling connection availability). Enable Supabase connection pooler in transaction mode.
 
 #### 1,000 Concurrent Users
 
-**Bottlenecks:** DB connection pool (15) fully saturated. At 270 queries/second and 15 connections, average query time must be <55ms.
+**Bottlenecks:** DB connection pool (30) under load. At 270 queries/second and 30 connections, average query time must be <110ms.
 
 **Fixes:** Phase 5 (YouTube caching reduces external latency). Consider Supabase Pro (/month) for 60 connection pool slots. Evaluate Vercel Pro for reduced cold starts.
 
@@ -1405,7 +1411,7 @@ Key test cases:
 **Success criteria (after Phase 3):**
 - P95 latency < 2s for dashboard page
 - Error rate < 1%
-- Database connection usage < 80% of pool (12 of 15 connections)
+- Database connection usage < 80% of pool (24 of 30 connections)
 
 ### Authentication Testing
 
@@ -1728,7 +1734,7 @@ Browser                              Next.js Server                        Supab
 | Service | Plan | Cost | Limits |
 |---|---|---|---|
 | Vercel | Hobby | Free | 100ms serverless, 512MB, 100 builds/month |
-| Supabase | Free | Free | 500MB DB, 15 connections, 5GB bandwidth, 50 Auth req/s |
+| Supabase | Free | Free | 500MB DB, 15 direct / 30 pooler connections, 5GB bandwidth, 50 Auth req/s |
 | Redis (Upstash) | Free | Free | 10,000 commands/day, 256KB messages |
 | YouTube API | Free | Free | 10,000 quota units/day |
 | Spotify API | Free | Free | Quota varies per plan |
@@ -1895,7 +1901,8 @@ Every audit finding mapped to its remediation phase, disposition, and verificati
 | P1-6 | SiteConfig Queried Twice (Uncached Second Query) | Phase 3 | **Fully Verified** | Page-level siteConfig query moved inside `getCachedAds` and wrapped in `unstable_cache` (300s revalidate, ads tag) alongside AdBanner query; only 1 cache hit per page load. Verified by code inspection of `page.tsx` — no standalone `siteConfig` fetch remains. |
 | P1-7 | AdBanner Query — No Cache and Missing Composite Index | Phase 3 | **Fully Verified** | AdBanner query wrapped in `unstable_cache` with 300s revalidation; composite indexes `@@index([active, semesterId])` and `@@index([active, universityId])` added and confirmed via `pg_indexes`. EXPLAIN ANALYZE shows Seq Scan at 0.071ms (expected behavior for 1-page table — index scan would be more expensive at this size; index will engage when table exceeds ~1 page). |
 | P2-1 | `getModuleProgress` — Over-fetching Subject and Lecture Rows | Phase 3 | **Fully Verified** | Rewritten with raw SQL aggregates; rows fetched reduced from ~800 to ~24. Data parity verified across 3 semesters — old nested-include implementation vs new raw SQL produced **identical output** for all tested semesterIds. Bug caught and fixed during testing: original raw SQL used `JOIN` (INNER) which silently excluded modules with no subjects/lectures; corrected to `LEFT JOIN` to match old behavior exactly. |
-| P2-2 | `DashboardPage` — `any` Types Throughout | Phase 10 | Fixed | `dashData`/`rankInfo` properly typed; `activity` vs `weekCounts` mismatch fixed; `(prisma as any)` casts removed; pre-existing `DashboardData.lastLectureActivity` type widened to include `videoUrl`, `videos`, `team` fields; `Subject.moduleId` nullable handled with fallback. `tsc --noEmit`: 0 errors on Phase 10 files. |
+| P2-2 | `DashboardPage` — `any` Types Throughout | Phase 10 | Fixed | `dashData`/`rankInfo` properly typed; `(prisma as any)` casts removed; pre-existing `DashboardData.lastLectureActivity` type widened to include `videoUrl`, `videos`, `team` fields; `Subject.moduleId` nullable handled with fallback. `tsc --noEmit`: 0 errors on Phase 10 files. |
+| P2-2-related | Dashboard stats display bug, silently masked by `any` typing, discovered and fixed during Phase 10 | Phase 10 | Fixed — see description in Phase 10 report below | **Root cause:** `let dashData: any` masked that the destructured field names `stats` and `activity` do not exist on the object returned by `getCachedDashboardData()`. The correct fields are `totalQuestions`, `totalCorrect`, `todayItemCount`, `streak`, and `weekCounts`. The `any` type allowed this silent mismatch to ship undetected. **Fix:** Replaced `stats`/`activity` destructuring with the real field names; typed `dashData` as `DashboardRawData` matching the actual return shape; computed `activityArr` from `weekCounts` mapped via `chartDays`. **Manual production DB verification:** Ran identical queries against live Supabase for 2 real users — confirmed totalQuestions=717, totalCorrect=2, overallPct=0% (0.28% rounds down), weekCounts correctly captured July 4 activity (29 items). Old code would have shown 0 for all values regardless of actual data. No other file references `dashData.stats` or `dashData.activity`. |
 | P2-3 | `lastLectureActivity` — Prisma Sorts ALL Videos | Phase 3, Phase 10 | **Documented Limitation — Fully Verified** | Known Prisma limitation; per-lecture video count is small (1-5); comment referencing plan and finding ID added in `dashboard-queries.ts` (both Phase 3 and Phase 10 branches); revisit only if per-lecture video count exceeds 50. Confirmed comment present via code inspection. `next build` passes — no runtime impact. |
 | P2-4 | No Error Boundaries on Dashboard | Phase 7 | **Fully Verified** | `CarouselErrorBoundary.tsx` created as React class component (`getDerivedStateFromError` + `componentDidCatch` with console.error log). `DashboardDesktopView.tsx` wraps RecordsCarousel, CommunityCarouselSidebar, and SuggestedVideosCarousel each in `<CarouselErrorBoundary title="...">`. Error fallback renders "This section is temporarily unavailable." Verified by code inspection — class component correctly implements both boundary lifecycle methods; each section independently wrapped so one crash does not cascade. |
 | P2-5 | `last7DayKeys()` — Recomputes Every Render | Phase 4, Phase 7 | **Fully Verified — Phase 7 scope satisfied** | Wrapped in React `cache()` — `export const last7DayKeys = cache(() => {...})`. Verified by code inspection of `src/lib/dashboard-stats.ts` (static/code-inspection review): function body unchanged, `import { cache } from "react"` added, `cache()` wrapping applied at export. Pure computation unchanged. `next build` passes. **No further action needed in Phase 7 for this finding.** |
@@ -1911,15 +1918,22 @@ These findings have been implemented and verified by code inspection (or locally
 |---|---|---|---|
 | P0-3 | Quiz completion triggers `revalidateTag("dashboard")` — dashboard should reflect updated scores/streak within ~2s | Local dev DB has no seeded past-paper questions; quiz flow cannot be completed end-to-end | 1. Log in as a student on staging. 2. Complete any past-paper quiz. 3. Navigate to dashboard. 4. Verify streak, today's count, and module progress scores reflect the just-completed attempt. |
 | P2-4 | Error boundary isolation — forcing one carousel (e.g., Community) to fail must leave the other two carousels (Records, Videos) rendering normally, with only the failing section showing "temporarily unavailable" | Vitest cannot import `.tsx` files (project's `jsx: "preserve"` + node environment); no `@testing-library/react` or `jsdom` installed; test infrastructure limitation acknowledged | 1. Log in as a student on staging. 2. Open DevTools → Network → block the `/api/v1/community/posts` endpoint or induce a 500 by editing the response. 3. Refresh dashboard. 4. Verify: Community carousel area shows "This section is temporarily unavailable". 5. Verify: Records and Videos carousels still render with real content. |
+| P1-5 (Phase 7) | Community carousel loads data in a single request (consolidated `/api/v1/community/posts` endpoint with 30s cache) | Unit tests confirm endpoint resolves and cache constants present, but cannot verify actual network waterfall in browser | 1. Log in on staging. 2. Open DevTools → Network tab. 3. Refresh dashboard. 4. Verify only ONE request to `/api/v1/community/posts` appears (not two sequential requests to forums then posts). 5. Verify community posts load within expected timeframe. |
+| P2-2-related | Dashboard stats now show real data — overallPct, dailyPct, currentStreak, activityArr previously showed 0/[] for all users; after fix they reflect actual DB values | Verified via manual production DB queries for 2 users — mathematically confirmed correct — but end-to-end visual rendering confirmation needed on staging | 1. Log in on staging as a user with quiz activity (e.g., Ahmed Hassan or 4KILL gaming). 2. Verify overallPct, dailyPct, currentStreak are NOT all zeros. 3. Verify activityArr shows real daily counts (not empty). 4. Cross-check module progress percentages against actual quiz scores. 5. Verify a user with NO recent activity still gracefully shows 0 (not an error). |
+| P1-4 (Phase 5) | YouTube cache hit/miss — first request to curriculum route triggers YouTube API; second request within 3600s returns cached data (verify no duplicate API call) | YouTube API key on free tier has daily quota limit; cannot safely make live API calls repeatedly from local/dev to test caching — staging with real keys is the correct environment | 1. On staging, access curriculum videos page. 2. Check server logs or Vercel function logs: confirm first request makes an outbound YouTube API call. 3. Refresh the page within 1 hour. 4. Confirm no second outbound YouTube API call appears in logs — data served from cache. |
+| P1-4 (Phase 5) | YouTube timeout on slow/unreachable API — confirm carousel loads with fallback channel metadata ("Medical Educator") when real YouTube API is slow or unreachable | Timeout behavior depends on real network conditions; cannot simulate upstream timeout reliably in unit tests without mocking | 1. On staging, simulate slow/unreachable YouTube API (e.g., block `www.googleapis.com` via hosts file or firewall on staging server). 2. Refresh curriculum page. 3. Verify carousel still renders with fallback channel name ("Medical Educator") and no blank/error state. 4. Verify no 5xx error returned to the client. |
+| P1-8 (Phase 5) | Spotify real API calls — dashboard record with valid Spotify URL renders album art; record with bad Spotify URL gracefully shows no art | Spotify metadata fetch uses real `SPOTIFY_CLIENT_ID`/`SPOTIFY_CLIENT_SECRET` from `.env`; local dev may not have staging keys or the same Spotify data; real API behavior must be verified with staging credentials | 1. On staging, open dashboard records carousel. 2. Confirm records with valid Spotify track/episode URLs display album art. 3. Confirm records with invalid/broken Spotify URLs show no art (fallback icon) without affecting other records. 4. Confirm no console/server errors from individual Spotify failures. |
+| Phase 9 | Community posts error response uses `apiError` format (`{ error, message }`) | Unit tests verify api-response helper shapes, but cannot test live HTTP response format from the actual route | 1. On staging, induce an error in the community posts route (e.g., by passing an invalid limit param). 2. Verify the response body follows `{ error: string, message?: string }` shape. 3. Verify the HTTP status code is appropriate (400, 401, 500). |
+| Phase 9 | Health endpoint full-healthy state — confirm `/api/v1/health` returns `status: "healthy"` (not `"degraded"`) when Supabase Auth, Redis, and DB are all genuinely reachable on staging | Locally, Supabase Auth health check showed `"degraded"` due to local dev environment limitations (no real Supabase Auth connectivity from local); staging is the first environment where all three checks can pass simultaneously | 1. On staging, curl or browser-navigate to `/api/v1/health`. 2. Verify response contains `status: "healthy"`. 3. Verify all three sub-checks (`database: "healthy"`, `redis: "healthy"`, `supabaseAuth: "healthy"`) are present and all show `"healthy"`. 4. Tear down one dependency (e.g., stop Redis) and confirm status degrades to `"degraded"` with the corresponding sub-check showing `"unhealthy"`. |
 
-**Note:** This list should be reviewed before the final Phase 10 merge. All items must be confirmed on staging (or explicitly waived) before marking the remediation rollout as complete.
+**Note:** This list should be reviewed before the final Phase 10 merge (which is NOT happening). All items must be confirmed on staging (or explicitly waived) before marking the remediation rollout as complete.
 
 ### Coverage Summary
 
 | Metric | Count |
 |---|---|
-| Total findings | 18 |
-| Actively fixed in code | 16 |
+| Total findings | 19 |
+| Actively fixed in code | 17 |
 | Documented limitation | 1 (P2-3) |
 | Accepted risk | 1 (P2-8) |
 | Silently missing (unaddressed) | 0 |

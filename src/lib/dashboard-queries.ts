@@ -51,10 +51,15 @@ export type DashboardData = {
     lecture: {
       id: string;
       title: string;
+      videoUrl: string | null;
+      videos: { url: string }[] | null;
       subject: { moduleId: string | null; name: string };
+      team: { name: string; imageUrl: string | null } | null;
     };
   } | null;
 };
+
+export type LastLectureActivity = NonNullable<DashboardData["lastLectureActivity"]>;
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Streak — uses raw SQL to get distinct active dates (last 60 days only)

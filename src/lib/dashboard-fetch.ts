@@ -39,7 +39,7 @@ export interface PostData {
   id: string;
   content: string;
   imageUrl: string | null;
-  attachments?: any;
+  attachments?: unknown;
   createdAt: string;
   author: { id: string; name: string; image: string | null };
   _count?: { likes: number; comments: number };

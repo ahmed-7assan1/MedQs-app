@@ -5,15 +5,34 @@ import { prisma, withRetry } from "@/lib/prisma";
 import { getCachedDashboardData, getCachedRankInfo } from "@/lib/dashboard-queries";
 import { last7DayKeys } from "@/lib/dashboard-stats";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import type { DashboardData } from "@/types/dashboard";
+import type { DashboardData, ModuleProgressItem, QuizCardData, LastLectureInfo } from "@/types/dashboard";
 import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import { CACHE_TAGS, CACHE_TTL } from "@/lib/cache-tags";
+import type { LastLectureActivity } from "@/lib/dashboard-queries";
 
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Your personalized medical study dashboard.",
 };
+
+interface DashboardRawData {
+  user: { name: string | null; image: string | null; semesterId: string | null; university: { name: string } | null; semester: { name: string } | null } | null;
+  recentQuizzes: QuizCardData[];
+  todayItemCount: number;
+  streak: number;
+  weekCounts: number[];
+  moduleProgress: ModuleProgressItem[];
+  totalQuestions: number;
+  totalCorrect: number;
+  lastLectureActivity: LastLectureActivity | null;
+}
+
+interface RankInfoData {
+  rank: { label: string } | null;
+  points: number;
+  progress: number;
+}
 
 export default async function DashboardPage() {
   const user = await getAuthenticatedUser();
@@ -40,8 +59,8 @@ export default async function DashboardPage() {
   const chartDays = last7DayKeys();
   const chartDayKeyStrings = chartDays.map((d) => d.key);
 
-  let dashData: any = null;
-  let rankInfo: any = null;
+  let dashData: DashboardRawData | null = null;
+  let rankInfo: RankInfoData | null = null;
 
   try {
     [dashData, rankInfo] = await withRetry(() => Promise.all([
@@ -52,16 +71,22 @@ export default async function DashboardPage() {
     console.warn("[dashboard-app] DB error:", err instanceof Error ? err.message : err);
   }
 
-  const { stats, moduleProgress, activity: activityArr, lastLectureActivity, recentQuizzes } = dashData || {
-    stats: { totalQuestions: 0, totalCorrect: 0, todayItemCount: 0, currentStreak: 0 },
+  const fallback: DashboardRawData = {
+    totalQuestions: 0,
+    totalCorrect: 0,
+    todayItemCount: 0,
+    streak: 0,
+    weekCounts: [],
     moduleProgress: [],
-    activity: [],
     lastLectureActivity: null,
     recentQuizzes: [],
+    user: null,
   };
+  const { totalQuestions, totalCorrect, todayItemCount, streak: currentStreak, weekCounts, moduleProgress, lastLectureActivity, recentQuizzes } = dashData || fallback;
 
-  const safeStats = stats || { totalQuestions: 0, totalCorrect: 0, todayItemCount: 0, currentStreak: 0 };
-  const { totalQuestions, totalCorrect, todayItemCount, currentStreak } = safeStats;
+  const activityArr = chartDays.length
+    ? chartDays.map((d, i) => ({ day: d.shortLabel, count: weekCounts[i] || 0 }))
+    : [];
   const overallPct = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
   const dailyTarget = 50;
   const dailyPct = Math.min(100, Math.round((todayItemCount / dailyTarget) * 100));
@@ -125,11 +150,11 @@ export default async function DashboardPage() {
     videoUrl: lastLectureActivity.lecture.videoUrl
       || lastLectureActivity.lecture.videos?.[0]?.url
       || null,
-    moduleId: lastLectureActivity.lecture.subject.moduleId,
+    moduleId: lastLectureActivity.lecture.subject.moduleId || "",
     subjectName: lastLectureActivity.lecture.subject.name,
     channelName: lastLectureActivity.lecture.team?.name || "MedOneX",
     channelAvatar: lastLectureActivity.lecture.team?.imageUrl || null,
-  } : null;
+  } as LastLectureInfo : null;
 
   const dashboardData: DashboardData = {
     firstName,
