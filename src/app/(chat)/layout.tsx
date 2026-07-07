@@ -7,6 +7,7 @@ import { PuterScript } from "@/components/system/PuterScript";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { prisma } from "@/lib/prisma";
 import { unstable_cache } from "next/cache";
+import { CACHE_TTL } from "@/lib/cache-tags";
 
 const getCachedSiteConfig = unstable_cache(
   async () => {
@@ -15,7 +16,7 @@ const getCachedSiteConfig = unstable_cache(
       .catch(() => null);
   },
   ["site-config"],
-  { revalidate: 300 }
+  { revalidate: CACHE_TTL.SITE_CONFIG }
 );
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {

@@ -7,6 +7,7 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { unstable_cache } from "next/cache";
+import { CACHE_TAGS, CACHE_TTL } from "@/lib/cache-tags";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Types
@@ -304,7 +305,7 @@ export const getCachedDashboardData = unstable_cache(
     return fetchDashboardData(userId, chartDayKeys);
   },
   ["dashboard-data"],
-  { revalidate: 60, tags: ["dashboard"] }
+  { revalidate: CACHE_TTL.DASHBOARD, tags: [CACHE_TAGS.DASHBOARD] }
 );
 
 export const getCachedRankInfo = unstable_cache(
@@ -313,5 +314,5 @@ export const getCachedRankInfo = unstable_cache(
     return getUserRankInfo(userId);
   },
   ["rank-info"],
-  { revalidate: 60, tags: ["dashboard"] }
+  { revalidate: CACHE_TTL.DASHBOARD, tags: [CACHE_TAGS.DASHBOARD] }
 );

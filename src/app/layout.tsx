@@ -19,6 +19,7 @@ import "../styles/globals.css";
 import "../styles/themes.css";
 
 import { unstable_cache } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 const getCachedSiteConfig = unstable_cache(
   async () => {
@@ -49,7 +50,7 @@ const getCachedSiteConfig = unstable_cache(
     }
   },
   ["global-site-config"],
-  { revalidate: 3600, tags: ["site-config"] }
+  { revalidate: 3600, tags: [CACHE_TAGS.SITE_CONFIG] }
 );
 
 // Fetch site config server-side — cached per request by Next.js

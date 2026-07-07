@@ -2,6 +2,7 @@ import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { unstable_cache } from "next/cache";
+import { CACHE_TTL } from "@/lib/cache-tags";
 
 const FirebaseProvider = dynamic(() => import("@/components/providers/FirebaseProvider").then(m => m.FirebaseProvider), { ssr: false });
 import { MobileChromeController } from "@/components/layout/MobileChromeController";
@@ -19,7 +20,7 @@ const getCachedSiteConfig = unstable_cache(
       .catch(() => null);
   },
   ["site-config"],
-  { revalidate: 300 }
+  { revalidate: CACHE_TTL.SITE_CONFIG }
 );
 
 export default async function SocialLayout({ children }: { children: React.ReactNode }) {
