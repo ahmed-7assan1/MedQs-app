@@ -631,12 +631,15 @@ export const getLast7DayKeys = cache(() => {
 \\\
 
 **Verification Checklist:**
-- [ ] All cache tags use the centralized constants
-- [ ] Quiz submission correctly invokes \evalidateTag(\"dashboard\")\
-- [ ] Dashboard data is fresh within 2 seconds of quiz completion
-- [ ] YouTube API calls are cached: subsequent requests within 1 hour hit cache
-- [ ] AdBanner changes are reflected within 300 seconds
-- [ ] No circular dependencies in \cache-tags.ts\
+
+Legend: `[static]` = code inspection / static analysis; `[runtime]` = local execution test; `[staging only]` = requires live staging environment.
+
+- [x] All cache tags use the centralized constants `[static]`
+- [x] Quiz submission correctly invokes `revalidateTag(CACHE_TAGS.DASHBOARD)` `[static]`
+- [ ] Dashboard data is fresh within 2 seconds of quiz completion `[staging only]`
+- [ ] YouTube API calls are cached: subsequent requests within 1 hour hit cache `[static]` (handled in Phase 5)
+- [ ] AdBanner changes are reflected within 300 seconds `[static]` (handled in Phase 3)
+- [x] No circular dependencies in `cache-tags.ts` `[static]`
 
 **Estimated Implementation Time:** 3-4 hours  
 **Risk Level:** Low (cache invalidation is additive and reversible)  
@@ -1851,7 +1854,7 @@ Every audit finding mapped to its remediation phase, disposition, and verificati
 | P2-2 | `DashboardPage` — `any` Types Throughout | Phase 10 | Fixed | `dashData`/`rankInfo` properly typed; `activity` vs `weekCounts` mismatch fixed; `(prisma as any)` casts removed; pre-existing `DashboardData.lastLectureActivity` type widened to include `videoUrl`, `videos`, `team` fields; `Subject.moduleId` nullable handled with fallback. `tsc --noEmit`: 0 errors on Phase 10 files. |
 | P2-3 | `lastLectureActivity` — Prisma Sorts ALL Videos | Phase 3, Phase 10 | **Documented Limitation — Fully Verified** | Known Prisma limitation; per-lecture video count is small (1-5); comment referencing plan and finding ID added in `dashboard-queries.ts` (both Phase 3 and Phase 10 branches); revisit only if per-lecture video count exceeds 50. Confirmed comment present via code inspection. `next build` passes — no runtime impact. |
 | P2-4 | No Error Boundaries on Dashboard | Phase 7 | Fixed | Each carousel section wrapped in React Error Boundary (`CarouselErrorBoundary`); one component crash does not cascade to entire dashboard |
-| P2-5 | `last7DayKeys()` — Recomputes Every Render | Phase 4, Phase 7 | **Fully Verified (Phase 4)** | Wrapped in React `cache()` — `export const last7DayKeys = cache(() => {...})`. Verified by code inspection of `src/lib/dashboard-stats.ts`: function body unchanged, `import { cache } from "react"` added, `cache()` wrapping applied at export. Pure computation unchanged. `next build` passes. Phase 7 (SWR waterfall fix) still pending. |
+| P2-5 | `last7DayKeys()` — Recomputes Every Render | Phase 4, Phase 7 | **Fully Verified — Phase 7 scope satisfied** | Wrapped in React `cache()` — `export const last7DayKeys = cache(() => {...})`. Verified by code inspection of `src/lib/dashboard-stats.ts` (static/code-inspection review): function body unchanged, `import { cache } from "react"` added, `cache()` wrapping applied at export. Pure computation unchanged. `next build` passes. **No further action needed in Phase 7 for this finding.** |
 | P2-6 | Unreachable `unstable_cache` in Forum Posts Route | Phase 10 | Fixed | Commented-out `unstable_cache` code and unused `unstable_cache` import removed from forum posts route; dead code eliminated |
 | P2-7 | TypeScript `as any` Casts for `prisma.lectureVideo` | Phase 10 | Fixed | `prisma generate` verified; `(prisma as any).lectureVideo` replaced with typed `prisma.lectureVideo` in both curriculum and search routes |
 | P2-8 | No CSRF Protection | Phase 10 (comment only) | Accepted Risk | `SameSite=Lax` cookie mitigation sufficient for current architecture; revisit when supporting third-party integrations; comment referencing plan and finding ID added in `src/lib/supabase/middleware.ts` |
