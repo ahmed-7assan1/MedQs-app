@@ -24,7 +24,7 @@ model SiteConfig {
   fontArabic              String?
   fontSans                String?
   aiPreferredProvider     String   @default("auto")
-  /// Square icon for PWA GÇ£Add to Home ScreenGÇ¥ / maskable (512+ù512). Falls back to faviconUrl then defaults.
+  /// Square icon for PWA GÃ‡Â£Add to Home ScreenGÃ‡Â¥ / maskable (512+Ã¹512). Falls back to faviconUrl then defaults.
   pwaIconUrl              String?
   logoUrlDark             String?
   facebookUrl             String?
@@ -96,7 +96,7 @@ model University {
   originatedResources LibraryResource[]
 }
 
-/// Faculty (+â+ä+è+ç) GÇö optional sub-division of a University.
+/// Faculty (+Ã¢+Ã¤+Ã¨+Ã§) GÃ‡Ã¶ optional sub-division of a University.
 /// When present, AcademicYears are grouped under a Faculty.
 /// If a University has no Faculties, the old flat structure is preserved (facultyId = null).
 model Faculty {
@@ -114,8 +114,6 @@ model Faculty {
   sourceBooks    SourceBook[]
 
   @@index([universityId])
-  @@index([active, semesterId])
-  @@index([active, universityId])
   @@index([category])
 }
 
@@ -347,7 +345,6 @@ model LectureVideoComment {
 
   @@index([videoId, createdAt])
   @@index([userId])
-  @@index([userId, createdAt])
   @@index([parentId])
 }
 
@@ -360,7 +357,6 @@ model LectureVideoLike {
 
   @@unique([videoId, userId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model Question {
@@ -696,7 +692,6 @@ model Note {
   @@unique([userId, lectureId])
   @@index([lectureId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model UserLectureActivity {
@@ -894,7 +889,6 @@ model PostReaction {
 
   @@unique([postId, userId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model Notification {
@@ -948,7 +942,6 @@ model GroupMember {
 
   @@unique([groupId, userId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model GroupJoinRequest {
@@ -963,7 +956,6 @@ model GroupJoinRequest {
   @@unique([groupId, userId])
   @@index([groupId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model Rank {
@@ -983,7 +975,6 @@ model EngagementLog {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model AIUsageLog {
@@ -996,7 +987,6 @@ model AIUsageLog {
 
   @@unique([userId, type, date])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model AdBanner {
@@ -1033,7 +1023,6 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model DocumentTemplate {
@@ -1047,7 +1036,6 @@ model DocumentTemplate {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model Session {
@@ -1110,8 +1098,6 @@ model MedicalTeam {
 
   @@index([facultyId])
   @@index([universityId])
-  @@index([active, semesterId])
-  @@index([active, universityId])
 }
 
 model TeamMember {
@@ -1125,7 +1111,6 @@ model TeamMember {
 
   @@unique([teamId, userId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model TeamFollower {
@@ -1138,7 +1123,6 @@ model TeamFollower {
 
   @@unique([teamId, userId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model PlatformMember {
@@ -1179,7 +1163,6 @@ model PushSubscription {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model Poll {
@@ -1213,7 +1196,6 @@ model PollVote {
   @@unique([pollOptionId, userId])
   @@index([pollOptionId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model TeamTask {
@@ -1254,8 +1236,6 @@ model StudyRoom {
   sessions        StudySession[]
 
   @@index([universityId])
-  @@index([active, semesterId])
-  @@index([active, universityId])
   @@index([inviteCode])
 }
 
@@ -1271,7 +1251,6 @@ model StudyRoomMember {
 
   @@unique([roomId, userId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model StudyRoomPost {
@@ -1322,7 +1301,6 @@ model StudyRoomTaskCompletion {
   @@unique([taskId, userId])
   @@index([taskId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model SavedPost {
@@ -1428,7 +1406,6 @@ model StudySessionParticipant {
   @@unique([sessionId, userId])
   @@index([sessionId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model UserPointsTransaction {
@@ -1510,7 +1487,6 @@ model BlockedUser {
 
   @@unique([userId, blockedId])
   @@index([userId])
-  @@index([userId, createdAt])
   @@index([blockedId])
 }
 
@@ -1804,7 +1780,6 @@ model IdentityProvider {
 
   @@unique([provider, providerUid])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model TeacherProfile {
@@ -2286,7 +2261,6 @@ model V2Reaction {
 
   @@unique([postId, userId, type])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model V2Group {
@@ -2309,7 +2283,6 @@ model V2GroupMembership {
   @@unique([groupId, userId])
   @@index([groupId])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model V2Message {
@@ -2469,7 +2442,6 @@ model SavedQuiz {
   updatedAt   DateTime @updatedAt
 
   @@index([userId])
-  @@index([userId, createdAt])
   @@index([shareCode])
 }
 
@@ -2519,7 +2491,6 @@ model SavedFlashcardSet {
   updatedAt  DateTime @updatedAt
 
   @@index([userId])
-  @@index([userId, createdAt])
   @@index([shareCode])
 }
 
@@ -2607,7 +2578,6 @@ model Testimonial {
 
   @@index([status])
   @@index([userId])
-  @@index([userId, createdAt])
 }
 
 model Warning {
@@ -2683,7 +2653,6 @@ model SecurityEvent {
   @@index([type, status])
   @@index([severity])
   @@index([userId])
-  @@index([userId, createdAt])
   @@index([createdAt])
   @@index([ipAddress])
   @@index([status, severity, createdAt])
@@ -2818,7 +2787,6 @@ model ChannelFollow {
 
   @@unique([userId, channelId])
   @@index([userId])
-  @@index([userId, createdAt])
   @@index([channelId])
 }
 
@@ -2838,7 +2806,6 @@ model VideoViewTracking {
 
   @@index([videoId, createdAt])
   @@index([userId])
-  @@index([userId, createdAt])
   @@index([lectureId])
 }
 
