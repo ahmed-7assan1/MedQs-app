@@ -15,9 +15,16 @@ import { QuickAccessLinks } from "@/components/dashboard/sections/QuickAccessLin
 import { SuggestedVideosCarousel } from "@/components/dashboard/sections/SuggestedVideosCarousel";
 import { DashboardFooter } from "@/components/dashboard/sections/DashboardFooter";
 import { CarouselErrorBoundary } from "@/components/dashboard/CarouselErrorBoundary";
+import { useRecords, useCurriculumVideos, useCommunityPosts } from "@/lib/dashboard-fetch";
 
 export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; hasAds?: boolean }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Observe SWR state so the error boundary can recover when data loads after a failure.
+  // SWR deduplicates — only one actual fetch per key regardless of how many components observe it.
+  const { data: recordsData } = useRecords();
+  const { data: communityData } = useCommunityPosts();
+  const { data: videosData } = useCurriculumVideos();
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1280px)");
@@ -40,13 +47,13 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-0 space-y-8 md:space-y-10 section-entrance no-scrollbar">
             <MissionControlHero data={data} onToggleSidebar={() => setSidebarOpen(o => !o)} sidebarOpen={sidebarOpen} />
             <ContinueLearningSection data={data} />
-            <CarouselErrorBoundary title="Records">
+            <CarouselErrorBoundary title="Records" resetKey={recordsData?.items?.length ?? 0}>
               <RecordsCarousel sidebarOpen={sidebarOpen} />
             </CarouselErrorBoundary>
-            <CarouselErrorBoundary title="Community">
+            <CarouselErrorBoundary title="Community" resetKey={communityData?.items?.length ?? 0}>
               <CommunityCarouselSidebar sidebarOpen={sidebarOpen} />
             </CarouselErrorBoundary>
-            <CarouselErrorBoundary title="Videos">
+            <CarouselErrorBoundary title="Videos" resetKey={videosData?.items?.length ?? 0}>
               <SuggestedVideosCarousel sidebarOpen={sidebarOpen} />
             </CarouselErrorBoundary>
             <DashboardFooter />

@@ -5,6 +5,7 @@ import { Component, type ReactNode, type ErrorInfo } from "react";
 interface Props {
   children: ReactNode;
   title?: string;
+  resetKey?: number | string;
 }
 
 interface State {
@@ -23,6 +24,12 @@ export class CarouselErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error(`[CarouselErrorBoundary] ${this.props.title || "Carousel"}:`, error.message, info.componentStack);
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (this.state.hasError && prevProps.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false });
+    }
   }
 
   render() {
