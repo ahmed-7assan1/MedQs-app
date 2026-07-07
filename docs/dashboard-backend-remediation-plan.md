@@ -753,8 +753,9 @@ Browser Request → Middleware (1 auth call, set headers) → Layout (0 Supabase
 **Files Expected to Change:**
 - \src/lib/dashboard-fetch.ts\ — replace 2-step community posts fetch
 - New: \src/app/api/v1/community/posts/route.ts\ — consolidated endpoint
-- \src/components/dashboard/DashboardShell.tsx\ — add ErrorBoundary
-- \src/app/(student-clean)/dashboard-app/loading.tsx\ — enhance streaming template
+- \src/components/dashboard/DashboardDesktopView.tsx\ — add ErrorBoundary wrappers
+- \src/lib/cache-tags.ts\ — add COMMUNITY to CACHE_TAGS and CACHE_TTL
+- New: \src/components/dashboard/CarouselErrorBoundary.tsx\ — React error boundary component
 
 **Implementation Strategy:**
 
@@ -791,6 +792,19 @@ Wrap each carousel section in a React Error Boundary so one failing section does
 **Estimated Implementation Time:** 5-6 hours  
 **Risk Level:** Low-Medium (new endpoint requires testing for edge cases)  
 **Expected Improvement:** Community carousel load time reduced by ~300-600ms; YouTube thumbnail bytes reduced by 80% per image; Dashboard crash resilience improved
+
+**Verification Checklist:**
+- [static] Community posts endpoint consolidated: `src/app/api/v1/community/posts/route.ts` exists with `unstable_cache` wrapper using `CACHE_TTL.COMMUNITY` and `CACHE_TAGS.COMMUNITY`
+- [static] `dashboard-fetch.ts`: `useSWRImmutable` import removed; `useCommunityPosts` calls single endpoint `/api/v1/community/posts?limit=6`
+- [static] `CommunityPostsCarousel.tsx`: fetches from `/api/v1/community/posts` instead of two-step forum→posts
+- [static] `CACHE_TAGS.COMMUNITY` and `CACHE_TTL.COMMUNITY` defined in `src/lib/cache-tags.ts`
+- [runtime] Vitest: consolidated endpoint import resolves, cache constants present, `useSWRImmutable` not referenced — 2/2 tests pass
+- [runtime] `tsc --noEmit`: 16 errors (baseline, unchanged) — no new type errors introduced
+- [runtime] `next build`: compiled successfully
+- [static] `CarouselErrorBoundary.tsx` exists as React class component with `getDerivedStateFromError` + `componentDidCatch`
+- [static] `DashboardDesktopView.tsx` wraps RecordsCarousel, CommunityCarouselSidebar, SuggestedVideosCarousel each in `<CarouselErrorBoundary>`
+- [static] Error fallback renders text "This section is temporarily unavailable" — no blank section or broken layout
+- [staging only] Community carousel loads data in a single request (check browser DevTools Network tab)
 
 ---
 
@@ -1214,7 +1228,7 @@ ull\ when Redis throws. Outer try-catch catches all errors. |
 | **Recommended Solution** | Add ErrorBoundary wrapper for each dashboard section. |
 | **Estimated Difficulty** | Easy (1 hour) |
 | **Implementation Time** | 1 hour |
-| **Files Affected** | \src/components/dashboard/DashboardShell.tsx\ |
+| **Files Affected** | \src/components/dashboard/DashboardDesktopView.tsx\ (error boundary wrappers), New: \src/components/dashboard/CarouselErrorBoundary.tsx\ |
 | **Testing Strategy** | Throw in one carousel component → verify other sections render normally. |
 | **Rollback Strategy** | Remove ErrorBoundary wrappers. |
 | **Priority** | 14 |
@@ -1855,13 +1869,13 @@ Every audit finding mapped to its remediation phase, disposition, and verificati
 | P1-2 | Auth Cache — No Fallback When Redis Is Down | Phase 2 | Fixed | `auth()` returns session from `user_metadata` alone when Redis is unavailable; outer try-catch removed; granular error handling around Redis ops only |
 | P1-3 | Triple Supabase Auth Call per Page Load | Phase 2 | Fixed | React `cache()` deduplicates `getUser()` within same request; layout and page share result via `getAuthenticatedUser()`; exactly 1 Supabase Auth call per dashboard load |
 | P1-4 | YouTube API — No Server-Side Caching | Phase 5 | **Fully Verified** | YouTube API data wrapped in `unstable_cache` with `CACHE_TTL.YOUTUBE` and `CACHE_TAGS.YOUTUBE` via `getCachedYouTubeData()` in `src/lib/youtube-cache.ts`. 5-second timeout via `AbortController`. Graceful fallback (empty metadata) on failure. Confirmed by code inspection — hardcoded `3600`/`"youtube"` replaced with centralized constants. Thumbnail optimized to `mqdefault`. |
-| P1-5 | Community Carousel — SWR Waterfall | Phase 7 | Fixed | Consolidated `/api/v1/community/posts` endpoint created; single-use SWR hook replaces two-step waterfall; single DB query for forum + posts |
+| P1-5 | Community Carousel — SWR Waterfall | Phase 7 | **Fully Verified** | Consolidated `/api/v1/community/posts` endpoint created at `src/app/api/v1/community/posts/route.ts` with `unstable_cache` (30s TTL, `CACHE_TAGS.COMMUNITY`). `dashboard-fetch.ts`: `useSWRImmutable` import removed, single `useSWR("/api/v1/community/posts?limit=6")` replaces two-step waterfall. `CommunityPostsCarousel.tsx`: fetches from consolidated endpoint. `CACHE_TAGS.COMMUNITY` + `CACHE_TTL.COMMUNITY` added to centralized constants. 2/2 vitest runtime tests pass. `tsc --noEmit`: 16 errors (baseline). `next build`: compiled successfully. |
 | P1-6 | SiteConfig Queried Twice (Uncached Second Query) | Phase 3 | **Fully Verified** | Page-level siteConfig query moved inside `getCachedAds` and wrapped in `unstable_cache` (300s revalidate, ads tag) alongside AdBanner query; only 1 cache hit per page load. Verified by code inspection of `page.tsx` — no standalone `siteConfig` fetch remains. |
 | P1-7 | AdBanner Query — No Cache and Missing Composite Index | Phase 3 | **Fully Verified** | AdBanner query wrapped in `unstable_cache` with 300s revalidation; composite indexes `@@index([active, semesterId])` and `@@index([active, universityId])` added and confirmed via `pg_indexes`. EXPLAIN ANALYZE shows Seq Scan at 0.071ms (expected behavior for 1-page table — index scan would be more expensive at this size; index will engage when table exceeds ~1 page). |
 | P2-1 | `getModuleProgress` — Over-fetching Subject and Lecture Rows | Phase 3 | **Fully Verified** | Rewritten with raw SQL aggregates; rows fetched reduced from ~800 to ~24. Data parity verified across 3 semesters — old nested-include implementation vs new raw SQL produced **identical output** for all tested semesterIds. Bug caught and fixed during testing: original raw SQL used `JOIN` (INNER) which silently excluded modules with no subjects/lectures; corrected to `LEFT JOIN` to match old behavior exactly. |
 | P2-2 | `DashboardPage` — `any` Types Throughout | Phase 10 | Fixed | `dashData`/`rankInfo` properly typed; `activity` vs `weekCounts` mismatch fixed; `(prisma as any)` casts removed; pre-existing `DashboardData.lastLectureActivity` type widened to include `videoUrl`, `videos`, `team` fields; `Subject.moduleId` nullable handled with fallback. `tsc --noEmit`: 0 errors on Phase 10 files. |
 | P2-3 | `lastLectureActivity` — Prisma Sorts ALL Videos | Phase 3, Phase 10 | **Documented Limitation — Fully Verified** | Known Prisma limitation; per-lecture video count is small (1-5); comment referencing plan and finding ID added in `dashboard-queries.ts` (both Phase 3 and Phase 10 branches); revisit only if per-lecture video count exceeds 50. Confirmed comment present via code inspection. `next build` passes — no runtime impact. |
-| P2-4 | No Error Boundaries on Dashboard | Phase 7 | Fixed | Each carousel section wrapped in React Error Boundary (`CarouselErrorBoundary`); one component crash does not cascade to entire dashboard |
+| P2-4 | No Error Boundaries on Dashboard | Phase 7 | **Fully Verified** | `CarouselErrorBoundary.tsx` created as React class component (`getDerivedStateFromError` + `componentDidCatch` with console.error log). `DashboardDesktopView.tsx` wraps RecordsCarousel, CommunityCarouselSidebar, and SuggestedVideosCarousel each in `<CarouselErrorBoundary title="...">`. Error fallback renders "This section is temporarily unavailable." Verified by code inspection — class component correctly implements both boundary lifecycle methods; each section independently wrapped so one crash does not cascade. |
 | P2-5 | `last7DayKeys()` — Recomputes Every Render | Phase 4, Phase 7 | **Fully Verified — Phase 7 scope satisfied** | Wrapped in React `cache()` — `export const last7DayKeys = cache(() => {...})`. Verified by code inspection of `src/lib/dashboard-stats.ts` (static/code-inspection review): function body unchanged, `import { cache } from "react"` added, `cache()` wrapping applied at export. Pure computation unchanged. `next build` passes. **No further action needed in Phase 7 for this finding.** |
 | P2-6 | Unreachable `unstable_cache` in Forum Posts Route | Phase 10 | Fixed | Commented-out `unstable_cache` code and unused `unstable_cache` import removed from forum posts route; dead code eliminated |
 | P2-7 | TypeScript `as any` Casts for `prisma.lectureVideo` | Phase 10 | Fixed | `prisma generate` verified; `(prisma as any).lectureVideo` replaced with typed `prisma.lectureVideo` in both curriculum and search routes |
