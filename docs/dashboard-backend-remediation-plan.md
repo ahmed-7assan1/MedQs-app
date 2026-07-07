@@ -687,17 +687,25 @@ Additions:
 3. **Error isolation:** Each record's Spotify enrichment should fail independently — one failing Spotify URL should not prevent other records from loading.
 
 **Verification Checklist:**
-- [ ] YouTube API calls are cached: first request triggers API, subsequent requests within 1 hour do not
-- [ ] YouTube API call has 5-second timeout; route returns gracefully with default channel data on timeout
-- [ ] Spotify API metadata fetch has 5-second timeout
-- [ ] Spotify rate-limit (429) is handled gracefully without crashing
-- [ ] One failing Spotify URL does not prevent other records from loading
-- [ ] YouTube quota is not consumed when cached data is available
+
+Legend: `[static]` = code inspection / static analysis; `[runtime]` = local execution test; `[staging only]` = requires live staging environment.
+
+- [x] YouTube API calls are cached: first request triggers API, subsequent requests within 1 hour do not `[static]`
+- [x] YouTube API call has 5-second timeout; route returns gracefully with default channel data on timeout `[static]`
+- [x] Spotify API metadata fetch has 5-second timeout `[static]`
+- [x] Spotify rate-limit (429) is handled gracefully without crashing `[static]`
+- [x] One failing Spotify URL does not prevent other records from loading `[static]`
+- [x] YouTube quota is not consumed when cached data is available `[static]`
 
 **Estimated Implementation Time:** 3-4 hours  
 **Risk Level:** Low (all changes are additive caching layers)  
 **Expected Improvement:** YouTube API calls per request: 2 → 0 (for cached data); YouTube daily quota consumption: 400+ units → ~2 units per 3600 seconds  
 **Success Criteria:** YouTube API key is called fewer than 24 times per day; Dashboard curriculum video carousel loads in <200ms from API route (down from 500ms-2s)
+
+> **🔍 Retrospective Note (July 2026 — Phase 5 Review):**
+> Phase 5 merge was clean — no conflicts with preceding phases. The only issue caught during verification: the `youtube-cache.ts` file used hardcoded `3600` and `"youtube"` instead of `CACHE_TTL.YOUTUBE` and `CACHE_TAGS.YOUTUBE` from Phase 4's centralized constants. This is the same pattern as Phase 4's leftover-hardcoded-strings catch, confirming that every phase creating new files after Phase 4 must import from `cache-tags.ts`. Fixed before signoff.
+> 
+> The thumbnail optimization (`maxresdefault → mqdefault`) is a bandwidth optimization reducing image payload from ~200KB to ~15KB per thumbnail. YouTube's `mqdefault` resolution (320×180) is sufficient for carousel cards and significantly improves page load on slower connections.
 
 ---
 
@@ -1846,7 +1854,7 @@ Every audit finding mapped to its remediation phase, disposition, and verificati
 | P1-1 | Profile Sync — Duplicated Write on Every Page Load | Phase 3 | **Fully Verified** | Profile upsert removed from page.tsx; layout.tsx handles all profile creation/update. Confirmed: page.tsx contains zero write operations on User; layout.tsx has both create + update paths with correct guard (`!dbUser \|\| !resolvedSemesterId`); 5 partial-profile users in DB verified as passing through layout sync normally. |
 | P1-2 | Auth Cache — No Fallback When Redis Is Down | Phase 2 | Fixed | `auth()` returns session from `user_metadata` alone when Redis is unavailable; outer try-catch removed; granular error handling around Redis ops only |
 | P1-3 | Triple Supabase Auth Call per Page Load | Phase 2 | Fixed | React `cache()` deduplicates `getUser()` within same request; layout and page share result via `getAuthenticatedUser()`; exactly 1 Supabase Auth call per dashboard load |
-| P1-4 | YouTube API — No Server-Side Caching | Phase 5 | Fixed | YouTube API data wrapped in `unstable_cache` with 3600s TTL and `youtube` tag; subsequent requests within 1 hour hit cache; no API calls for cached data |
+| P1-4 | YouTube API — No Server-Side Caching | Phase 5 | **Fully Verified** | YouTube API data wrapped in `unstable_cache` with `CACHE_TTL.YOUTUBE` and `CACHE_TAGS.YOUTUBE` via `getCachedYouTubeData()` in `src/lib/youtube-cache.ts`. 5-second timeout via `AbortController`. Graceful fallback (empty metadata) on failure. Confirmed by code inspection — hardcoded `3600`/`"youtube"` replaced with centralized constants. Thumbnail optimized to `mqdefault`. |
 | P1-5 | Community Carousel — SWR Waterfall | Phase 7 | Fixed | Consolidated `/api/v1/community/posts` endpoint created; single-use SWR hook replaces two-step waterfall; single DB query for forum + posts |
 | P1-6 | SiteConfig Queried Twice (Uncached Second Query) | Phase 3 | **Fully Verified** | Page-level siteConfig query moved inside `getCachedAds` and wrapped in `unstable_cache` (300s revalidate, ads tag) alongside AdBanner query; only 1 cache hit per page load. Verified by code inspection of `page.tsx` — no standalone `siteConfig` fetch remains. |
 | P1-7 | AdBanner Query — No Cache and Missing Composite Index | Phase 3 | **Fully Verified** | AdBanner query wrapped in `unstable_cache` with 300s revalidation; composite indexes `@@index([active, semesterId])` and `@@index([active, universityId])` added and confirmed via `pg_indexes`. EXPLAIN ANALYZE shows Seq Scan at 0.071ms (expected behavior for 1-page table — index scan would be more expensive at this size; index will engage when table exceeds ~1 page). |
