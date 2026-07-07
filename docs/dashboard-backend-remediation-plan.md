@@ -915,8 +915,10 @@ Rule: **serve degraded content, not errors.**
 - [static] Health endpoint uses `createLogger("health")` for degraded/unhealthy state logging
 - [runtime] `tsc --noEmit`: 16 errors (baseline) — no new type errors introduced
 - [runtime] `next build`: compiled successfully
-- [runtime] `withRetry` helper in `prisma.ts` already exists with connection-drop detection and exponential backoff — unchanged
-- [staging only] Health endpoint returns accurate status for all 3 checks (DB, Redis, Supabase Auth)
+- [runtime] `withRetry` helper in `prisma.ts` with exponential backoff + jitter — verified via vitest: 5 tests cover success, retry-on-connection-drop, exponential delay ordering, retry exhaustion, non-connection-error passthrough; all passing
+- [runtime] `api-response.ts` helpers — verified via vitest: 7 tests cover apiError with/without details, apiSuccess with default/custom status, apiUnauthorized, apiNotFound, apiServerError; all passing
+- [runtime] `logger.ts` JSON output — verified via vitest: 3 tests verify JSON parseability, correct level routing (info→console.log, error→console.error, warn→console.warn), and meta field passthrough; all passing
+- [runtime] Health endpoint logic — verified via vitest with mocked prisma/redis: 3 tests confirm correct status computation (all healthy→200/degraded→200/unhealthy→503), DB+Redis health, and graceful missing-URL handling; all 18/18 tests passing
 - [staging only] Community posts endpoint error response uses `apiError` format (`{ error, message }`)
 
 ---
