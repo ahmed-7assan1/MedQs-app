@@ -38,7 +38,7 @@ export async function GET() {
     };
   }
 
-  // Supabase Auth check (resolve URL without making an external HTTP call)
+  // Supabase Auth check — hit a real endpoint; any non-network-error response means alive
   const authStart = Date.now();
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -47,21 +47,23 @@ export async function GET() {
     if (!supabaseUrl) {
       checks.supabaseAuth = { status: "degraded", latencyMs: Date.now() - authStart, error: "SUPABASE_URL not configured" };
     } else {
-      // Lightweight DNS/connectivity check — attempt a HEAD to supabase URL
+      const healthUrl = supabaseUrl.replace(/\/$/, "") + "/auth/v1/settings";
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000);
-      const resp = await fetch(supabaseUrl, { method: "HEAD", signal: controller.signal });
+      const resp = await fetch(healthUrl, { method: "GET", signal: controller.signal });
       clearTimeout(timeoutId);
+      // Any response from the server (including 401, 404) means the Auth service is alive.
+      // Only a network-level failure (timeout, DNS, connection refused) should mark it degraded.
       checks.supabaseAuth = {
-        status: resp.ok ? "healthy" : "degraded",
+        status: "healthy",
         latencyMs: Date.now() - authStart,
-        ...(hasAnonKey ? {} : { error: "NEXT_PUBLIC_SUPABASE_ANON_KEY not configured" }),
+        ...(hasAnonKey ? {} : { warning: "NEXT_PUBLIC_SUPABASE_ANON_KEY not configured" }),
         ...(hasServiceKey ? {} : { warning: "SUPABASE_SERVICE_ROLE_KEY not configured" }),
       };
     }
   } catch (err) {
     checks.supabaseAuth = {
-      status: "degraded",
+      status: "unhealthy",
       latencyMs: Date.now() - authStart,
       error: err instanceof Error ? err.message : "Unknown error",
     };
