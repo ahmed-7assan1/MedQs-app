@@ -61,11 +61,23 @@ export async function getSpotifyMetadata(url: string) {
   const id = match[2];
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
     const res = await fetch(`https://api.spotify.com/v1/${type}s/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
+
+    if (res.status === 429) {
+      // Rate-limited — cache token as rate-limited to prevent immediate retry
+      const retryAfter = parseInt(res.headers.get("Retry-After") || "60", 10);
+      tokenExpiry = Date.now() + Math.min(retryAfter * 1000, 60000);
+      return null;
+    }
 
     if (!res.ok) return null;
     const data = await res.json();

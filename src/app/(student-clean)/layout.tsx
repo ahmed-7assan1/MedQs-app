@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/get-authenticated-user";
 import dynamic from "next/dynamic";
 import { SiteConfigProvider } from "@/contexts/SiteConfigContext";
 import { NavbarWrapper } from "@/components/layout/NavbarWrapper";
@@ -12,6 +12,7 @@ import { TelegramBlocker } from "@/components/system/TelegramBlocker";
 import { PuterScript } from "@/components/system/PuterScript";
 import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
 import { unstable_cache } from "next/cache";
+import { CACHE_TTL } from "@/lib/cache-tags";
 
 const Sidebar = dynamic(() => import("@/components/layout/SidebarWrapper").then(m => m.SidebarWrapper), { ssr: false });
 const FirebaseProvider = dynamic(() => import("@/components/providers/FirebaseProvider").then(m => m.FirebaseProvider), { ssr: false });
@@ -23,12 +24,11 @@ const getCachedSiteConfig = unstable_cache(
       .catch(() => null);
   },
   ["site-config"],
-  { revalidate: 300 }
+  { revalidate: CACHE_TTL.SITE_CONFIG }
 );
 
 export default async function CleanStudentLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createClient();
-  const { data: { user: authUser } } = await supabase.auth.getUser();
+  const authUser = await getAuthenticatedUser();
   const isGuest = !authUser;
 
   const sessionUserId = authUser?.id ?? "";

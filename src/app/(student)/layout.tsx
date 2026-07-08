@@ -26,6 +26,7 @@ import { redirect } from "next/navigation";
 import { TelegramBlocker } from "@/components/system/TelegramBlocker";
 import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
 import { unstable_cache } from "next/cache";
+import { CACHE_TTL } from "@/lib/cache-tags";
 
 // Cache site config for 5 minutes - it rarely changes
 const getCachedSiteConfig = unstable_cache(
@@ -35,7 +36,7 @@ const getCachedSiteConfig = unstable_cache(
       .catch(() => null);
   },
   ["site-config"],
-  { revalidate: 300 }
+  { revalidate: CACHE_TTL.SITE_CONFIG }
 );
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {

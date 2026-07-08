@@ -841,17 +841,11 @@ export function CommunityPostsCarousel() {
     let cancelled = false;
     (async () => {
       try {
-        const forumRes = await fetch("/api/v1/forums?type=GLOBAL");
-        if (!forumRes.ok) throw new Error();
-        const forums = await forumRes.json();
-        const gf = Array.isArray(forums) ? forums.find((f: any) => f.type === "GLOBAL") : null;
-        if (!gf) throw new Error();
-
-        const postsRes = await fetch(`/api/v1/forums/${gf.id}/posts?page=1&limit=12`);
-        if (!postsRes.ok) throw new Error();
-        const data = await postsRes.json();
-        const raw = data.posts || data || [];
-        if (!cancelled) setPosts(Array.isArray(raw) ? raw : []);
+        const res = await fetch("/api/v1/community/posts?limit=12");
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const body = (data as any)?.data ?? data;
+        if (!cancelled) setPosts(Array.isArray(body.items) ? body.items : []);
       } catch {
         if (!cancelled) setError(true);
       } finally {

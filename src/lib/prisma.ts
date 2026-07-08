@@ -31,7 +31,7 @@ export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 // Graceful shutdown
 process.on("beforeExit", () => prisma.$disconnect());
 
-// Retry helper for transient connection drops
+// Retry helper for transient connection drops with exponential backoff + jitter
 export async function withRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
   for (let i = 0; i <= retries; i++) {
     try {
@@ -42,7 +42,9 @@ export async function withRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T
         err?.message?.includes("Connection reset") ||
         err?.message?.includes("timeout");
       if (i < retries && isConnectionDrop) {
-        await new Promise((r) => setTimeout(r, 200 * (i + 1)));
+        const baseMs = 200 * Math.pow(2, i);
+        const jitter = Math.random() * baseMs;
+        await new Promise((r) => setTimeout(r, baseMs + jitter));
         continue;
       }
       throw err;

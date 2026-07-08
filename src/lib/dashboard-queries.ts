@@ -7,6 +7,7 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { unstable_cache } from "next/cache";
+import { CACHE_TAGS, CACHE_TTL } from "@/lib/cache-tags";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Types
@@ -50,10 +51,15 @@ export type DashboardData = {
     lecture: {
       id: string;
       title: string;
+      videoUrl: string | null;
+      videos: { url: string }[] | null;
       subject: { moduleId: string | null; name: string };
+      team: { name: string; imageUrl: string | null } | null;
     };
   } | null;
 };
+
+export type LastLectureActivity = NonNullable<DashboardData["lastLectureActivity"]>;
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Streak — uses raw SQL to get distinct active dates (last 60 days only)
@@ -132,24 +138,23 @@ async function getWeeklyActivity(
 // ──────────────────────────────────────────────────────────────────────────────
 
 async function getModuleProgress(userId: string, semesterId: string): Promise<ModuleProgressItem[]> {
-  // 1. Load modules with subject/lecture counts only (no question rows)
-  const modules = await prisma.module.findMany({
-    where: { semesterId },
-    orderBy: { name: "asc" },
-    include: {
-      subjects: {
-        include: {
-          lectures: {
-            include: {
-              _count: { select: { questions: true } },
-            },
-          },
-        },
-      },
-    },
-  });
+  // 1. Get module-level aggregates in one raw SQL query instead of 3-level nested include (~800 rows -> ~24 rows)
+  const totals = await prisma.$queryRaw<Array<{ moduleId: string; total: bigint; lectures: bigint }>>(
+    Prisma.sql`
+      SELECT
+        m.id AS "moduleId",
+        COUNT(DISTINCT q.id) AS total,
+        COUNT(DISTINCT l.id) AS lectures
+      FROM "Module" m
+      LEFT JOIN "Subject" s ON s."moduleId" = m.id
+      LEFT JOIN "Lecture" l ON l."subjectId" = s.id
+      LEFT JOIN "Question" q ON q."lectureId" = l.id
+      WHERE m."semesterId" = ${semesterId}
+      GROUP BY m.id
+    `
+  );
 
-  if (modules.length === 0) return [];
+  if (totals.length === 0) return [];
 
   // 2. Get correct question counts per module via raw aggregate
   const correctRows = await prisma.$queryRaw<Array<{ moduleId: string; cnt: bigint }>>(
@@ -164,20 +169,26 @@ async function getModuleProgress(userId: string, semesterId: string): Promise<Mo
       JOIN "Subject" s ON s.id = l."subjectId"
       WHERE a."userId" = ${userId}
         AND i."isCorrect" = TRUE
-        AND s."moduleId" IN (${Prisma.join(modules.map((m) => m.id))})
+        AND s."moduleId" IN (${Prisma.join(totals.map((t) => t.moduleId))})
       GROUP BY s."moduleId"
     `
   );
 
   const correctByModule = new Map(correctRows.map((r) => [r.moduleId, Number(r.cnt)]));
 
+  // 3. Fetch module names and imageUrls (lightweight query — no nested includes)
+  const modules = await prisma.module.findMany({
+    where: { semesterId },
+    select: { id: true, name: true, imageUrl: true },
+    orderBy: { name: "asc" },
+  });
+
   return modules.map((mod) => {
-    const total = mod.subjects
-      .flatMap((s) => s.lectures)
-      .reduce((acc, l) => acc + l._count.questions, 0);
+    const row = totals.find((t) => t.moduleId === mod.id);
+    const total = Number(row?.total ?? 0);
     const correct = correctByModule.get(mod.id) ?? 0;
     const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
-    const lectures = mod.subjects.reduce((a, s) => a + s.lectures.length, 0);
+    const lectures = Number(row?.lectures ?? 0);
     return { id: mod.id, name: mod.name, total, correct, pct, lectures, imageUrl: mod.imageUrl };
   });
 }
@@ -212,6 +223,9 @@ export async function fetchDashboardData(
       }),
       computeStreakFromDb(userId),
       getWeeklyActivity(userId, chartDayKeys),
+      // P2-3: Prisma sorts ALL lecture videos client-side when using include with nested orderBy.
+      // Per-lecture video count is small (1-5), so this is acceptable. Revisit only if per-lecture
+      // video count exceeds 50. See dashboard-backend-remediation-plan.md P2-3 for details.
       prisma.userLectureActivity.findFirst({
         where: { userId },
         orderBy: { lastViewedAt: "desc" },
@@ -296,7 +310,7 @@ export const getCachedDashboardData = unstable_cache(
     return fetchDashboardData(userId, chartDayKeys);
   },
   ["dashboard-data"],
-  { revalidate: 60, tags: ["dashboard"] }
+  { revalidate: CACHE_TTL.DASHBOARD, tags: [CACHE_TAGS.DASHBOARD] }
 );
 
 export const getCachedRankInfo = unstable_cache(
@@ -305,5 +319,5 @@ export const getCachedRankInfo = unstable_cache(
     return getUserRankInfo(userId);
   },
   ["rank-info"],
-  { revalidate: 60, tags: ["dashboard"] }
+  { revalidate: CACHE_TTL.DASHBOARD, tags: [CACHE_TAGS.DASHBOARD] }
 );

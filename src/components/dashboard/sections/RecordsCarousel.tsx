@@ -115,7 +115,8 @@ export function RecordsCarousel({ sidebarOpen }: { sidebarOpen?: boolean }) {
   }, [api]);
 
   if (isLoading) return <div className="h-80"><CarouselSkeleton /></div>;
-  if (error || !data?.items?.length) return null;
+  if (error) throw new Error("Failed to load lecture recordings");
+  if (!data?.items?.length) return null;
 
   const records = data.items;
 

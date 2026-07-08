@@ -1,15 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const semesterId = (session?.user as any)?.semesterId;
+  if (!semesterId) {
+    return NextResponse.json({ message: "Complete onboarding to see podcasts." }, { status: 400 });
+  }
+
   const { searchParams } = new URL(req.url);
   const page = Math.max(1, Number(searchParams.get("page") ?? 1));
   const limit = Math.min(50, Math.max(4, Number(searchParams.get("limit") ?? 12)));
   const skip = (page - 1) * limit;
 
   try {
+    const where = {
+      lecture: {
+        subject: {
+          module: {
+            semesterId: semesterId
+          }
+        }
+      }
+    };
+
     const [records, total] = await Promise.all([
       prisma.lectureRecord.findMany({
+        where,
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
@@ -25,7 +47,7 @@ export async function GET(req: NextRequest) {
           }
         }
       }),
-      prisma.lectureRecord.count()
+      prisma.lectureRecord.count({ where })
     ]);
 
     const formattedRecords = await Promise.all(records.map(async (r: any) => {

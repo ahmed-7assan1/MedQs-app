@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
   try {
     // 1. Database Search (Prioritize Local Curriculum)
-    const dbVideos = await (prisma as any).lectureVideo.findMany({
+    const dbVideos = await prisma.lectureVideo.findMany({
       where: {
         OR: [
           { title: { contains: q, mode: "insensitive" } },

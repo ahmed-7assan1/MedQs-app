@@ -24,7 +24,7 @@ model SiteConfig {
   fontArabic              String?
   fontSans                String?
   aiPreferredProvider     String   @default("auto")
-  /// Square icon for PWA “Add to Home Screen” / maskable (512×512). Falls back to faviconUrl then defaults.
+  /// Square icon for PWA GÇ£Add to Home ScreenGÇ¥ / maskable (512+ù512). Falls back to faviconUrl then defaults.
   pwaIconUrl              String?
   logoUrlDark             String?
   facebookUrl             String?
@@ -96,7 +96,7 @@ model University {
   originatedResources LibraryResource[]
 }
 
-/// Faculty (كليه) — optional sub-division of a University.
+/// Faculty (+â+ä+è+ç) GÇö optional sub-division of a University.
 /// When present, AcademicYears are grouped under a Faculty.
 /// If a University has no Faculties, the old flat structure is preserved (facultyId = null).
 model Faculty {
@@ -313,6 +313,7 @@ model LectureVideo {
   telegramMigrationTasks TelegramMigrationTask[]
 
   @@index([lectureId, sortOrder])
+  @@index([lectureId, createdAt])
 }
 
 model LectureRecord {
@@ -327,7 +328,7 @@ model LectureRecord {
   telegramChatId    String?
   lecture           Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
 
-  @@index([lectureId])
+  @@index([lectureId, createdAt])
 }
 
 model LectureVideoComment {
@@ -478,6 +479,7 @@ model QuizAttempt {
   items           QuizAttemptItem[]
 
   @@index([userId])
+  @@index([userId, createdAt])
   @@index([guestQuizUserId])
   @@index([pastPaperId])
 }
@@ -1000,6 +1002,8 @@ model AdBanner {
 
   @@index([semesterId])
   @@index([universityId])
+  @@index([active, semesterId])
+  @@index([active, universityId])
 }
 
 model Account {
