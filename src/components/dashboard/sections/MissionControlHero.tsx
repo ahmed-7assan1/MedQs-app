@@ -178,17 +178,17 @@ export function MissionControlHero({ data, onToggleSidebar, sidebarOpen }: { dat
         </div>
       </div>
 
-      <div className="mt-6 md:mt-8 flex gap-2 md:gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth [-webkit-scrollbar]:hidden">
+      <div className="mt-6 md:mt-8 flex flex-col items-end">
         {data.recentQuizzes.length === 0 ? (
           <p className="text-xs text-muted-foreground/50 text-center py-8 w-full">No quizzes yet</p>
         ) : (
-          data.recentQuizzes.slice(0, 4).map((quiz) => {
+          data.recentQuizzes.slice(0, 3).map((quiz, i) => {
             const scoreColor = quiz.bestScore !== null
               ? quiz.bestScore >= 70 ? "text-emerald-500" : quiz.bestScore >= 50 ? "text-amber-500" : "text-red-500"
               : "text-muted-foreground/40";
-            return (
-              <button key={quiz.id} onClick={() => setSelectedQuiz(quiz)} className="snap-start shrink-0 text-left">
-                <Card className="group w-[220px] md:w-[280px] lg:w-[260px] rounded-xl bg-card/80 border-border/40 p-3 shadow-sm flex items-center gap-2.5 transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5 cursor-pointer">
+            return i === 0 ? (
+              <button key={quiz.id} onClick={() => router.push("/past-papers")} className="relative text-left transition-all duration-300 hover:-translate-y-2 hover:z-50" style={{ zIndex: 3 }}>
+                <Card className="group w-[280px] md:w-[320px] lg:w-[300px] rounded-xl bg-card border-border/30 p-3 shadow-sm flex items-center gap-2.5 transition-all duration-300 hover:shadow-md hover:border-primary/40 cursor-pointer">
                   <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 shrink-0">
                     <FileText className="h-3.5 w-3.5 text-primary" />
                   </div>
@@ -202,6 +202,18 @@ export function MissionControlHero({ data, onToggleSidebar, sidebarOpen }: { dat
                   <ChevronRight className="h-3 w-3 text-muted-foreground/50 shrink-0" />
                 </Card>
               </button>
+            ) : (
+              <div key={quiz.id} className="relative pointer-events-none" style={{ marginTop: -52 }}>
+                <Card className="w-[280px] md:w-[320px] lg:w-[300px] rounded-xl bg-card border-border/20 p-3 shadow-sm flex items-center gap-2.5">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/5 shrink-0">
+                    <FileText className="h-3.5 w-3.5 text-primary/40" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-black text-foreground/40 truncate leading-tight">{quiz.title}</p>
+                    <p className="text-[8px] font-bold text-foreground/20 uppercase tracking-wider">{quiz.moduleName}</p>
+                  </div>
+                </Card>
+              </div>
             );
           })
         )}

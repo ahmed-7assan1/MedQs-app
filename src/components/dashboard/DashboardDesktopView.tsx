@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { DashboardData } from "@/types/dashboard";
 import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
 import { MissionControlHero } from "@/components/dashboard/sections/MissionControlHero";
 import { ContinueLearningSection } from "@/components/dashboard/sections/ContinueLearningSection";
 import { ContinueLectureCard } from "@/components/dashboard/sections/ContinueLectureCard";
@@ -45,8 +46,8 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           transition: "max-width .3s cubic-bezier(.2,0,0,1)",
         }}
       >
-        <div className="flex gap-6 xl:gap-8 px-4 sm:px-8 lg:px-12 h-full">
-          <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-0 space-y-8 md:space-y-10 section-entrance no-scrollbar">
+          <div className="flex gap-2 xl:gap-3 pl-4 sm:pl-8 lg:pl-12 h-full">
+          <div className="flex-1 min-w-0 overflow-y-auto h-full pt-6 lg:pt-8 pb-0 space-y-8 md:space-y-10 section-entrance no-scrollbar pr-6 xl:pr-8">
             <MissionControlHero data={data} onToggleSidebar={() => setSidebarOpen(o => !o)} sidebarOpen={sidebarOpen} />
             <ContinueLearningSection data={data} />
             <CarouselErrorBoundary title="Records" resetKey={recordsData?.items?.length ?? 0}>
@@ -64,16 +65,20 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
           <div className="hidden lg:flex shrink-0 h-full">
             <div className={cn(
               "overflow-hidden transition-all duration-500 ease-in-out h-full",
-              sidebarOpen ? "w-[calc(336px-var(--sidebar-offset,64px)*.25)]" : "w-0"
+              sidebarOpen ? "w-80" : "w-0"
             )}>
-              <aside className="flex flex-col gap-6 md:gap-8 pt-4 lg:pt-6 pb-8 premium-glass rounded-2xl pl-4 pr-3 overflow-y-auto no-scrollbar min-h-0 h-full w-[calc(336px-var(--sidebar-offset,64px)*.25)]">
-                <SearchableSidebar>
-                  <div className="shrink-0"><ActiveRoomsSidebar /></div>
-                  <div className="shrink-0"><LeaderboardSidebar /></div>
-                  <div className="shrink-0"><ContinueLectureCard lecture={data.lastLecture ?? null} /></div>
-                  <div className="shrink-0"><QuickAccessLinks /></div>
-                </SearchableSidebar>
-              </aside>
+              <Card className="h-full rounded-none border-border/40 shadow-sm backdrop-blur-3xl bg-card/70">
+                <div className="h-full overflow-y-auto no-scrollbar p-4">
+                  <div className="flex flex-col gap-6 md:gap-8">
+                    <SearchableSidebar>
+                      <div className="shrink-0"><ActiveRoomsSidebar /></div>
+                      <div className="shrink-0"><LeaderboardSidebar /></div>
+                      <div className="shrink-0"><ContinueLectureCard lecture={data.lastLecture ?? null} /></div>
+                      <div className="shrink-0"><QuickAccessLinks /></div>
+                    </SearchableSidebar>
+                  </div>
+                </div>
+              </Card>
             </div>
           </div>
         </div>

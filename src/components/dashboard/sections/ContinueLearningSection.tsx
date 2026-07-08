@@ -48,9 +48,11 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
 
   return (
     <div>
-      <SectionHeader icon={BookOpen} title="Continue Learning" />
+      <div className="flex justify-center">
+        <SectionHeader icon={BookOpen} title="Continue Learning" className="mb-0 justify-center [&>div:last-child]:hidden" />
+      </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth [-webkit-scrollbar]:hidden pr-4">
+      <div className="flex flex-wrap justify-center gap-3 mt-5">
         {modules.map((mod, i) => {
           const thumbGrad = thumbnailGradients[i % thumbnailGradients.length];
           const accentBorder = accentBorders[i % accentBorders.length];
