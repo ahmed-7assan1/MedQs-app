@@ -123,31 +123,19 @@
     }
   }
 
-  /* ✨ PREMIUM GLASSMORPHISM 2.0 (Patholytica Inspired) */
+  /* ✨ SURFACE CARDS — Solid, refined (replaced glassmorphism) */
   .premium-glass {
-    @apply backdrop-blur-3xl;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.03) 100%
-    );
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 
-      0 8px 32px 0 rgba(0, 0, 0, 0.08),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    border: 1px solid hsl(var(--border) / 0.5);
+    background-color: hsl(var(--card));
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.04);
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .dark .premium-glass {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.02) 0%,
-      rgba(255, 255, 255, 0.005) 100%
-    );
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 
-      0 12px 40px 0 rgba(0, 0, 0, 0.3),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.015);
+    border: 1px solid hsl(var(--border) / 0.4);
+    background-color: hsl(var(--card));
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
   }
 
   /* 🍃 SPRING ANIMATIONS (Make it feel alive) */
@@ -166,13 +154,11 @@
     transition: transform 0.1s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* 🌈 MESH GRADIENT BACKGROUNDS */
+  /* 🌈 SUBTLE MESH BACKGROUND */
   .mesh-gradient-bg {
-    background-color: hsla(245, 82%, 66%, 1);
     background-image:
-      radial-gradient(at 0% 0%, hsla(245, 82%, 66%, 0.15) 0, transparent 50%),
-      radial-gradient(at 50% 0%, hsla(190, 80%, 50%, 0.15) 0, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(320, 80%, 50%, 0.15) 0, transparent 50%);
+      radial-gradient(at 0% 0%, hsl(var(--primary) / 0.06) 0, transparent 50%),
+      radial-gradient(at 50% 0%, hsl(190 70% 50% / 0.06) 0, transparent 50%);
   }
 
   /* 🦴 SKELETON LOADERS: Ultra-smooth pulse */
@@ -220,7 +206,7 @@
   --card-foreground: 240 28% 14%;
   --popover: 0 0% 100%;
   --popover-foreground: 240 28% 14%;
-  --primary: 246 89% 70%;           /* #7C6FF7 brand purple */
+  --primary: 180 60% 26%;           /* #1A6A6A deep medical teal */
   --primary-foreground: 0 0% 100%;
   --secondary: 0 0% 0% / 0.04;
   --secondary-foreground: 240 18% 35%;  /* #4A4A6A */
@@ -232,7 +218,7 @@
   --destructive-foreground: 0 0% 100%;
   --border: 240 14% 93%;            /* #EBEBF0 */
   --input: 240 14% 93%;
-  --ring: 246 89% 70%;              /* #7C6FF7 */
+  --ring: 180 60% 26%;              /* #1A6A6A teal */
   --radius: 12px;
 
   --success: 157 58% 49%;           /* #34C48B */
@@ -245,10 +231,10 @@
   --glass-shadow: 0 8px 32px rgba(0,0,0,0.08);
   --glass-blur: blur(20px);
 
-  /* MedOneX brand — kept subtle */
-  --medq-primary: 0 0% 10%;
-  --medq-secondary: 0 0% 40%;
-  --medq-accent: 0 0% 0%;
+  /* MedOneX brand — teal identity */
+  --medq-primary: 180 60% 26%;
+  --medq-secondary: 180 40% 45%;
+  --medq-accent: 40 60% 50%;
 
   /* ── Surface bridge vars ── 
      Used to make hardcoded dark hex values theme-aware via global CSS below */
@@ -311,7 +297,7 @@
   --card-foreground: 250 33% 95%;
   --popover: 240 16% 12%;
   --popover-foreground: 250 33% 95%;
-  --primary: 246 89% 70%;           /* #7C6FF7 brand purple (same as light) */
+  --primary: 180 70% 30%;           /* #1A8A8A deep medical teal */
   --primary-foreground: 0 0% 100%;
   --secondary: 0 0% 100% / 0.03;
   --secondary-foreground: 246 18% 70%;  /* #A8A6C0 */
@@ -323,7 +309,7 @@
   --destructive-foreground: 0 0% 100%;
   --border: 240 20% 22%;            /* #2C2C42 */
   --input: 240 20% 22%;
-  --ring: 246 89% 70%;              /* #7C6FF7 */
+  --ring: 180 70% 30%;              /* #1A8A8A teal */
   --radius: 12px;
 
   --success: 157 65% 50%;           /* #2FCF92 */
@@ -360,10 +346,10 @@
   --info: 204 100% 50%;
   --info-foreground: 0 0% 98%;
   
-  /* MedOneX brand colors preserved for dark mode */
-  --medq-primary: 180 77% 40%;
-  --medq-secondary: 188 47% 55%;
-  --medq-accent: 245 82% 66%;
+  /* MedOneX brand colors — dark mode teal */
+  --medq-primary: 180 65% 35%;
+  --medq-secondary: 180 40% 55%;
+  --medq-accent: 40 60% 55%;
 }
 
 /* Force text colors for dark/light consistency */
@@ -473,10 +459,10 @@ html[data-theme="dark"] body,
 
 /* ── Global Styles ── */
 
-/* ── MedOneX Modern Design System (Quiz-Inspired) ── */
+/* ── MedOneX Primary Button ── */
 .btn-gradient {
-  background: linear-gradient(135deg, #534AB7 0%, #7C6FF5 100%);
-  color: #fff;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
   transition: all 0.2s ease;
 }
 .btn-gradient:hover {
@@ -489,11 +475,11 @@ html[data-theme="dark"] body,
 
 .stat-card-new {
   border-radius: var(--radius);
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.5);
   background-color: hsl(var(--card));
-  padding: 18px 20px;
+  padding: 16px 20px;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .row-card-new {
@@ -501,57 +487,56 @@ html[data-theme="dark"] body,
   display: flex;
   align-items: center;
   gap: 1rem;
-  border-radius: var(--radius);
-  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid hsl(var(--border) / 0.5);
   background-color: hsl(var(--card));
-  padding: 18px 20px;
+  padding: 16px 20px;
   transition: all 0.2s;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  border-left-color: rgba(108, 95, 240, 0.4);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  border-left: 3px solid hsl(var(--primary) / 0.3);
 }
 .row-card-new:hover {
-  @apply bg-[#1C1A2E] shadow-xl;
+  background-color: hsl(var(--muted));
 }
 
 .module-card-new {
-  @apply relative rounded-xl border border-transparent bg-[#131220] p-5 transition-all shadow-md;
-  border-top-width: 3px;
-  border-top-color: rgba(108, 95, 240, 0.4);
+  @apply relative rounded-xl border border-border/40 bg-card p-5 transition-all shadow-sm;
+  border-top: 3px solid hsl(var(--primary) / 0.3);
 }
 
 .tag-new {
   @apply rounded-full border px-2 py-0.5 text-[10px] font-medium;
-  border-color: rgba(108, 95, 240, 0.4);
-  color: #AFA9EC;
-  background: rgba(108, 95, 240, 0.08);
+  border-color: hsl(var(--primary) / 0.3);
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.08);
 }
 .tag-teal {
-  border-color: rgba(29, 158, 117, 0.4);
-  color: #5DCAA5;
-  background: rgba(29, 158, 117, 0.08);
+  border-color: hsl(160 50% 40% / 0.3);
+  color: hsl(160 50% 45%);
+  background: hsl(160 50% 40% / 0.08);
 }
 
 .tab-bar {
-  @apply flex gap-1 rounded-xl border border-white/[0.07] bg-[#131220] p-1;
+  @apply flex gap-1 rounded-xl border border-border/40 bg-card p-1;
 }
 .tab-item {
-  @apply flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-medium text-white/40 transition-all cursor-pointer;
+  @apply flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-medium text-muted-foreground/60 transition-all cursor-pointer;
 }
 .tab-item:hover {
-  @apply bg-white/5 text-white/60;
+  @apply bg-muted/30 text-foreground/60;
 }
 .tab-item.active {
-  @apply bg-gradient-to-br from-[#534AB7] to-[#7C6FF5] text-white shadow-lg;
+  @apply bg-primary text-primary-foreground shadow-sm;
 }
 
 .date-pill {
-  @apply flex flex-col items-center justify-center gap-0.5 rounded-xl border border-white/[0.07] bg-[#131220] transition-all;
+  @apply flex flex-col items-center justify-center gap-0.5 rounded-xl border border-border/40 bg-card transition-all;
   width: 48px;
   height: 60px;
 }
 .date-pill.active {
-  @apply border-transparent bg-gradient-to-br from-[#534AB7] to-[#7C6FF5] shadow-lg;
+  @apply border-primary/50 bg-primary/10 shadow-sm;
 }
 
 .prog-track {
@@ -769,20 +754,15 @@ html[data-theme="light"] body {
 }
 
 html[data-theme="light"] .premium-glass {
-  background: hsl(var(--card) / 0.85);
-  border-color: hsl(var(--border));
-  box-shadow: 0 4px 24px hsl(var(--shadow-clr, 0 0% 0%) / 0.05);
-  backdrop-filter: none;
-}
-
-html[data-theme="light"] [class*="backdrop-blur"] {
-  backdrop-filter: none !important;
+  background: hsl(var(--card));
+  border-color: hsl(var(--border) / 0.5);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 html[data-theme="light"] .surface-card {
   background-color: hsl(var(--card)) !important;
-  border-color: rgba(0, 0, 0, 0.04) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+  border-color: hsl(var(--border) / 0.4) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
 }
 
 @media (max-width: 768px) {
@@ -791,12 +771,12 @@ html[data-theme="light"] .surface-card {
   p { font-size: 0.925rem !important; }
 }
 
-/* ── Dark: sleek, calm slate ── */
+/* ── Dark: warm, refined backdrop ── */
 html[data-theme="dark"] body {
-  background-color: hsl(225 15% 9%);
+  background-color: hsl(225 10% 7%);
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, hsl(210 100% 55% / 0.08), transparent 60%),
-    linear-gradient(180deg, hsl(225 15% 9%), hsl(225 15% 7%));
+    radial-gradient(ellipse 80% 50% at 50% -10%, hsl(180 70% 30% / 0.05), transparent 60%),
+    linear-gradient(180deg, hsl(225 10% 8%), hsl(225 10% 5%));
   background-attachment: fixed;
 }
 
@@ -956,30 +936,29 @@ html[data-theme="dark"] body {
 /* Card surfaces — plain CSS only (Tailwind @apply cannot use arbitrary opacity like ring-black/[0.04]) */
 @layer components {
   .surface-card {
-    border-radius: var(--radius);
-    border: 1px solid hsl(var(--border) / 0.85);
+    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid hsl(var(--border) / 0.5);
     background-color: hsl(var(--card));
-    backdrop-filter: blur(10px);
     box-shadow:
-      0 1px 0 rgb(0 0 0 / 0.03),
-      0 8px 24px rgb(0 0 0 / 0.055);
+      0 1px 0 rgb(0 0 0 / 0.02),
+      0 4px 12px rgb(0 0 0 / 0.04);
   }
 
   .dark .surface-card {
     box-shadow:
-      0 1px 0 rgb(255 255 255 / 0.04),
-      0 4px 20px rgb(0 0 0 / 0.35);
+      0 1px 0 rgb(255 255 255 / 0.02),
+      0 4px 12px rgb(0 0 0 / 0.25);
   }
 
   .surface-card-subtle {
-    border-radius: calc(var(--radius) - 2px);
-    border: 1px solid hsl(var(--border) / 0.75);
+    border-radius: calc(var(--radius) - 4px);
+    border: 1px solid hsl(var(--border) / 0.4);
     background-color: hsl(var(--card));
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.04);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
   }
 
   .dark .surface-card-subtle {
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
   }
 }
 
@@ -1014,7 +993,7 @@ html[data-theme="dark"] body {
   left: 0;
   width: 2px;
   height: 44px;
-  background: linear-gradient(180deg, hsl(var(--primary)), hsl(190 72% 48%));
+  background: hsl(var(--primary) / 0.6);
   border-radius: 0 2px 2px 0;
   opacity: .8;
   pointer-events: none;
@@ -1073,7 +1052,7 @@ html[data-theme="dark"] body {
   font-size: 21px;
   font-weight: 800;
   letter-spacing: -0.05em;
-  background: linear-gradient(90deg, hsl(var(--primary)), hsl(220, 80%, 65%));
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(180 70% 40%));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1290,10 +1269,9 @@ html[data-theme="dark"] body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: hsl(142 71% 45%);
-  /* Vivid Green */
-  color: white;
-  box-shadow: 0 4px 12px hsl(142 71% 45% / 0.35);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  box-shadow: 0 4px 12px hsl(var(--primary) / 0.35);
   opacity: 0;
   transform: scale(.8);
   transition: opacity .15s .06s, transform .15s .06s;
@@ -1312,9 +1290,9 @@ html[data-theme="dark"] body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: hsl(142 71% 45%);
+  background: hsl(var(--primary));
   border: 1.5px solid hsl(var(--card));
-  box-shadow: 0 2px 8px hsl(142 71% 45% / 0.5);
+  box-shadow: 0 2px 8px hsl(var(--primary) / 0.5);
   transition: opacity .15s;
 }
 
@@ -1403,12 +1381,12 @@ html[data-theme="dark"] body {
 }
 
 .btn-primary:hover {
-  box-shadow: 0 6px 20px hsl(var(--primary) / .4);
+  box-shadow: 0 4px 12px hsl(var(--primary) / .3);
 }
 
 .btn-secondary {
   background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.5);
   color: hsl(var(--foreground));
   padding: 9px 20px;
 }
@@ -1421,7 +1399,7 @@ html[data-theme="dark"] body {
 
 .btn-ghost:hover {
   color: hsl(var(--foreground));
-  background: hsl(var(--muted));
+  background: hsl(var(--muted) / 0.5);
   box-shadow: none;
   transform: none;
 }
@@ -1457,8 +1435,8 @@ html[data-theme="dark"] body {
 
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, .07);
-  border-color: hsl(var(--primary) / .25);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .06);
+  border-color: hsl(var(--primary) / .2);
 }
 
 /* ── Scrollbar ── */
@@ -1483,7 +1461,7 @@ html[data-theme="dark"] body {
 
 /* ── Gradient text ── */
 .gradient-text {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(168 70% 42%), hsl(190 75% 48%));
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(168 50% 40%));
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1979,18 +1957,15 @@ select,
 /* ── Cinematic gradient backgrounds ── */
 .cinematic-bg {
   background:
-    radial-gradient(ellipse 100% 60% at 50% -10%, rgba(108,95,240,0.12), transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0,229,255,0.06), transparent 50%),
-    radial-gradient(ellipse 50% 30% at 20% 80%, rgba(108,95,240,0.04), transparent 50%),
-    linear-gradient(180deg, #09080F 0%, #0C0B17 50%, #09080F 100%);
+    radial-gradient(ellipse 100% 60% at 50% -10%, hsl(var(--primary) / 0.08), transparent 60%),
+    linear-gradient(180deg, hsl(225 10% 8%), hsl(225 10% 5%));
   background-attachment: fixed;
 }
 
 .cinematic-bg--blue {
   background:
-    radial-gradient(ellipse 100% 60% at 50% -10%, rgba(79,95,255,0.15), transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0,229,255,0.08), transparent 50%),
-    linear-gradient(180deg, #09080F 0%, #0C0B17 100%);
+    radial-gradient(ellipse 100% 60% at 50% -10%, hsl(var(--primary) / 0.12), transparent 60%),
+    linear-gradient(180deg, hsl(225 10% 8%), hsl(225 10% 5%));
   background-attachment: fixed;
 }
 
@@ -2010,20 +1985,16 @@ select,
   background-attachment: fixed;
 }
 
-/* ── Glass card variants ── */
+/* ── Surface card variants ── */
 .glass-card-premium {
-  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
-  backdrop-filter: blur(24px) saturate(1.2);
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.2),
-    inset 0 1px 0 rgba(255,255,255,0.04);
-  border-radius: 16px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.4);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.04);
+  border-radius: calc(var(--radius) - 2px);
 }
 
 .glass-card-premium:hover {
-  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
-  border-color: rgba(255,255,255,0.10);
+  border-color: hsl(var(--border) / 0.6);
   box-shadow:
     0 12px 48px rgba(0,0,0,0.3),
     inset 0 1px 0 rgba(255,255,255,0.06);

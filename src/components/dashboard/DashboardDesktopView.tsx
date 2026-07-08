@@ -67,7 +67,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
               "overflow-hidden transition-all duration-500 ease-in-out h-full",
               sidebarOpen ? "w-80" : "w-0"
             )}>
-              <Card className="h-full rounded-none border-border/40 shadow-sm backdrop-blur-3xl bg-card/70">
+              <Card className="h-full rounded-none border-border/30 shadow-sm bg-card">
                 <div className="h-full overflow-y-auto no-scrollbar p-4">
                   <div className="flex flex-col gap-6 md:gap-8">
                     <SearchableSidebar>

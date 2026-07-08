@@ -62,66 +62,62 @@ export function MissionControlHero({ data, onToggleSidebar, sidebarOpen }: { dat
           <div className="relative shrink-0">
             <div className="relative h-16 w-16 md:h-20 md:w-20">
               <svg className="absolute -inset-1 h-[calc(100%+8px)] w-[calc(100%+8px)] -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="44" fill="none" strokeWidth="6" className="stroke-slate-200 dark:stroke-white/5" />
+                <circle cx="50" cy="50" r="44" fill="none" strokeWidth="6" className="stroke-muted-foreground/10" />
                 <motion.circle
                   cx="50" cy="50" r="44" fill="none" strokeWidth="6" strokeLinecap="round"
                   strokeDasharray={Math.PI * 88}
                   initial={{ strokeDashoffset: Math.PI * 88 }}
                   animate={{ strokeDashoffset: Math.PI * 88 - (Math.PI * 88 * data.progressToNext) / 100 }}
                   transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-                  className={cn(
-                    data.rankLabel === "Elite" ? "stroke-amber-500" :
-                    data.rankLabel === "Expert" ? "stroke-purple-500" :
-                    data.rankLabel === "Contributor" ? "stroke-blue-500" :
-                    data.rankLabel === "Active" ? "stroke-emerald-500" :
-                    "stroke-slate-400"
-                  )}
+                  className="stroke-primary"
                 />
               </svg>
-              <Avatar className="h-full w-full shrink-0 shadow-lg shadow-primary/20">
+              <Avatar className="h-full w-full shrink-0 shadow-sm">
                 {data.userImage ? (
                   <AvatarImage src={data.userImage} alt={data.firstName} className="object-cover" />
                 ) : null}
-                <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xl md:text-2xl font-black">
+                <AvatarFallback className="bg-primary text-primary-foreground text-xl md:text-2xl font-bold">
                   {data.firstName.charAt(0)}
                 </AvatarFallback>
               </Avatar>
-              <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-500 border-2 border-background shadow-lg shadow-emerald-500/30" />
+              <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-background" />
             </div>
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent uppercase tracking-[0.2em]">
+              <span className="text-[10px] font-semibold text-primary uppercase tracking-[0.15em]">
                 {data.greeting}
               </span>
               {data.overallPct >= 80 && (
-                <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-[0.2em] bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.15em] bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
                   <Sparkles className="h-3 w-3" /> Top Performer
                 </span>
               )}
             </div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter text-foreground leading-none">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-foreground leading-none">
               Dr. {data.firstName}
             </h1>
             <p className="mt-1.5 text-xs font-medium text-muted-foreground/70 flex items-center gap-1.5 flex-wrap">
               <GraduationCap className="h-3.5 w-3.5 text-primary/60" />
-              <span className="text-foreground/80 font-bold">{data.rankLabel}</span>
+              <span className="text-foreground/80 font-semibold">{data.rankLabel}</span>
             </p>
           </div>
         </div>
 
           <div className="flex gap-1.5 shrink-0">
           <div className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/40 bg-card/40",
-            data.currentStreak > 0 && "border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-amber-500/0"
+            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border",
+            data.currentStreak > 0
+              ? "border-orange-500/30 bg-orange-500/5"
+              : "border-border/40 bg-card/40"
           )}>
             <Flame className={cn("h-4 w-4", data.currentStreak > 0 ? "text-orange-500" : "text-muted-foreground")} />
-            <span className={cn("text-base font-black tabular-nums leading-none", data.currentStreak > 0 ? "text-red-500" : "text-muted-foreground")}>{data.currentStreak}</span>
+            <span className={cn("text-base font-bold tabular-nums leading-none", data.currentStreak > 0 ? "text-orange-600 dark:text-orange-400" : "text-muted-foreground")}>{data.currentStreak}</span>
             <span className="text-[9px] font-medium text-muted-foreground/60">day streak</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/40 bg-card/40 border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-yellow-500/0">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/5">
             <Trophy className="h-4 w-4 text-amber-500" />
-            <span className="text-base font-black tabular-nums leading-none text-foreground">{(data.rankPoints || 0).toLocaleString()}</span>
+            <span className="text-base font-bold tabular-nums leading-none text-foreground">{(data.rankPoints || 0).toLocaleString()}</span>
             <span className="text-[9px] font-medium text-muted-foreground/60">XP</span>
           </div>
           <div className="flex gap-1.5 items-center">
@@ -230,17 +226,17 @@ export function MissionControlHero({ data, onToggleSidebar, sidebarOpen }: { dat
           </div>
           <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden relative">
             <div
-              className="absolute inset-0 rounded-full opacity-20 blur-sm"
+              className="absolute inset-0 rounded-full opacity-10"
               style={{
                 width: `${data.dailyPct}%`,
-                background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))",
+                backgroundColor: "hsl(var(--primary))",
               }}
             />
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${data.dailyPct}%` }}
               transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="relative h-full rounded-full bg-gradient-to-r from-primary to-accent"
+              className="relative h-full rounded-full bg-primary"
             />
           </div>
         </div>
@@ -322,7 +318,7 @@ export function MissionControlHero({ data, onToggleSidebar, sidebarOpen }: { dat
           </div>
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => setSelectedQuiz(null)} className="flex-1">Cancel</Button>
-            <Button onClick={() => { router.push(`/quiz/${selectedQuiz?.id}`); setSelectedQuiz(null); }} className="flex-1 bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold shadow-lg shadow-primary/20">
+            <Button onClick={() => { router.push(`/quiz/${selectedQuiz?.id}`); setSelectedQuiz(null); }} className="flex-1 bg-primary text-primary-foreground font-bold shadow-sm">
               Start Quiz
             </Button>
           </div>

@@ -67,7 +67,7 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
               transition={{ delay: 0.06 * i, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               <Card asChild className={cn(
-                "group w-[220px] md:w-[280px] lg:w-[260px] overflow-hidden rounded-2xl border-border/40 bg-card/40 backdrop-blur-sm shadow-sm will-change-transform transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg",
+                "group w-[220px] md:w-[280px] lg:w-[260px] overflow-hidden rounded-xl border-border/30 bg-card shadow-sm will-change-transform transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md",
                 accentBorder
               )}>
                 <Link href={`/modules/${mod.id}`}>
@@ -88,7 +88,7 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
                       "relative flex items-center justify-center h-24 md:h-28 bg-gradient-to-br",
                       thumbGrad
                     )}>
-                      <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-background/40 backdrop-blur-sm border border-white/10 dark:border-white/10 transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-background/40 border border-border/20 transition-all duration-300 group-hover:scale-105 group-hover:-translate-y-0.5">
                         <GraduationCap className={cn(
                           "h-6 w-6 transition-colors duration-300",
                           mod.pct >= 80 ? "text-emerald-500" : mod.pct >= 40 ? "text-primary" : "text-muted-foreground"
@@ -105,9 +105,6 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
 
                     {/* Content area */}
                     <div className="p-4 relative">
-                      {/* Accent line */}
-                      <div className="absolute top-0 left-4 right-4 h-0.5 rounded-full bg-gradient-to-r from-primary/30 to-accent/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Module</p>
                         <span className="text-muted-foreground/50 flex items-center gap-1 text-[9px]">
@@ -125,10 +122,8 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
                           initial={{ width: 0 }}
                           animate={{ width: `${mod.pct}%` }}
                           transition={{ duration: 0.8, delay: 0.1 * i, ease: [0.16, 1, 0.3, 1] }}
-                          className="h-full rounded-full bg-gradient-to-r from-primary to-accent relative overflow-hidden"
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
-                        </motion.div>
+                          className="h-full rounded-full bg-primary"
+                        />
                       </div>
 
                       <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-wider transition-all duration-300 group-hover:translate-x-1 mt-3">
