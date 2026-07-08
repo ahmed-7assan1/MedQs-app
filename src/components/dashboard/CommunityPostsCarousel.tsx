@@ -844,7 +844,8 @@ export function CommunityPostsCarousel() {
         const res = await fetch("/api/v1/community/posts?limit=12");
         if (!res.ok) throw new Error();
         const data = await res.json();
-        if (!cancelled) setPosts(Array.isArray(data.items) ? data.items : []);
+        const body = (data as any)?.data ?? data;
+        if (!cancelled) setPosts(Array.isArray(body.items) ? body.items : []);
       } catch {
         if (!cancelled) setError(true);
       } finally {

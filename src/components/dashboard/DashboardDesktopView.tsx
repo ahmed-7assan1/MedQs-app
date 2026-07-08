@@ -23,8 +23,10 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
   // Observe SWR state so the error boundary can recover when data loads after a failure.
   // SWR deduplicates — only one actual fetch per key regardless of how many components observe it.
   const { data: recordsData } = useRecords();
-  const { data: communityData } = useCommunityPosts();
+  const { data: _communityData } = useCommunityPosts();
   const { data: videosData } = useCurriculumVideos();
+
+  const communityData = (_communityData as any)?.data ?? _communityData;
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1280px)");
