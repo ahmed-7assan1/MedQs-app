@@ -5,6 +5,112 @@ import PizZip from "pizzip";
 // @ts-ignore
 import Docxtemplater from "docxtemplater";
 
+
+export async function downloadTemplateSample(settings: ExportWordSettings, filename = "Template_Sample.docx") {
+  const qColor = settings.questionColor.replace('#', '');
+  const aColor = settings.answerColor.replace('#', '');
+  const bColor = settings.borderColor.replace('#', '');
+  const cbg = settings.bgColor.replace('#', '');
+  const fFam = settings.fontFamily;
+
+  const doc = new Document({
+    sections: [{
+      properties: {
+        page: {
+          margin: { top: 1440, bottom: 1440, left: 720, right: 720 },
+        }
+      },
+      children: [
+        new Paragraph({
+          children: [
+            new TextRun({ text: "{quizTitle}", font: fFam, bold: true, size: 36, color: qColor }),
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 400 },
+        }),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 8, color: bColor },
+            bottom: { style: BorderStyle.SINGLE, size: 8, color: bColor },
+            left: { style: BorderStyle.SINGLE, size: 8, color: bColor },
+            right: { style: BorderStyle.SINGLE, size: 8, color: bColor },
+            insideHorizontal: { style: BorderStyle.SINGLE, size: 8, color: bColor },
+            insideVertical: { style: BorderStyle.SINGLE, size: 8, color: bColor },
+          },
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  width: { size: 10, type: WidthType.PERCENTAGE },
+                  shading: { fill: cbg, type: ShadingType.CLEAR, color: "auto" },
+                  verticalAlign: VerticalAlign.CENTER,
+                  children: [new Paragraph({ children: [new TextRun({ text: "{#questions}", font: fFam, bold: true, size: 18, color: "888888" })], alignment: AlignmentType.CENTER })],
+                }),
+                new TableCell({
+                  width: { size: 70, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ text: "" })],
+                }),
+                new TableCell({
+                  width: { size: 20, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ text: "" })],
+                }),
+              ],
+            }),
+            new TableRow({
+              cantSplit: true,
+              children: [
+                new TableCell({
+                  width: { size: 10, type: WidthType.PERCENTAGE },
+                  shading: { fill: cbg, type: ShadingType.CLEAR, color: "auto" },
+                  verticalAlign: VerticalAlign.CENTER,
+                  children: [new Paragraph({ children: [new TextRun({ text: "{n}", font: fFam, bold: true, size: 24 })], alignment: AlignmentType.CENTER })],
+                }),
+                new TableCell({
+                  width: { size: 70, type: WidthType.PERCENTAGE },
+                  margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                  children: [
+                    new Paragraph({ children: [new TextRun({ text: "{body}", font: fFam, size: 24, bold: true, color: qColor })] }),
+                    new Paragraph({ children: [new TextRun({ text: "{choices}", font: fFam, size: 22, color: aColor })] }),
+                    new Paragraph({ children: [new TextRun({ text: "{explanation}", font: fFam, size: 20, italics: true, color: "555555" })] }),
+                  ],
+                }),
+                new TableCell({
+                  width: { size: 20, type: WidthType.PERCENTAGE },
+                  shading: { fill: cbg, type: ShadingType.CLEAR, color: "auto" },
+                  verticalAlign: VerticalAlign.CENTER,
+                  children: [new Paragraph({ children: [new TextRun({ text: "{answer}", font: fFam, bold: true, size: 28 })], alignment: AlignmentType.CENTER })],
+                }),
+              ],
+            }),
+            new TableRow({
+              children: [
+                new TableCell({
+                  width: { size: 10, type: WidthType.PERCENTAGE },
+                  shading: { fill: cbg, type: ShadingType.CLEAR, color: "auto" },
+                  verticalAlign: VerticalAlign.CENTER,
+                  children: [new Paragraph({ children: [new TextRun({ text: "{/questions}", font: fFam, bold: true, size: 18, color: "888888" })], alignment: AlignmentType.CENTER })],
+                }),
+                new TableCell({
+                  width: { size: 70, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ text: "" })],
+                }),
+                new TableCell({
+                  width: { size: 20, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ text: "" })],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    }],
+  });
+
+  const blob = await Packer.toBlob(doc);
+  saveAs(blob, filename.endsWith(".docx") ? filename : `${filename}.docx`);
+}
+
 export interface ExportWordItem {
   groupTitle?: string;
   body: string;
@@ -29,7 +135,7 @@ export interface ExportWordSettings {
   randomizeQuestions: boolean;
 }
 
-export async function exportQuestionsToWord(questions: ExportWordItem[], settings: ExportWordSettings, filename = "Questions_Export.docx", templateBuffer?: ArrayBuffer) {
+export async function exportQuestionsToWord(questions: ExportWordItem[], settings: ExportWordSettings, filename = "Questions_Export.docx", templateBuffer?: ArrayBuffer, qrUrl?: string) {
   try {
     const qColor = settings.questionColor.replace('#', '');
     const aColor = settings.answerColor.replace('#', '');
@@ -300,6 +406,23 @@ export async function exportQuestionsToWord(questions: ExportWordItem[], setting
     let blob: Blob;
     if (templateBuffer) {
       const zip = new PizZip(templateBuffer);
+
+      // Pre-process: replace {qr} with placeholder in ALL XML files before docxtemplater
+      // This ensures {qr} inside <w:instrText> (DISPLAYBARCODE field codes) is preserved
+      // as plain text rather than being skipped by docxtemplater (which only processes <w:t>)
+      if (qrUrl) {
+        Object.keys(zip.files).forEach((filePath) => {
+          const file = zip.files[filePath];
+          if (filePath.endsWith(".xml") && typeof file.asText === "function") {
+            let content = file.asText();
+            if (content.includes("{qr}")) {
+              content = content.replace(/\{qr\}/g, "QR_PLACEHOLDER");
+              zip.file(filePath, content);
+            }
+          }
+        });
+      }
+
       const docTpl = new Docxtemplater(zip, {
         paragraphLoop: true,
         linebreaks: true,
@@ -387,10 +510,26 @@ export async function exportQuestionsToWord(questions: ExportWordItem[], setting
         MEDIUM: globalQuestions.filter(q => q.difficulty === "MEDIUM"),
         HARD: globalQuestions.filter(q => q.difficulty === "HARD"),
         answers: globalAnswers,
-        all_answers: globalAnswers 
+        all_answers: globalAnswers,
       });
 
-      blob = docTpl.getZip().generate({
+      const finalZip = docTpl.getZip();
+
+      // Post-process: replace QR_PLACEHOLDER with actual URL in ALL XML files
+      if (qrUrl) {
+        Object.keys(finalZip.files).forEach((filePath) => {
+          const file = finalZip.files[filePath];
+          if (filePath.endsWith(".xml") && typeof file.asText === "function") {
+            let content = file.asText();
+            if (content.includes("QR_PLACEHOLDER")) {
+              content = content.replace(/QR_PLACEHOLDER/g, qrUrl);
+              finalZip.file(filePath, content);
+            }
+          }
+        });
+      }
+
+      blob = finalZip.generate({
         type: "blob",
         mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       });

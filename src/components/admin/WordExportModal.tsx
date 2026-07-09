@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { FileText, Loader2, Download, Printer } from "lucide-react";
 import { MedqsSelect } from "@/components/ui/MedqsSelect";
-import { ExportWordItem, ExportWordSettings, exportQuestionsToWord } from "@/lib/export-word-client";
+import { ExportWordItem, ExportWordSettings, exportQuestionsToWord, downloadTemplateSample } from "@/lib/export-word-client";
 import { exportQuestionsToPdf } from "@/lib/export-pdf-client";
 import toast from "react-hot-toast";
 
@@ -25,6 +25,7 @@ export function WordExportModal({ questions, onClose, title = "Export Settings",
   const [saveToLibrary, setSaveToLibrary] = useState(false);
   const [libTemplateName, setLibTemplateName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [createShareLink, setCreateShareLink] = useState(false);
   const [exportSettings, setExportSettings] = useState<ExportWordSettings>({
     questionColor: "#C00000",
     answerColor: "#000000",
@@ -112,8 +113,21 @@ export function WordExportModal({ questions, onClose, title = "Export Settings",
       }
     }
 
+    let qrUrl: string | undefined;
+    if (createShareLink) {
+      const shareCode = Array.from({ length: 8 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+      qrUrl = `${window.location.origin}/quiz/shared/${shareCode}`;
+      fetch("/api/v1/export/save-shared", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: exportFilename || filename, questions: finalQuestions, shareCode }),
+      }).then(r => {
+        if (!r.ok) console.error("Failed to save shared export to DB");
+      }).catch(e => console.error("Failed to save shared export to DB", e));
+    }
+
     const finalName = exportFilename || filename;
-    const success = await exportQuestionsToWord(finalQuestions, exportSettings, finalName.endsWith(".docx") ? finalName : `${finalName}.docx`, templateBuffer);
+    const success = await exportQuestionsToWord(finalQuestions, exportSettings, finalName.endsWith(".docx") ? finalName : `${finalName}.docx`, templateBuffer, qrUrl);
     setIsExporting(false);
     if (success) onClose();
   };
@@ -221,6 +235,10 @@ export function WordExportModal({ questions, onClose, title = "Export Settings",
             <input type="checkbox" checked={exportSettings.randomizeQuestions} onChange={(e) => setExportSettings({...exportSettings, randomizeQuestions: e.target.checked})} className="rounded border-violet-500 text-violet-600 focus:ring-violet-500 h-4 w-4" />
             Randomize Order (Shuffle)
           </label>
+          <label className="flex items-center gap-2 text-xs font-medium cursor-pointer text-emerald-700 dark:text-emerald-400">
+            <input type="checkbox" checked={createShareLink} onChange={(e) => setCreateShareLink(e.target.checked)} className="rounded border-emerald-500 text-emerald-600 focus:ring-emerald-500 h-4 w-4" />
+            Generate shareable student link with QR code
+          </label>
         </div>
 
         <div className="col-span-full grid gap-3 sm:grid-cols-2 bg-muted/20 p-3 rounded-lg border border-border mt-1">
@@ -280,6 +298,14 @@ export function WordExportModal({ questions, onClose, title = "Export Settings",
               <a href="/templates/4_Large_Font.docx" target="_blank" className="text-primary hover:underline">Large Font</a>
               <a href="/templates/5_Clinical_Vignette.docx" target="_blank" className="text-primary hover:underline">Clinical</a>
             </div>
+            <button
+              type="button"
+              onClick={() => downloadTemplateSample(exportSettings, exportFilename)}
+              className="inline-flex items-center gap-1.5 rounded border border-primary/40 bg-primary/5 px-3 py-1.5 text-[11px] font-medium text-primary hover:bg-primary/10 transition-colors mt-2"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Download Sample Template with My Settings
+            </button>
           </div>
         </div>
 

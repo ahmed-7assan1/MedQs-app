@@ -2438,6 +2438,7 @@ model SavedQuiz {
   questions   Json
   shareCode   String   @unique
   published   Boolean  @default(false)
+  source      String   @default("ai_library")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

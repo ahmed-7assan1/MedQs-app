@@ -54,5 +54,5 @@ export default async function SharedQuizPage({ params }: Props) {
     );
   }
 
-  return <SharedQuizClient quiz={{ id: quiz.id, title: quiz.title, questions: quiz.questions as any[], shareCode: quiz.shareCode }} />;
+  return <SharedQuizClient quiz={{ id: quiz.id, title: quiz.title, questions: quiz.questions as any[], shareCode: quiz.shareCode, source: quiz.source }} />;
 }
