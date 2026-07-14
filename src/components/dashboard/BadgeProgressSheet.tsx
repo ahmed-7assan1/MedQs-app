@@ -17,7 +17,7 @@ const BADGE_CARD_STYLES: Record<string, string> = {
   expert: "border border-rose-300/40 dark:border-red-500/20 border-l-4 border-l-rose-400 dark:border-l-red-500/50",
   streak_30: "border border-amber-300/40 dark:border-amber-500/20 border-dashed",
   centurion: "border-2 border-violet-300/40 dark:border-violet-500/20 rounded-t-lg rounded-b-xl rounded-tr-xl",
-  streak_7: "border border-emerald-300/40 dark:border-emerald-500/20 border-b-4 border-b-emerald-400 dark:border-b-emerald-500/50",
+  streak_7: "border border-sky-300/40 dark:border-sky-500/20 border-b-4 border-b-sky-400 dark:border-b-sky-500/50",
   scholar: "border border-sky-300/40 dark:border-sky-500/20 rounded-[18px]",
   first_steps: "border border-slate-300/40 dark:border-slate-600/30 rounded-lg",
 };
@@ -107,14 +107,14 @@ export function BadgeProgressSheet({
                   className={cn(
                     "transition-colors relative overflow-hidden shadow-none",
                     earned
-                      ? "bg-emerald-50/50 dark:bg-emerald-500/5"
-                      : "bg-card/30",
+                      ? "bg-sky-50/50 dark:bg-sky-500/5"
+                      : "bg-white/5 dark:bg-white/5",
                     cardStyle
                   )}
                 >
                   <CardContent className="p-3.5">
                   {earned && (
-                    <div className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-emerald-400/20 blur-xl" />
+                    <div className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-sky-400/20 blur-xl" />
                   )}
 
                   <div className="flex items-center gap-3 mb-2.5 relative z-10">
@@ -127,7 +127,7 @@ export function BadgeProgressSheet({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-bold text-foreground">{badge.label}</p>
-                        {earned && <span className="text-[9px] font-black text-emerald-600 uppercase tracking-wider bg-emerald-100 dark:bg-emerald-500/20 px-1.5 py-0.5 rounded">Earned</span>}
+                        {earned && <span className="text-[9px] font-black text-sky-600 uppercase tracking-wider bg-sky-100 dark:bg-sky-500/20 px-1.5 py-0.5 rounded">Earned</span>}
                       </div>
                       <p className="text-[10px] text-muted-foreground mt-0.5">{badge.desc}</p>
                     </div>
@@ -138,7 +138,7 @@ export function BadgeProgressSheet({
                       value={progress}
                       className={cn(
                         "h-full",
-                        earned ? "[&>div]:bg-emerald-500" : badge.gradient.split(" ")[0].replace("from-", "[&>div]:bg-")
+                        earned ? "[&>div]:bg-sky-500" : badge.gradient.split(" ")[0].replace("from-", "[&>div]:bg-")
                       )}
                     />
                   </div>

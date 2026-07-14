@@ -71,7 +71,7 @@ export const BADGES: BadgeDef[] = [
     label: "Week Warrior",
     desc: "7 consecutive study days",
     icon: Flame,
-    gradient: "from-emerald-500 to-teal-500",
+    gradient: "from-sky-500 to-indigo-500",
     glow: "shadow-[0_0_12px_rgba(52,211,153,0.3)]",
     check: (d) => d.currentStreak >= 7,
   },

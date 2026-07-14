@@ -44,7 +44,7 @@ const CATEGORIES: { label: string; icon: React.ComponentType<{ className?: strin
     sections: [
       { label: "Lectures", href: "/modules", icon: Book, gradient: "from-sky-500/20 via-sky-500/5 to-transparent", iconBg: "bg-sky-500/15 text-sky-500" },
       { label: "Videos", href: "/videos", icon: Video, gradient: "from-blue-500/20 via-blue-500/5 to-transparent", iconBg: "bg-blue-500/15 text-blue-500" },
-      { label: "Quizzes", href: "/past-papers", icon: HelpCircle, gradient: "from-emerald-500/20 via-emerald-500/5 to-transparent", iconBg: "bg-emerald-500/15 text-emerald-500" },
+      { label: "Quizzes", href: "/past-papers", icon: HelpCircle, gradient: "from-sky-500/20 via-sky-500/5 to-transparent", iconBg: "bg-sky-500/15 text-sky-500" },
       { label: "Flashcards", href: "/study-tools/flashcards-from-text", icon: Target, gradient: "from-amber-500/20 via-amber-500/5 to-transparent", iconBg: "bg-amber-500/15 text-amber-500" },
     ],
   },
@@ -72,9 +72,9 @@ const CATEGORIES: { label: string; icon: React.ComponentType<{ className?: strin
   {
     label: "Progress",
     icon: Award,
-    color: "text-emerald-500",
+    color: "text-sky-500",
     sections: [
-      { label: "Dashboard", href: "/dashboard-app", icon: LayoutDashboard, gradient: "from-emerald-500/20 via-emerald-500/5 to-transparent", iconBg: "bg-emerald-500/15 text-emerald-500" },
+      { label: "Dashboard", href: "/dashboard-app", icon: LayoutDashboard, gradient: "from-sky-500/20 via-sky-500/5 to-transparent", iconBg: "bg-sky-500/15 text-sky-500" },
       { label: "Tasks", href: "/taskat", icon: Clock, gradient: "from-orange-500/20 via-orange-500/5 to-transparent", iconBg: "bg-orange-500/15 text-orange-500" },
     ],
   },
@@ -150,7 +150,7 @@ export function SiteSectionsTrigger({ className }: { className?: string }) {
       <button
         onClick={() => setOpen(true)}
         className={cn(
-          "flex items-center justify-center h-9 w-9 rounded-xl border border-border/40 bg-card/60 text-muted-foreground/50 hover:text-muted-foreground/70 hover:bg-card/80 hover:border-border/60 transition-all shrink-0",
+          "flex items-center justify-center h-11 w-11 rounded-xl border border-border/40 bg-card/60 text-muted-foreground/50 hover:text-muted-foreground/70 hover:bg-card/80 hover:border-border/60 transition-all shrink-0",
           className
         )}
       >

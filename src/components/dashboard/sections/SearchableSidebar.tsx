@@ -60,10 +60,10 @@ export function SearchableSidebar({ children }: { children: React.ReactNode }) {
 
   const sections = searchData
     ? [
-        { key: "lectures", label: "Lectures", icon: BookOpen, items: searchData.lectures, color: "text-blue-500" },
-        { key: "modules", label: "Modules", icon: Folder, items: searchData.modules, color: "text-amber-500" },
-        { key: "quizzes", label: "Quizzes", icon: HelpCircle, items: searchData.quizzes, color: "text-emerald-500" },
-        { key: "users", label: "Users", icon: Users, items: searchData.users, color: "text-purple-500" },
+        { key: "lectures", label: "Lectures", icon: BookOpen, items: searchData.lectures, color: "var(--search-result-lecture)" },
+        { key: "modules", label: "Modules", icon: Folder, items: searchData.modules, color: "var(--search-result-module)" },
+        { key: "quizzes", label: "Quizzes", icon: HelpCircle, items: searchData.quizzes, color: "var(--search-result-quiz)" },
+        { key: "users", label: "Users", icon: Users, items: searchData.users, color: "var(--search-result-user)" },
       ].filter((s) => s.items.length > 0)
     : [];
 
@@ -78,9 +78,9 @@ export function SearchableSidebar({ children }: { children: React.ReactNode }) {
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search lectures, modules..."
-              className="pl-8 pr-8 h-9 rounded-xl border-border/40 bg-card/60 text-xs placeholder:text-muted-foreground/40 focus-visible:ring-primary/30"
+              className="pl-8 pr-8 min-h-11 rounded-xl border-border/40 bg-card/60 text-xs placeholder:text-muted-foreground/40 focus-visible:ring-primary/30"
             />
-            <button onClick={closeSearch} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+            <button onClick={closeSearch} className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center h-9 w-9 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
               <X className="h-3.5 w-3.5" />
             </button>
             {searching && (
@@ -91,7 +91,7 @@ export function SearchableSidebar({ children }: { children: React.ReactNode }) {
           </>
         ) : (
           <div className="flex items-center gap-2">
-            <button onClick={openSearch} className="flex-1 flex items-center gap-2 h-9 px-2.5 rounded-xl border border-border/40 bg-card/60 text-xs text-muted-foreground/50 hover:text-muted-foreground/70 hover:bg-card/80 transition-all">
+            <button onClick={openSearch} className="flex-1 flex items-center gap-2 min-h-11 px-2.5 rounded-xl border border-border/40 bg-card/60 text-xs text-muted-foreground/50 hover:text-muted-foreground/70 hover:bg-card/80 transition-all">
               <Search className="h-3.5 w-3.5 shrink-0" />
               <span>Search lectures...</span>
             </button>
@@ -108,7 +108,7 @@ export function SearchableSidebar({ children }: { children: React.ReactNode }) {
               return (
                 <div key={section.key}>
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <Icon className={`h-3 w-3 ${section.color}`} />
+                    <Icon className="h-3 w-3" style={{ color: `hsl(${section.color})` }} />
                     <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">{section.label}</span>
                   </div>
                   <div className="flex flex-col gap-0.5">

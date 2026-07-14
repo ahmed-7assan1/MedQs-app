@@ -52,7 +52,7 @@ export const MemoMessageList = React.memo(function MessageList({
                     {(DRQ_PERSONAS[activePersona as DrQPersonaId] || DRQ_PERSONAS.explainer).name}
                   </span>
                   <span className={cn("text-[10px] font-semibold uppercase tracking-widest", isDark ? "text-gray-500" : "text-gray-400")}>
-                    {PROVIDER_CONFIGS[activeProvider]?.label ?? "Provider"} · MedOneX Expert
+                    {PROVIDER_CONFIGS[activeProvider as keyof typeof PROVIDER_CONFIGS]?.label ?? "Provider"} · MedOneX Expert
                   </span>
                 </div>
               </div>

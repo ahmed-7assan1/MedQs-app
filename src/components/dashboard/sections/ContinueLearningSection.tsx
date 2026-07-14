@@ -1,5 +1,6 @@
-﻿"use client";
+"use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Play, GraduationCap, BookOpen, ArrowRight, Clock } from "lucide-react";
@@ -11,26 +12,26 @@ import type { DashboardData } from "@/types/dashboard";
 
 const thumbnailGradients = [
   "from-primary/30 via-primary/10 to-transparent",
-  "from-emerald-500/30 via-emerald-500/10 to-transparent",
+  "from-sky-500/30 via-sky-500/10 to-transparent",
   "from-violet-500/30 via-violet-500/10 to-transparent",
   "from-amber-500/30 via-amber-500/10 to-transparent",
 ];
 
 const accentBorders = [
   "border-primary/30 group-hover:border-primary/50",
-  "border-emerald-500/30 group-hover:border-emerald-500/50",
+  "border-sky-500/30 group-hover:border-sky-500/50",
   "border-violet-500/30 group-hover:border-violet-500/50",
   "border-amber-500/30 group-hover:border-amber-500/50",
 ];
 
-export function ContinueLearningSection({ data }: { data: DashboardData }) {
+export const ContinueLearningSection = memo(function ContinueLearningSection({ data }: { data: DashboardData }) {
   const modules = data.moduleProgress?.slice(0, 4) || [];
 
   if (modules.length === 0) {
     return (
       <div>
         <SectionHeader icon={BookOpen} title="Continue Learning" />
-        <Button variant="outline" asChild className="w-full p-0 h-auto rounded-2xl border-dashed bg-card/30 hover:bg-card/50">
+        <Button variant="outline" asChild className="w-full p-0 h-auto rounded-xl border-dashed bg-card/30 hover:bg-card/50">
           <Link href="/modules" className="flex items-center justify-between p-5">
             <div className="flex items-center gap-3">
               <GraduationCap className="h-7 w-7 text-muted-foreground/30" />
@@ -49,10 +50,10 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
   return (
     <div>
       <div className="flex justify-center">
-        <SectionHeader icon={BookOpen} title="Continue Learning" className="mb-0 justify-center [&>div:last-child]:hidden" />
+        <SectionHeader icon={BookOpen} title="Continue Learning" className="mb-0 justify-center" hideSeparator />
       </div>
 
-      <div className="flex flex-wrap justify-center gap-3 mt-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
         {modules.map((mod, i) => {
           const thumbGrad = thumbnailGradients[i % thumbnailGradients.length];
           const accentBorder = accentBorders[i % accentBorders.length];
@@ -61,16 +62,15 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
           return (
             <motion.div
               key={mod.id}
-              className="snap-start shrink-0"
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.06 * i, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Card asChild className={cn(
-                "group w-[220px] md:w-[280px] lg:w-[260px] overflow-hidden rounded-xl border-border/30 bg-card shadow-sm will-change-transform transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md",
-                accentBorder
-              )}>
-                <Link href={`/modules/${mod.id}`}>
+              <Link href={`/modules/${mod.id}`} className="block">
+                <Card className={cn(
+                  "group overflow-hidden rounded-xl border-border/30 bg-card shadow-sm will-change-transform transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md",
+                  accentBorder
+                )}>
                   <CardContent className="p-0 relative">
                     {/* Thumbnail area */}
                     {mod.imageUrl ? (
@@ -91,7 +91,7 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
                       <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-background/40 border border-border/20 transition-all duration-300 group-hover:scale-105 group-hover:-translate-y-0.5">
                         <GraduationCap className={cn(
                           "h-6 w-6 transition-colors duration-300",
-                          mod.pct >= 80 ? "text-emerald-500" : mod.pct >= 40 ? "text-primary" : "text-muted-foreground"
+                          mod.pct >= 80 ? "text-sky-500" : mod.pct >= 40 ? "text-primary" : "text-muted-foreground"
                         )} />
                       </div>
                       {/* Play button overlay on hover */}
@@ -132,12 +132,12 @@ export function ContinueLearningSection({ data }: { data: DashboardData }) {
                       </div>
                     </div>
                   </CardContent>
-                </Link>
-              </Card>
+                </Card>
+              </Link>
             </motion.div>
           );
         })}
       </div>
     </div>
   );
-}
+});

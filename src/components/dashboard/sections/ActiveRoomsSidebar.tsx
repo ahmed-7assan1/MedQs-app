@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { DoorOpen, Users } from "lucide-react";
+import { DoorOpen, Users, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { normalizeImageUrl } from "@/lib/markdown-helpers";
-import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
+import { SidebarLabel } from "@/components/dashboard/shared/SidebarLabel";
 
 interface ActiveSession {
   id: string;
@@ -33,9 +32,9 @@ interface RoomData {
 }
 
 const STATUS_CONFIG = {
-  WAITING: { label: "Waiting", dot: "bg-yellow-400", pulse: false },
-  ACTIVE: { label: "Studying", dot: "bg-green-400", pulse: true },
-  PAUSED: { label: "Paused", dot: "bg-amber-400", pulse: false },
+  WAITING: { label: "Waiting", dot: "bg-amber-400", pulse: false },
+  ACTIVE: { label: "Studying", dot: "bg-primary", pulse: true },
+  PAUSED: { label: "Paused", dot: "bg-muted-foreground/45", pulse: false },
 } as const;
 
 export function ActiveRoomsSidebar() {
@@ -60,83 +59,88 @@ export function ActiveRoomsSidebar() {
   }, []);
 
   const hasActive = sessions.length > 0;
-  const visibleSessions = sessions.slice(0, 5);
-  const visibleRooms = fallbackRooms.slice(0, 5);
+  const visibleSessions = sessions.slice(0, 3);
+  const visibleRooms = fallbackRooms.slice(0, 3);
 
   return (
-    <div className="min-h-[90px]">
-      <SectionHeader icon={DoorOpen} title={hasActive ? "Active Sessions" : "Rooms"} />
+    <div className="space-y-3">
+      <SidebarLabel icon={DoorOpen} label={hasActive ? "Active Sessions" : "Study Rooms"} />
 
-      {hasActive ? (
-        <div className="flex flex-col gap-1 mt-2">
+      {loading ? (
+        <div className="space-y-2 animate-pulse">
+          {[1, 2].map((i) => (
+            <div key={i} className="h-10 rounded-xl bg-muted/20" />
+          ))}
+        </div>
+      ) : hasActive ? (
+        <div className="space-y-2">
           {visibleSessions.map((s) => {
             const cfg = STATUS_CONFIG[s.status] || STATUS_CONFIG.WAITING;
             return (
               <Link
                 key={s.id}
-                href={`/teams/${s.room.id}`}
-                className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-muted/40 transition-all group"
+                href={`/rooms/${s.room.id}`}
+                className="group flex items-center justify-between p-3 rounded-xl border border-border/30 bg-card/45 backdrop-blur-sm hover:border-primary/20 hover:bg-card/65 transition-[transform,opacity,border-color,background-color] duration-200"
               >
-                <div className={cn("h-2 w-2 rounded-full shrink-0", cfg.dot, cfg.pulse && "animate-pulse")} />
-                <div className="h-7 w-7 rounded-full overflow-hidden bg-muted/30 border border-border/40 shrink-0">
-                  {s.room.image ? (
-                    <img src={normalizeImageUrl(s.room.image)} alt={s.room.name} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-[9px] font-bold text-muted-foreground">
-                      {s.room.name.charAt(0)}
-                    </div>
-                  )}
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="relative flex items-center shrink-0">
+                    <span className={cn("h-2 w-2 rounded-full", cfg.dot, cfg.pulse && "animate-ping absolute inset-0 opacity-75")} />
+                    <span className={cn("h-2 w-2 rounded-full relative", cfg.dot)} />
+                  </div>
+                  <span className="text-xs font-bold text-foreground/80 truncate group-hover:text-primary transition-colors leading-none">
+                    {s.room.name}
+                  </span>
                 </div>
-                <span className="text-xs font-semibold text-foreground truncate min-w-0 flex-1 group-hover:text-primary transition-colors">
-                  {s.room.name}
-                </span>
-                <span className="text-[10px] text-muted-foreground/60 font-medium shrink-0 whitespace-nowrap">
-                  {s._count.participants} {cfg.label}
-                </span>
+                
+                <div className="flex items-center gap-1.5 shrink-0 text-[10px] font-bold text-muted-foreground/50">
+                  <Users className="h-3 w-3" />
+                  <span className="tabular-nums">{s._count.participants}</span>
+                </div>
               </Link>
             );
           })}
+          
           <Link
             href="/community"
-            className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-muted/30 transition-all text-[10px] font-bold text-muted-foreground/50 hover:text-muted-foreground/80"
+            className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground/45 hover:text-primary transition-all pt-1 pl-1"
           >
-            <Users className="h-3 w-3" />
-            <span>Browse all rooms</span>
+            Browse rooms <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
-      ) : loading ? null : visibleRooms.length > 0 ? (
-        <div className="flex gap-3 overflow-x-auto mt-2 pb-1 snap-x snap-mandatory scroll-smooth [-webkit-scrollbar]:hidden">
+      ) : visibleRooms.length > 0 ? (
+        <div className="space-y-2">
           {visibleRooms.map((room) => (
             <Link
               key={room.id}
-              href={`/teams/${room.id}`}
-              className="flex flex-col items-center gap-1 shrink-0 snap-start"
+              href={`/rooms/${room.id}`}
+              className="group flex items-center justify-between p-3 rounded-xl border border-border/30 bg-card/45 backdrop-blur-sm hover:border-primary/20 hover:bg-card/65 transition-[transform,opacity,border-color,background-color] duration-200"
             >
-              <div className="h-10 w-10 rounded-full overflow-hidden bg-muted/30 border border-border/40 ring-1 ring-border/20 shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
                 {room.image ? (
-                  <img src={normalizeImageUrl(room.image)} alt={room.name} className="h-full w-full object-cover" />
+                  <img src={room.image} alt={room.name} className="h-6 w-6 rounded-lg object-cover shrink-0" loading="lazy" />
                 ) : (
-                  <div className="h-full w-full flex items-center justify-center text-xs font-bold text-muted-foreground">
-                    {room.name.charAt(0)}
-                  </div>
+                  <DoorOpen className="h-3.5 w-3.5 text-muted-foreground/30 shrink-0" />
                 )}
+                <span className="text-xs font-bold text-foreground/80 truncate group-hover:text-primary transition-colors leading-none">
+                  {room.name}
+                </span>
               </div>
-              <span className="text-[9px] font-medium text-muted-foreground/70 truncate max-w-14 text-center leading-tight">
-                {room.name}
-              </span>
+              <ArrowRight className="h-3 w-3 text-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
           ))}
+          
           <Link
             href="/community"
-            className="flex flex-col items-center justify-center gap-1 shrink-0 snap-start"
+            className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground/45 hover:text-primary transition-all pt-1 pl-1"
           >
-            <div className="h-10 w-10 rounded-full bg-muted/20 border border-dashed border-border/40 flex items-center justify-center">
-              <span className="text-xs text-muted-foreground font-bold">+</span>
-            </div>
-            <span className="text-[9px] font-medium text-muted-foreground/50">More</span>
+            Browse rooms <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
-      ) : null}
+      ) : (
+        <div className="p-4 rounded-xl border border-dashed border-border/40 bg-card/20 text-center">
+          <p className="text-[11px] font-bold text-muted-foreground/60">No active study sessions</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -79,7 +79,7 @@ export const StatCard = ({
       <IconRenderer name={iconName} className="h-4 w-4 md:h-5 md:w-5" />
      </div>
      {trend && (
-      <div className={cn("flex items-center gap-1 text-[10px] font-bold", trend === "up" ? "text-emerald-500" : "text-rose-500")}>
+      <div className={cn("flex items-center gap-1 text-[10px] font-bold", trend === "up" ? "text-sky-500" : "text-rose-500")}>
        {trend === "up" ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
        {trend === "up" ? "+12%" : "-4%"}
       </div>
@@ -108,7 +108,7 @@ export const StatCard = ({
 export const StatCardMini = ({ label, value, iconName, color }: { label: string; value: string | number; iconName: string; color: string }) => {
  return (
   <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-colors">
-   <div className={cn("p-1.5 rounded-lg", color.replace("text", "bg").replace("blue", "blue-500").replace("purple", "purple-500").replace("emerald", "emerald-500").replace("amber", "amber-500"))}>
+   <div className={cn("p-1.5 rounded-lg", color.replace("text", "bg").replace("blue", "blue-500").replace("purple", "purple-500").replace("emerald", "sky-500").replace("amber", "amber-500"))}>
     <IconRenderer name={iconName} size={14} className="text-white" />
    </div>
    <div className="flex-1 min-w-0">
@@ -153,15 +153,15 @@ interface QuickActionCardProps {
 export const QuickActionCard = ({ label, iconName, color, href }: QuickActionCardProps) => {
   const iconColor = color?.replace("bg-", "text-").replace(" text-white", "");
   return (
-   <Card asChild className="group min-w-[90px] overflow-hidden rounded-2xl border-border/40 bg-card/80 shadow-sm will-change-transform transition-transform transition-shadow transition-colors duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lg hover:border-primary/40">
-    <Link href={href}>
+   <Link href={href} className="group block min-w-[90px]">
+    <Card className="overflow-hidden rounded-2xl border-border/40 bg-card/80 shadow-sm will-change-transform transition-transform transition-shadow transition-colors duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lg hover:border-primary/40">
      <CardContent className="flex flex-col items-center gap-3 p-4">
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
       <IconRenderer name={iconName} size={22} className={cn("transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_var(--tw-shadow-color)]", iconColor)} />
       <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors duration-300">{label}</span>
      </CardContent>
-    </Link>
-   </Card>
+    </Card>
+   </Link>
   );
 };
 

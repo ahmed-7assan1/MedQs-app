@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Play, Pause, RotateCcw, Timer } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,11 +34,6 @@ export const StudyTimer = () => {
     } catch {}
   }, []);
 
-  const saveSessions = useCallback((n: number) => {
-    setSessions(n);
-    try { localStorage.setItem("pomodoro-sessions", n.toString()); } catch {}
-  }, []);
-
   const total = mode === "focus" ? POMODORO : mode === "short" ? SHORT_BREAK : LONG_BREAK;
   const progress = ((total - remaining) / total) * 100;
 
@@ -59,14 +54,18 @@ export const StudyTimer = () => {
       setRemaining((r) => {
         if (r <= 1) {
           setState("idle");
-          if (mode === "focus") saveSessions(sessions + 1);
+          setSessions((prev) => {
+            const next = prev + 1;
+            try { localStorage.setItem("pomodoro-sessions", next.toString()); } catch {}
+            return next;
+          });
           return total;
         }
         return r - 1;
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [state, mode, total, sessions, saveSessions]);
+  }, [state, mode, total]);
 
   const r = 32;
   const circ = 2 * Math.PI * r;
@@ -122,11 +121,11 @@ export const StudyTimer = () => {
 
         <div className="flex items-center gap-2">
           {state === "idle" || state === "paused" ? (
-            <button onClick={() => setState("running")} className="flex items-center gap-1 px-4 py-1.5 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-wider hover:scale-105 active:scale-95 transition-all">
+            <button onClick={() => setState("running")} className="flex items-center gap-1 px-4 py-1.5 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-wider hover:scale-105 active:scale-95 transition-all">
               <Play size={12} /> {state === "paused" ? "Resume" : "Start"}
             </button>
           ) : (
-            <button onClick={() => setState("paused")} className="flex items-center gap-1 px-4 py-1.5 rounded-xl bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider hover:scale-105 active:scale-95 transition-all">
+            <button onClick={() => setState("paused")} className="flex items-center gap-1 px-4 py-1.5 rounded-xl bg-warning text-warning-foreground text-[10px] font-black uppercase tracking-wider hover:scale-105 active:scale-95 transition-all">
               <Pause size={12} /> Pause
             </button>
           )}

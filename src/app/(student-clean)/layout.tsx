@@ -115,15 +115,6 @@ export default async function CleanStudentLayout({ children }: { children: React
       >
         <div className="app-shell app-shell--tabbar min-h-screen bg-background/90 flex flex-col">
 
-          {/* Purple ambient glow — brand signature */}
-          <div
-            className="pointer-events-none fixed inset-0 z-0 opacity-[0.15] dark:opacity-[0.25] max-md:opacity-[0.08]"
-            style={{
-              background:
-                "radial-gradient(ellipse 80% 60% at 0% 0%, #E7D6FF 0%, #B36BFF 25%, #7C3AED 45%, transparent 70%)",
-            }}
-          />
-
           <MobileChromeController />
           {/* Desktop Navigation */}
           <NavbarWrapper

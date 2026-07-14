@@ -200,7 +200,7 @@
   --shadow-clr: rgba(0, 0, 0, 0.05);
   --z-navbar: 300;
 
-  --background: 240 33% 97%;        /* #F5F5FA page bg */
+  --background: 240 16% 93%;        /* page bg — slightly grayer so cards pop */
   --foreground: 240 28% 14%;        /* #1A1A2E headings */
   --card: 0 0% 100%;                /* #FFFFFF surfaces */
   --card-foreground: 240 28% 14%;
@@ -236,9 +236,20 @@
   --medq-secondary: 180 40% 45%;
   --medq-accent: 40 60% 50%;
 
+  /* ── Rank tokens for leaderboard ── */
+  --rank-1: 45 100% 50%;             /* Gold */
+  --rank-2: 0 0% 65%;                /* Silver */
+  --rank-3: 30 60% 50%;              /* Bronze */
+
+  /* ── Search result category tokens ── */
+  --search-result-lecture: 210 100% 55%;
+  --search-result-module: 35 100% 50%;
+  --search-result-quiz: 160 60% 40%;
+  --search-result-user: 270 60% 55%;
+
   /* ── Surface bridge vars ── 
      Used to make hardcoded dark hex values theme-aware via global CSS below */
-  --surface-bg: 240 33% 97%;        /* matches --background */
+  --surface-bg: 240 16% 93%;        /* matches --background */
   --surface-card: 0 0% 100%;        /* matches --card */
   --surface-text: 240 28% 14%;      /* matches --foreground */
   --surface-text-muted: 240 10% 59%;/* matches --muted-foreground */
@@ -291,9 +302,9 @@
 
 .dark {
   --shadow-clr: rgba(0, 0, 0, 0.5);
-  --background: 240 3% 4%;          /* #0A0A0B page bg — near-black */
+  --background: 240 8% 15%;          /* page bg — just under card for subtle layering */
   --foreground: 250 33% 95%;        /* #F0EFF8 headings */
-  --card: 240 16% 12%;              /* #1A1A24 surfaces */
+  --card: 240 20% 16%;              /* surfaces — lighter than bg for contrast */
   --card-foreground: 250 33% 95%;
   --popover: 240 16% 12%;
   --popover-foreground: 250 33% 95%;
@@ -317,8 +328,8 @@
   --warning: 38 100% 65%;           /* #FFB84D */
   --warning-foreground: 0 0% 100%;
 
-  --surface-bg: 240 3% 4%;          /* matches --background */
-  --surface-card: 240 16% 12%;      /* matches --card */
+  --surface-bg: 240 8% 15%;          /* matches --background */
+  --surface-card: 240 20% 16%;      /* matches --card */
   --surface-text: 250 33% 95%;      /* matches --foreground */
   --surface-text-muted: 246 14% 42%;/* matches --muted-foreground */
   --surface-border: 240 20% 22%;    /* matches --border */
@@ -350,6 +361,17 @@
   --medq-primary: 180 65% 35%;
   --medq-secondary: 180 40% 55%;
   --medq-accent: 40 60% 55%;
+
+  /* ── Rank tokens ── */
+  --rank-1: 45 100% 55%;             /* Gold (brighter in dark) */
+  --rank-2: 0 0% 70%;                /* Silver (brighter in dark) */
+  --rank-3: 30 60% 55%;              /* Bronze (brighter in dark) */
+
+  /* ── Search result category tokens ── */
+  --search-result-lecture: 210 100% 60%;
+  --search-result-module: 35 100% 55%;
+  --search-result-quiz: 160 60% 45%;
+  --search-result-user: 270 60% 60%;
 }
 
 /* Force text colors for dark/light consistency */
@@ -453,7 +475,7 @@
 
 html[data-theme="dark"] body,
 .dark body {
-  background: #09080F;
+  background: hsl(240 7% 5%);
   background-attachment: fixed;
 }
 
@@ -773,7 +795,7 @@ html[data-theme="light"] .surface-card {
 
 /* ── Dark: warm, refined backdrop ── */
 html[data-theme="dark"] body {
-  background-color: hsl(225 10% 7%);
+  background-color: hsl(240 7% 5%);
   background-image:
     radial-gradient(ellipse 80% 50% at 50% -10%, hsl(180 70% 30% / 0.05), transparent 60%),
     linear-gradient(180deg, hsl(225 10% 8%), hsl(225 10% 5%));
@@ -858,15 +880,12 @@ html[data-theme="dark"] body {
   flex: 1 1 0%;
   min-height: 0;
   min-width: 0;
-  width: calc(100% - var(--sidebar-offset, 0px));
+  width: 100%;
   position: relative;
   z-index: 0;
   display: flex;
   flex-direction: column;
   padding-top: 0;
-  transform: translateX(var(--sidebar-offset, 0px));
-  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
-  will-change: transform;
 }
 
 @media (min-width: 768px) {
@@ -1958,14 +1977,14 @@ select,
 .cinematic-bg {
   background:
     radial-gradient(ellipse 100% 60% at 50% -10%, hsl(var(--primary) / 0.08), transparent 60%),
-    linear-gradient(180deg, hsl(225 10% 8%), hsl(225 10% 5%));
+    linear-gradient(180deg, hsl(240 10% 8%), hsl(240 8% 5%));
   background-attachment: fixed;
 }
 
 .cinematic-bg--blue {
   background:
     radial-gradient(ellipse 100% 60% at 50% -10%, hsl(var(--primary) / 0.12), transparent 60%),
-    linear-gradient(180deg, hsl(225 10% 8%), hsl(225 10% 5%));
+    linear-gradient(180deg, hsl(240 10% 8%), hsl(240 8% 5%));
   background-attachment: fixed;
 }
 
@@ -2268,9 +2287,27 @@ select,
 }
 
 /* ── Hero mesh gradient for dashboard ── */
+@keyframes hero-gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .hero-mesh {
   position: relative;
   overflow: hidden;
+}
+
+.hero-mesh::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 0% 0%, hsl(var(--primary) / 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, hsl(var(--primary) / 0.04) 0%, transparent 50%);
+  background-size: 220% 220%;
+  animation: hero-gradient-shift 20s ease infinite;
+  pointer-events: none;
 }
 /* ── Notification dot ── */
 .notif-dot {
@@ -2411,5 +2448,117 @@ select,
     margin: 0 auto;
   }
 }
+
+/* ── 6. Today Command Center Dashboard Styles (Refined & Premium) ── */
+
+/* Time-based Dynamic Hero Gradients (Light / Dark) */
+.hero-gradient-morning {
+  background: linear-gradient(135deg, hsl(32 100% 96%), hsl(350 100% 96%), hsl(240 33% 97%));
+}
+.dark .hero-gradient-morning {
+  background: linear-gradient(135deg, hsl(28 35% 8%), hsl(345 35% 8%), hsl(240 10% 4%));
+}
+
+.hero-gradient-afternoon {
+  background: linear-gradient(135deg, hsl(185 100% 96%), hsl(210 100% 96%), hsl(240 33% 97%));
+}
+.dark .hero-gradient-afternoon {
+  background: linear-gradient(135deg, hsl(185 30% 6%), hsl(210 30% 6%), hsl(240 10% 4%));
+}
+
+.hero-gradient-evening {
+  background: linear-gradient(135deg, hsl(265 100% 96%), hsl(315 100% 96%), hsl(240 33% 97%));
+}
+.dark .hero-gradient-evening {
+  background: linear-gradient(135deg, hsl(265 25% 10%), hsl(315 25% 8%), hsl(240 10% 4%));
+}
+
+.hero-gradient-night {
+  background: linear-gradient(135deg, hsl(240 30% 96%), hsl(270 30% 96%), hsl(240 33% 97%));
+}
+.dark .hero-gradient-night {
+  background: linear-gradient(135deg, hsl(240 25% 8%), hsl(275 25% 8%), hsl(240 10% 4%));
+}
+
+/* Premium Glassmorphic Focus Plan Card */
+.focus-plan-card {
+  position: relative;
+  overflow: hidden;
+  background: hsla(var(--card) / 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid hsla(var(--border) / 0.5);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.focus-plan-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, hsla(var(--primary) / 0.08), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.focus-plan-card:hover {
+  border-color: hsla(var(--primary) / 0.4);
+  box-shadow: 0 12px 30px -10px hsla(var(--primary) / 0.08);
+}
+.focus-plan-card:hover::before {
+  opacity: 1;
+}
+
+/* Today's Queue Row Styling */
+.today-queue-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: hsla(var(--card) / 0.3);
+  border: 1px solid hsla(var(--border) / 0.4);
+  transition: all 0.2s ease;
+}
+.today-queue-item:hover {
+  background: hsla(var(--card) / 0.6);
+  border-color: hsla(var(--border) / 0.8);
+  transform: translateX(4px);
+}
+.today-queue-item.priority-primary {
+  border-left: 3px solid hsl(var(--primary));
+}
+.today-queue-item.priority-recommended {
+  border-left: 3px solid hsl(var(--warning));
+}
+.today-queue-item.priority-optional {
+  border-left: 3px solid hsl(var(--muted-foreground) / 0.4);
+}
+
+/* Quick Action Strip Card */
+.quick-action-strip-card {
+  position: relative;
+  overflow: hidden;
+  background: hsla(var(--card) / 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid hsla(var(--border) / 0.4);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.quick-action-strip-card:hover {
+  transform: translateY(-2px);
+  border-color: hsla(var(--primary) / 0.3);
+  box-shadow: 0 8px 20px -8px hsla(var(--primary) / 0.15);
+}
+
+/* Metric Strip Chip */
+.metric-strip-chip {
+  background: hsla(var(--card) / 0.5);
+  border: 1px solid hsla(var(--border) / 0.4);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 
 

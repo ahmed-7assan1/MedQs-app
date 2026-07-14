@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,6 +12,7 @@ import {
 import { Play, Video, ArrowRight, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getYouTubeThumbnail } from "@/lib/video-utils";
+import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 import { useCurriculumVideos } from "@/lib/dashboard-fetch";
 
@@ -43,7 +44,7 @@ function VideoCard({ video }: { video: SuggestedVideo }) {
 
   return (
     <Link href={`/modules/${video.moduleId}/lectures/${video.lectureId}`}>
-      <Card className="overflow-hidden border-border/40 shadow-sm h-[300px] group cursor-pointer">
+      <Card className="overflow-hidden border-border/40 shadow-sm h-[260px] group cursor-pointer">
         <div className="relative aspect-video bg-muted/20 overflow-hidden">
           {thumbnailUrl ? (
             <img
@@ -65,13 +66,13 @@ function VideoCard({ video }: { video: SuggestedVideo }) {
             </div>
           )}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-            <div className="h-10 w-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100">
+            <div className="h-10 w-10 rounded-full bg-background/90 shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100">
               <Play className="h-5 w-5 text-foreground ml-0.5" />
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-1.5 px-3 py-2.5 flex-1 min-h-0">
+        <div className="flex flex-col gap-1.5 p-4 flex-1">
           <p className="text-xs font-bold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
             {video.title}
           </p>
@@ -83,7 +84,7 @@ function VideoCard({ video }: { video: SuggestedVideo }) {
               {video.channelThumbnail ? (
                 <AvatarImage src={video.channelThumbnail} alt={video.channelTitle} />
               ) : null}
-              <AvatarFallback className="text-[6px] font-black bg-primary/10 text-primary">
+              <AvatarFallback className="text-[9px] font-black bg-primary/10 text-primary">
                 {video.channelTitle.charAt(0)}
               </AvatarFallback>
             </Avatar>
@@ -106,7 +107,7 @@ export function CarouselSkeleton() {
       </div>
       <div className="flex gap-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <Card key={i} className="overflow-hidden border-border/40 shadow-sm h-[300px] flex-1">
+          <Card key={i} className="overflow-hidden border-border/40 shadow-sm h-[260px] flex-1">
             <div className="aspect-video bg-muted/20" />
             <div className="p-3 space-y-2.5">
               <div className="h-3 w-full rounded bg-muted/30" />
@@ -124,10 +125,11 @@ export function CarouselSkeleton() {
   );
 }
 
-export function SuggestedVideosCarousel({ sidebarOpen }: { sidebarOpen?: boolean }) {
+export const SuggestedVideosCarousel = memo(function SuggestedVideosCarousel() {
   const { data, error, isLoading } = useCurriculumVideos();
   const [api, setApi] = useState<any>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     if (!api) return;
@@ -136,36 +138,48 @@ export function SuggestedVideosCarousel({ sidebarOpen }: { sidebarOpen?: boolean
   }, [api]);
 
   useEffect(() => {
-    if (!api) return;
-    const timer = setTimeout(() => api.reInit(), 500);
-    return () => clearTimeout(timer);
-  }, [sidebarOpen, api]);
-
-  useEffect(() => {
-    if (!api) return;
+    if (!api || isPaused) return;
     const interval = setInterval(() => {
       api.scrollNext();
     }, 30000);
     return () => clearInterval(interval);
-  }, [api]);
+  }, [api, isPaused]);
 
   if (isLoading) return <div className="h-80"><CarouselSkeleton /></div>;
   if (error) throw new Error("Failed to load suggested videos");
-  if (!data?.items?.length) return null;
+  if (!data?.items?.length) {
+    return (
+      <div>
+        <SectionHeader icon={Video} title="Suggested Videos" />
+        <Button variant="outline" asChild className="w-full p-0 h-auto rounded-xl border-dashed bg-card/30 hover:bg-card/50">
+          <Link href="/videos" className="flex items-center justify-between p-5">
+            <div className="flex items-center gap-3">
+              <Video className="h-7 w-7 text-muted-foreground/30" />
+              <div>
+                <p className="text-sm font-bold text-foreground">No suggested videos yet</p>
+                <p className="text-xs text-muted-foreground">Videos will appear here based on your curriculum</p>
+              </div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
+          </Link>
+        </Button>
+    </div>
+  );
+}
 
   const videos = data.items;
 
   return (
-    <div>
+    <div onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)} onFocus={() => setIsPaused(true)} onBlur={() => setIsPaused(false)}>
       <SectionHeader
         icon={Video}
         title="Suggested Videos"
         right={
           <div className="flex items-center gap-1">
-            <button onClick={() => api?.scrollPrev()} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border/40 bg-card/40 text-muted-foreground hover:bg-card/60 hover:text-primary transition-all">
+            <button onClick={() => api?.scrollPrev()} className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 bg-card/40 text-muted-foreground hover:bg-card/60 hover:text-primary transition-all">
               <ArrowLeft className="h-3.5 w-3.5" />
             </button>
-            <button onClick={() => api?.scrollNext()} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border/40 bg-card/40 text-muted-foreground hover:bg-card/60 hover:text-primary transition-all">
+            <button onClick={() => api?.scrollNext()} className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 bg-card/40 text-muted-foreground hover:bg-card/60 hover:text-primary transition-all">
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -193,4 +207,4 @@ export function SuggestedVideosCarousel({ sidebarOpen }: { sidebarOpen?: boolean
       </Carousel>
     </div>
   );
-}
+});

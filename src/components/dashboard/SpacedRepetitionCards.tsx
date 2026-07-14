@@ -162,12 +162,12 @@ export function SpacedRepetitionCards() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4 text-indigo-500" />
+            <RefreshCw className="h-4 w-4 text-primary" />
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
               Spaced Repetition
             </span>
           </div>
-          <button onClick={() => setCollapsed(false)} className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
+          <button onClick={() => setCollapsed(false)} className="text-[9px] font-bold text-primary dark:text-primary uppercase tracking-widest">
             Show
           </button>
         </div>
@@ -210,8 +210,8 @@ export function SpacedRepetitionCards() {
           className={cn(
             "absolute -top-2 -right-2 z-20 h-8 w-8 rounded-full flex items-center justify-center transition-all shadow-lg active:scale-90",
             saved.has(currentId)
-              ? "bg-indigo-500 text-white shadow-indigo-500/30"
-              : "bg-background border border-border text-muted-foreground/60 hover:text-indigo-500 hover:border-indigo-300"
+              ? "bg-primary text-primary-foreground shadow-primary/30"
+              : "bg-background border border-border text-muted-foreground/60 hover:text-primary hover:border-indigo-300"
           )}
         >
           <Bookmark className={cn("h-4 w-4", saved.has(currentId) ? "fill-current" : "")} />
@@ -275,7 +275,7 @@ export function SpacedRepetitionCards() {
                 <CardContent className="p-0">
                 <div className="flex items-center justify-between px-4 pt-3 pb-1">
                   <div className="flex items-center gap-1.5">
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
+                    <CheckCircle className="h-3.5 w-3.5 text-sky-500" />
                     <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Answer</span>
                   </div>
                   <span className="text-[9px] font-bold text-muted-foreground/40 tabular-nums">
@@ -321,8 +321,8 @@ export function SpacedRepetitionCards() {
               className={cn(
                 "flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-[0.97]",
                 exiting === current.id
-                  ? "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-400"
-                  : "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-500/20"
+                  ? "bg-sky-100 dark:bg-sky-500/10 text-sky-400"
+                  : "bg-sky-100 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-200 dark:hover:bg-sky-500/20"
               )}
             >
               <CheckCircle className="h-4 w-4" />
@@ -340,13 +340,13 @@ export function SpacedRepetitionCards() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4 text-indigo-500" />
+            <RefreshCw className="h-4 w-4 text-primary" />
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
               Spaced Repetition
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => fetchCards(true)} className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
+            <button onClick={() => fetchCards(true)} className="text-[9px] font-bold text-primary dark:text-primary uppercase tracking-widest">
               Refresh
             </button>
             <button onClick={dismissAll} className="h-6 w-6 rounded-full hover:bg-muted/40 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground transition-colors">
@@ -371,11 +371,11 @@ export function SpacedRepetitionCards() {
                 style={{ backfaceVisibility: "hidden" }}
               >
                 <CardContent className="p-5 min-h-[160px] flex flex-col items-center justify-center text-center">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-3 shadow-lg shadow-indigo-500/20">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-3 shadow-lg shadow-primary/20">
                   <span className="text-white font-black text-lg">M</span>
                 </div>
                 <p className="text-xl font-black text-foreground tracking-tight">
-                  Med<span className="text-indigo-500">Onex</span>
+                  Med<span className="text-primary">Onex</span>
                 </p>
                 <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] mt-1">
                   Your AI Medical Companion
@@ -396,7 +396,7 @@ export function SpacedRepetitionCards() {
                 </p>
                 <Link
                   href="/modules"
-                  className="mt-3 inline-flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl bg-indigo-500/10 text-indigo-500 font-bold text-[10px] uppercase tracking-widest active:scale-[0.97] transition-all"
+                  className="mt-3 inline-flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl bg-primary/10 text-primary font-bold text-[10px] uppercase tracking-widest active:scale-[0.97] transition-all"
                 >
                   Start Learning
                 </Link>
@@ -414,7 +414,7 @@ export function SpacedRepetitionCards() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <RefreshCw className="h-4 w-4 text-indigo-500" />
+          <RefreshCw className="h-4 w-4 text-primary" />
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
             {isRandomCards ? "Explore Flashcards" : "Spaced Repetition"}
           </span>
@@ -425,7 +425,7 @@ export function SpacedRepetitionCards() {
               {wrongCards.length} wrong
             </span>
           )}
-          <button onClick={() => fetchCards(true)} className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
+          <button onClick={() => fetchCards(true)} className="text-[9px] font-bold text-primary dark:text-primary uppercase tracking-widest">
             Refresh
           </button>
           <button onClick={dismissAll} className="h-6 w-6 rounded-full hover:bg-muted/40 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground transition-colors" title="Dismiss">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -138,7 +138,7 @@ function PostCardBody({ post }: { post: PostData }) {
             loading="lazy"
           />
           <div className="absolute inset-0 bg-black/15 flex items-center justify-center">
-            <div className="h-9 w-9 rounded-full bg-white/90 shadow-lg flex items-center justify-center">
+            <div className="h-9 w-9 rounded-full bg-background/90 shadow-lg flex items-center justify-center">
               <Play className="h-4 w-4 text-foreground ml-0.5" />
             </div>
           </div>
@@ -271,6 +271,7 @@ export function CommunityCarouselSidebar({ sidebarOpen }: { sidebarOpen?: boolea
   const { data: raw, error, isLoading } = useCommunityPosts();
   const [api, setApi] = useState<any>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     if (!api) return;
@@ -285,10 +286,10 @@ export function CommunityCarouselSidebar({ sidebarOpen }: { sidebarOpen?: boolea
   }, [sidebarOpen, api]);
 
   useEffect(() => {
-    if (!api) return;
+    if (!api || isPaused) return;
     const interval = setInterval(() => api.scrollNext(), 30000);
     return () => clearInterval(interval);
-  }, [api]);
+  }, [api, isPaused]);
 
   if (isLoading) return <div className="h-80"><CarouselSkeleton /></div>;
   if (error) throw new Error("Failed to load community posts");
@@ -296,19 +297,37 @@ export function CommunityCarouselSidebar({ sidebarOpen }: { sidebarOpen?: boolea
   const body = (raw as any)?.data ?? raw;
   const rawPosts = body?.items ?? [];
   const posts: PostData[] = Array.isArray(rawPosts) ? rawPosts : [];
-  if (posts.length === 0) return null;
+  if (posts.length === 0) {
+    return (
+      <div>
+        <SectionHeader icon={MessageCircle} title="Social" />
+        <Button variant="outline" asChild className="w-full p-0 h-auto rounded-xl border-dashed bg-card/30 hover:bg-card/50">
+          <Link href="/social" className="flex items-center justify-between p-5">
+            <div className="flex items-center gap-3">
+              <MessageCircle className="h-7 w-7 text-muted-foreground/30" />
+              <div>
+                <p className="text-sm font-bold text-foreground">No community posts yet</p>
+                <p className="text-xs text-muted-foreground">Be the first to share something</p>
+              </div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
+          </Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div>
+    <div onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)} onFocus={() => setIsPaused(true)} onBlur={() => setIsPaused(false)}>
       <SectionHeader
         icon={MessageCircle}
         title="Social"
         right={
           <div className="flex items-center gap-1">
-            <button onClick={() => api?.scrollPrev()} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border/40 bg-card/40 text-muted-foreground hover:bg-card/60 hover:text-primary transition-all">
+            <button onClick={() => api?.scrollPrev()} className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 bg-card/40 text-muted-foreground hover:bg-card/60 hover:text-primary transition-all">
               <ArrowLeft className="h-3.5 w-3.5" />
             </button>
-            <button onClick={() => api?.scrollNext()} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border/40 bg-card/40 text-muted-foreground hover:bg-card/60 hover:text-primary transition-all">
+            <button onClick={() => api?.scrollNext()} className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 bg-card/40 text-muted-foreground hover:bg-card/60 hover:text-primary transition-all">
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>

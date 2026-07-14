@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
@@ -21,7 +21,7 @@ function computeBadges(data: DashboardData) {
     icon: BookCheck,
     label: `${modulesCompleted} Module${modulesCompleted !== 1 ? "s" : ""} Mastered`,
     unlocked: modulesCompleted > 0,
-    color: "text-emerald-500",
+    color: "text-sky-500",
   });
 
   const nearestQ = Q_MILESTONES.slice().reverse().find(m => data.totalQuestions >= m);

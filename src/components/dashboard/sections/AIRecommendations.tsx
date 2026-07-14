@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, memo } from "react";
 import { motion } from "framer-motion";
 import { Lightbulb, TrendingUp, Target, AlertCircle, Sparkles, BrainCircuit, ArrowRight, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -61,9 +61,9 @@ function generateRecommendations(data: DashboardData): Recommendation[] {
   } else if (data.overallPct >= 80) {
     recs.push({
       icon: Sparkles,
-      accentColor: "text-emerald-500",
-      borderColor: "border-l-emerald-500",
-      bgColor: "from-emerald-500/5",
+      accentColor: "text-indigo-500",
+      borderColor: "border-l-indigo-500",
+      bgColor: "from-indigo-500/5",
       title: "Excellent mastery!",
       desc: `You\'re at ${data.overallPct}% overall. Push for 90% to unlock the Expert badge.`,
       action: "Challenge yourself",
@@ -116,14 +116,14 @@ function generateRecommendations(data: DashboardData): Recommendation[] {
   return recs.slice(0, 3);
 }
 
-export function AIRecommendations({ data }: { data: DashboardData }) {
+export const AIRecommendations = memo(function AIRecommendations({ data }: { data: DashboardData }) {
   const recommendations = useMemo(() => generateRecommendations(data), [data]);
 
   return (
-    <div>
+    <div className="space-y-4">
       <SectionHeader icon={BrainCircuit} title="AI Insights" />
 
-      <div className="grid gap-2.5">
+      <div className="grid gap-3">
         {recommendations.map((rec, i) => {
           const Icon = rec.icon;
           return (
@@ -134,26 +134,26 @@ export function AIRecommendations({ data }: { data: DashboardData }) {
               transition={{ delay: 0.08 * i, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               <Card className={cn(
-                "group overflow-hidden rounded-2xl border-border/40 bg-card/40 backdrop-blur-sm shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 border-l-2",
+                "group overflow-hidden rounded-xl border-border/30 bg-card/40 backdrop-blur-sm shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/20 border-l-2",
                 rec.borderColor
               )}>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-muted/50 shrink-0 mt-0.5">
-                      <Icon className={cn("h-4 w-4", rec.accentColor)} />
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-card border border-border/30 shadow-sm shrink-0">
+                      <Icon className={cn("h-4.5 w-4.5", rec.accentColor)} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="text-xs font-bold text-foreground">{rec.title}</p>
-                          <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{rec.desc}</p>
+                      <div className="flex items-start justify-between gap-4 flex-wrap sm:flex-nowrap">
+                        <div className="space-y-1">
+                          <p className="text-xs font-black text-foreground leading-none">{rec.title}</p>
+                          <p className="text-[11px] text-muted-foreground/60 leading-relaxed">{rec.desc}</p>
                         </div>
                         {rec.action && rec.actionHref && (
                           <Button
                             asChild
                             variant="ghost"
                             size="sm"
-                            className="shrink-0 h-7 px-2.5 rounded-lg text-[9px] font-black uppercase tracking-wider gap-1 text-primary hover:text-primary hover:bg-primary/10"
+                            className="shrink-0 h-8 px-3 rounded-lg text-[9px] font-black uppercase tracking-wider gap-1 text-primary hover:text-primary hover:bg-primary/10"
                           >
                             <a href={rec.actionHref}>
                               {rec.action} <ArrowRight className="h-3 w-3" />
@@ -171,4 +171,4 @@ export function AIRecommendations({ data }: { data: DashboardData }) {
       </div>
     </div>
   );
-}
+});

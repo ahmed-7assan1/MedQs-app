@@ -796,6 +796,10 @@ model Post {
   videoEndTime         Int?
   isAnonymous          Boolean        @default(false)
   backgroundStyle      String?
+  title                String?
+  category             String?
+  solved               Boolean        @default(false)
+  views                Int            @default(0)
   comments             Comment[]
   likes                Like[]
   reactions            PostReaction[]

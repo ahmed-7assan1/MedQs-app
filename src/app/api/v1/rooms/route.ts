@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     include: {
       owner: { select: { id: true, name: true, image: true } },
       _count: { select: { members: true, posts: true } },
-      members: { where: { userId }, select: { id: true, role: true } },
+      members: { take: 4, orderBy: { joinedAt: "desc" }, include: { user: { select: { id: true, name: true, image: true } } } },
     },
     orderBy: { createdAt: "desc" },
     take: 50,
@@ -46,8 +46,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "You already own a room. Delete it first to create a new one." }, { status: 400 });
   }
 
-  const body = await req.json();
-  const { name, description, isPublic, memberLimit } = body;
+  const { name, description, isPublic, memberLimit, image, spotifyUrl, telegramMediaUrl } = await req.json();
   if (!name?.trim()) return NextResponse.json({ error: "Name is required" }, { status: 400 });
 
   // Generate unique invite code
@@ -66,6 +65,9 @@ export async function POST(req: NextRequest) {
       description: description?.trim() || null,
       isPublic: isPublic !== false,
       memberLimit: Math.min(Math.max(Number(memberLimit) || 10, 2), 50),
+      image: image?.trim() || null,
+      spotifyUrl: spotifyUrl?.trim() || null,
+      customAiConfig: telegramMediaUrl?.trim() ? { telegramMediaUrl: telegramMediaUrl.trim() } : undefined,
       inviteCode,
       ownerId: userId,
       universityId,

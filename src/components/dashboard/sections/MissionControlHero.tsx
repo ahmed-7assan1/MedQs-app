@@ -1,14 +1,9 @@
-﻿"use client";
+"use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useState, useEffect, memo } from "react";
 import { motion } from "framer-motion";
-import { Flame, Trophy, Sparkles, GraduationCap, TrendingUp, Bell, Sun, Moon, Maximize, Minimize, FileText, ChevronRight, PanelLeft } from "lucide-react";
+import { Bell, Sun, Moon, Sparkles, Flame, Trophy, CheckCircle2, HelpCircle, GraduationCap, Zap, Medal, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useThemeStore, useNotificationStore } from "@/lib/store";
 import {
@@ -16,235 +11,201 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { DashboardData, QuizCardData } from "@/types/dashboard";
+import type { DashboardData } from "@/types/dashboard";
 
-export function MissionControlHero({ data, onToggleSidebar, sidebarOpen }: { data: DashboardData; onToggleSidebar?: () => void; sidebarOpen?: boolean }) {
+const FALLBACK_GRADIENTS = [
+  "from-blue-500/20 to-blue-600/20",
+  "from-violet-500/20 to-violet-600/20",
+  "from-emerald-500/20 to-emerald-600/20",
+  "from-rose-500/20 to-rose-600/20",
+  "from-amber-500/20 to-amber-600/20",
+  "from-cyan-500/20 to-cyan-600/20",
+];
+
+const RANK_CONFIG: Record<string, { color: string }> = {
+  Newbie:       { color: "#64748B" },
+  Active:       { color: "#06B6D4" },
+  Contributor:  { color: "#8B5CF6" },
+  Expert:       { color: "#D97706" },
+  Elite:        { color: "#E11D48" },
+};
+
+const RANK_ICONS: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
+  Newbie: GraduationCap,
+  Active: Zap,
+  Contributor: Flame,
+  Expert: Medal,
+  Elite: Crown,
+};
+
+export const MissionControlHero = memo(function MissionControlHero({
+  data,
+}: {
+  data: DashboardData;
+}) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [selectedQuiz, setSelectedQuiz] = useState<QuizCardData | null>(null);
-  const router = useRouter();
   const { theme, setTheme } = useThemeStore();
   const { notifications, unread, setNotifications, markRead, markAllRead } = useNotificationStore();
-
-  useEffect(() => { setMounted(true); }, []);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  };
-
   useEffect(() => {
-    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener("fullscreenchange", onFsChange);
-    return () => document.removeEventListener("fullscreenchange", onFsChange);
+    setMounted(true);
   }, []);
 
   useEffect(() => {
     if (notifOpen && notifications.length === 0) {
       fetch("/api/v1/notifications")
         .then((r) => r.json())
-        .then((data) => setNotifications(Array.isArray(data) ? data : []))
+        .then((notifs) => setNotifications(Array.isArray(notifs) ? notifs : []))
         .catch(() => {});
     }
   }, [notifOpen]);
 
+  const rankConfig = RANK_CONFIG[data.rankLabel] || { color: "hsl(var(--primary))" };
+  const RankIconComponent = RANK_ICONS[data.rankLabel] || Medal;
+  const firstLetter = data.firstName.charAt(0).toUpperCase();
+  const gradientIndex = firstLetter.charCodeAt(0) % FALLBACK_GRADIENTS.length;
+
+  const metrics = [
+    { icon: Flame, value: `${data.currentStreak}d`, label: "Streak", color: "text-orange-500" },
+    { icon: Trophy, value: data.rankPoints.toLocaleString(), label: "XP", color: "text-amber-500" },
+    { icon: CheckCircle2, value: `${data.overallPct}%`, label: "Accuracy", color: "text-sky-500" },
+    { icon: HelpCircle, value: data.totalQuestions.toLocaleString(), label: "Solved", color: "text-violet-500" },
+  ];
+
   return (
     <TooltipProvider>
-      <div className="hero-mesh">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-4 min-w-0">
-          <div className="relative shrink-0">
-            <div className="relative h-16 w-16 md:h-20 md:w-20">
-              <svg className="absolute -inset-1 h-[calc(100%+8px)] w-[calc(100%+8px)] -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="44" fill="none" strokeWidth="6" className="stroke-muted-foreground/10" />
-                <motion.circle
-                  cx="50" cy="50" r="44" fill="none" strokeWidth="6" strokeLinecap="round"
-                  strokeDasharray={Math.PI * 88}
-                  initial={{ strokeDashoffset: Math.PI * 88 }}
-                  animate={{ strokeDashoffset: Math.PI * 88 - (Math.PI * 88 * data.progressToNext) / 100 }}
-                  transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-                  className="stroke-primary"
-                />
-              </svg>
-              <Avatar className="h-full w-full shrink-0 shadow-sm">
-                {data.userImage ? (
-                  <AvatarImage src={data.userImage} alt={data.firstName} className="object-cover" />
-                ) : null}
-                <AvatarFallback className="bg-primary text-primary-foreground text-xl md:text-2xl font-bold">
-                  {data.firstName.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-background" />
-            </div>
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-semibold text-primary uppercase tracking-[0.15em]">
-                {data.greeting}
-              </span>
-              {data.overallPct >= 80 && (
-                <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.15em] bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" /> Top Performer
-                </span>
-              )}
-            </div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-foreground leading-none">
-              Dr. {data.firstName}
-            </h1>
-            <p className="mt-1.5 text-xs font-medium text-muted-foreground/70 flex items-center gap-1.5 flex-wrap">
-              <GraduationCap className="h-3.5 w-3.5 text-primary/60" />
-              <span className="text-foreground/80 font-semibold">{data.rankLabel}</span>
-            </p>
-          </div>
-        </div>
+      <div className={cn("rounded-2xl p-4 md:p-5 transition-all duration-500 relative overflow-hidden", "hero-gradient-night")}>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl opacity-40 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl opacity-30 pointer-events-none" />
 
-          <div className="flex gap-1.5 shrink-0">
-          <div className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border",
-            data.currentStreak > 0
-              ? "border-orange-500/30 bg-orange-500/5"
-              : "border-border/40 bg-card/40"
-          )}>
-            <Flame className={cn("h-4 w-4", data.currentStreak > 0 ? "text-orange-500" : "text-muted-foreground")} />
-            <span className={cn("text-base font-bold tabular-nums leading-none", data.currentStreak > 0 ? "text-orange-600 dark:text-orange-400" : "text-muted-foreground")}>{data.currentStreak}</span>
-            <span className="text-[9px] font-medium text-muted-foreground/60">day streak</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/5">
-            <Trophy className="h-4 w-4 text-amber-500" />
-            <span className="text-base font-bold tabular-nums leading-none text-foreground">{(data.rankPoints || 0).toLocaleString()}</span>
-            <span className="text-[9px] font-medium text-muted-foreground/60">XP</span>
-          </div>
-          <div className="flex gap-1.5 items-center">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setNotifOpen(true)}
-                  className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
-                >
-                  <Bell className="h-4 w-4" />
-                  {unread > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
+        <div className="relative space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="flex flex-col items-center gap-1.5 shrink-0">
+                <div className="h-20 w-20 rounded-3xl border-2 dark:border-white/[0.05] border-slate-200 p-1 transition-all duration-500 overflow-hidden shadow-sm">
+                  <div className="h-full w-full rounded-2xl overflow-hidden dark:bg-[#1a1a1a] bg-slate-100">
+                    {data.userImage ? (
+                      <img
+                        src={data.userImage}
+                        alt={data.firstName}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className={cn("h-full w-full flex items-center justify-center bg-gradient-to-br", FALLBACK_GRADIENTS[gradientIndex])}>
+                        <span className="text-lg font-black text-foreground/40">{firstLetter}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="w-full">
+                  <div className="h-1 w-full bg-muted-foreground/10 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${data.progressToNext}%` }}
+                      transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                      className="h-full rounded-full bg-primary"
+                    />
+                  </div>
+                  <span className="text-[8px] font-bold text-muted-foreground/40 tabular-nums text-center block mt-0.5">
+                    {data.progressToNext}%
+                  </span>
+                </div>
+              </div>
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] leading-none">
+                    {data.greeting}
+                  </span>
+                  {data.overallPct >= 80 && (
+                    <span className="text-[9px] font-black text-primary uppercase tracking-wider bg-primary/10 px-2.5 py-0.5 rounded-full flex items-center gap-1 leading-none border border-primary/20">
+                      <Sparkles className="h-2.5 w-2.5" /> Top Performer
+                    </span>
                   )}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>Notifications</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
-                >
-                  {mounted && theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>{theme === "dark" ? "Light mode" : "Dark mode"}</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={toggleFullscreen}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
-                >
-                  {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</TooltipContent>
-            </Tooltip>
-            {onToggleSidebar && (
+                </div>
+                <h1 className="text-xl md:text-2xl font-black tracking-tight text-foreground leading-none">
+                  Dr. {data.firstName}
+                </h1>
+                
+                {data.rankLabel && (
+                  <div
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl border-2 mt-2 shadow-sm"
+                    style={{
+                      borderColor: rankConfig.color + "40",
+                      background: `linear-gradient(135deg, ${rankConfig.color}15, ${rankConfig.color}08)`,
+                      boxShadow: `0 2px 8px ${rankConfig.color}15`,
+                    }}
+                  >
+                    <RankIconComponent className="h-3.5 w-3.5" style={{ color: rankConfig.color }} />
+                    <span className="text-[10px] font-black tracking-wider uppercase" style={{ color: rankConfig.color }}>
+                      {data.rankLabel}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={onToggleSidebar}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/30 border border-border/40 text-muted-foreground hover:bg-muted/50 hover:text-primary transition-all"
+                    onClick={() => setNotifOpen(true)}
+                    className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-card border border-border/40 text-muted-foreground hover:bg-muted/40 hover:text-primary transition-all duration-200"
                   >
-                    <PanelLeft className={cn("h-4 w-4 transition-transform duration-500", sidebarOpen && "rotate-180")} />
+                    <Bell className="h-3.5 w-3.5" />
+                    {unread > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-background" />
+                    )}
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>{sidebarOpen ? "Close sidebar" : "Open sidebar"}</TooltipContent>
+                <TooltipContent>Notifications</TooltipContent>
               </Tooltip>
-            )}
-          </div>
-        </div>
-      </div>
 
-      <div className="mt-6 md:mt-8 flex flex-col items-end">
-        {data.recentQuizzes.length === 0 ? (
-          <p className="text-xs text-muted-foreground/50 text-center py-8 w-full">No quizzes yet</p>
-        ) : (
-          data.recentQuizzes.slice(0, 3).map((quiz, i) => {
-            const scoreColor = quiz.bestScore !== null
-              ? quiz.bestScore >= 70 ? "text-emerald-500" : quiz.bestScore >= 50 ? "text-amber-500" : "text-red-500"
-              : "text-muted-foreground/40";
-            return i === 0 ? (
-              <button key={quiz.id} onClick={() => router.push("/past-papers")} className="relative text-left transition-all duration-300 hover:-translate-y-2 hover:z-50" style={{ zIndex: 3 }}>
-                <Card className="group w-[280px] md:w-[320px] lg:w-[300px] rounded-xl bg-card border-border/30 p-3 shadow-sm flex items-center gap-2.5 transition-all duration-300 hover:shadow-md hover:border-primary/40 cursor-pointer">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 shrink-0">
-                    <FileText className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-black text-foreground truncate leading-tight">{quiz.title}</p>
-                    <p className="text-[8px] font-bold text-foreground/40 uppercase tracking-wider">{quiz.moduleName}</p>
-                    {quiz.bestScore !== null && (
-                      <p className={cn("text-[9px] font-bold mt-0.5", scoreColor)}>Best: {quiz.bestScore}%</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="flex h-8 w-8 items-center justify-center rounded-xl bg-card border border-border/40 text-muted-foreground hover:bg-muted/40 hover:text-primary transition-all duration-200"
+                  >
+                    {mounted && theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>{theme === "dark" ? "Light Mode" : "Dark Mode"}</TooltipContent>
+              </Tooltip>
+
+
+            </div>
+          </div>
+
+          <div className="border-t border-border/10 pt-3">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 md:gap-x-6">
+              {metrics.map((metric, i) => {
+                const Icon = metric.icon;
+                return (
+                  <motion.div
+                    key={metric.label}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.05 * i }}
+                    className="flex items-center gap-1.5"
+                  >
+                    <Icon className={cn("h-3 w-3", metric.color)} />
+                    <span className="text-xs font-black text-foreground tabular-nums leading-none">{metric.value}</span>
+                    <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-wider leading-none">{metric.label}</span>
+                    {i < metrics.length - 1 && (
+                      <span className="hidden md:block ml-2 h-3 w-px bg-border/40" />
                     )}
-                  </div>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-                </Card>
-              </button>
-            ) : (
-              <div key={quiz.id} className="relative pointer-events-none" style={{ marginTop: -52 }}>
-                <Card className="w-[280px] md:w-[320px] lg:w-[300px] rounded-xl bg-card border-border/20 p-3 shadow-sm flex items-center gap-2.5">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/5 shrink-0">
-                    <FileText className="h-3.5 w-3.5 text-primary/40" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-black text-foreground/40 truncate leading-tight">{quiz.title}</p>
-                    <p className="text-[8px] font-bold text-foreground/20 uppercase tracking-wider">{quiz.moduleName}</p>
-                  </div>
-                </Card>
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      {data.dailyTarget > 0 && (
-        <div className="mt-4">
-          <div className="flex items-center justify-between text-[10px] font-bold mb-1.5">
-            <span className="text-muted-foreground/60 flex items-center gap-1">
-              <TrendingUp className="h-3 w-3 text-primary/60" />
-              Daily Target
-            </span>
-            <span className="text-foreground/80">{data.todayItemCount} / {data.dailyTarget}</span>
-          </div>
-          <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden relative">
-            <div
-              className="absolute inset-0 rounded-full opacity-10"
-              style={{
-                width: `${data.dailyPct}%`,
-                backgroundColor: "hsl(var(--primary))",
-              }}
-            />
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${data.dailyPct}%` }}
-              transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="relative h-full rounded-full bg-primary"
-            />
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Notifications Dialog */}
       <Dialog open={notifOpen} onOpenChange={setNotifOpen}>
-        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto rounded-2xl">
           <DialogTitle className="sr-only">Notifications</DialogTitle>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -269,26 +230,26 @@ export function MissionControlHero({ data, onToggleSidebar, sidebarOpen }: { dat
               <p className="text-sm font-medium">No notifications yet</p>
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {notifications.map((n) => (
                 <button
                   key={n.id}
                   onClick={() => markRead(n.id)}
                   className={cn(
-                    "flex w-full items-start gap-3 p-3.5 rounded-xl text-left transition-all",
+                    "flex w-full items-start gap-3 p-3.5 rounded-xl text-left transition-all border",
                     !n.read
-                      ? "bg-primary/5 border border-primary/15"
-                      : "hover:bg-muted/30 border border-transparent"
+                      ? "bg-primary/5 border-primary/10"
+                      : "hover:bg-muted/30 border-transparent"
                   )}
                 >
                   <div className="min-w-0 flex-1">
-                    <p className={cn("text-sm font-semibold", !n.read ? "text-foreground" : "text-muted-foreground/70")}>
+                    <p className={cn("text-sm font-bold", !n.read ? "text-foreground" : "text-muted-foreground/70")}>
                       {n.title}
                     </p>
-                    <p className={cn("mt-0.5 text-xs leading-relaxed line-clamp-2", !n.read ? "text-muted-foreground/80" : "text-muted-foreground/50")}>
+                    <p className={cn("mt-1 text-xs leading-relaxed line-clamp-2", !n.read ? "text-muted-foreground/80" : "text-muted-foreground/50")}>
                       {n.body}
                     </p>
-                    <p className="mt-1 text-[10px] font-medium text-muted-foreground/40">
+                    <p className="mt-1.5 text-[9px] font-bold text-muted-foreground/40">
                       {new Date(n.createdAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -299,32 +260,6 @@ export function MissionControlHero({ data, onToggleSidebar, sidebarOpen }: { dat
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Quiz confirmation dialog */}
-      <Dialog open={!!selectedQuiz} onOpenChange={(open) => { if (!open) setSelectedQuiz(null); }}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogTitle className="sr-only">Start Quiz</DialogTitle>
-          <div className="py-4 text-center">
-            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 mx-auto mb-4">
-              <FileText className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="text-lg font-black text-foreground mb-1">{selectedQuiz?.title}</h3>
-            <p className="text-sm font-medium text-muted-foreground mb-1">{selectedQuiz?.moduleName}</p>
-            {selectedQuiz?.bestScore !== null && (
-              <p className={cn("text-xs font-bold mt-2", selectedQuiz && (
-                selectedQuiz.bestScore >= 70 ? "text-emerald-500" : selectedQuiz.bestScore >= 50 ? "text-amber-500" : "text-red-500"
-              ))}>Previous best: {selectedQuiz?.bestScore}%</p>
-            )}
-          </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setSelectedQuiz(null)} className="flex-1">Cancel</Button>
-            <Button onClick={() => { router.push(`/quiz/${selectedQuiz?.id}`); setSelectedQuiz(null); }} className="flex-1 bg-primary text-primary-foreground font-bold shadow-sm">
-              Start Quiz
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-      </div>
     </TooltipProvider>
   );
-}
+});

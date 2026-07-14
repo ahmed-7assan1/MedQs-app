@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { FloatingIslandNavbar } from "@/components/layout/FloatingIslandNavbar";
 
 export function NavbarWrapper(props: {
@@ -7,5 +8,8 @@ export function NavbarWrapper(props: {
   userName?: string;
   userId: string;
 }) {
+  const pathname = usePathname();
+  if (pathname === "/dashboard-app") return null;
+
   return <FloatingIslandNavbar {...props} />;
 }

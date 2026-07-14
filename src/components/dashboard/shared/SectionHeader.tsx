@@ -6,11 +6,13 @@ export function SectionHeader({
   title,
   right,
   className,
+  hideSeparator,
 }: {
   icon?: LucideIcon;
   title: string;
   right?: React.ReactNode;
   className?: string;
+  hideSeparator?: boolean;
 }) {
   return (
     <div className={cn("flex items-center gap-2.5 mb-5 group", className)}>
@@ -22,7 +24,7 @@ export function SectionHeader({
       <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">
         {title}
       </span>
-      <div className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent ml-1" />
+      {!hideSeparator && <div className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent ml-1" />}
       {right && <div className="ml-auto">{right}</div>}
     </div>
   );

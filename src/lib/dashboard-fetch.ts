@@ -79,9 +79,11 @@ export function useCurriculumVideos() {
 }
 
 export function useCommunityPosts() {
-  return useSWR<PaginatedResponse<PostData>>(
+  const { data, ...rest } = useSWR<PaginatedResponse<PostData>>(
     "/api/v1/community/posts?limit=6",
     fetcher,
     SWR_OPTIONS
   );
+  const unwrapped = (data as any)?.data ?? data;
+  return { data: unwrapped, ...rest };
 }

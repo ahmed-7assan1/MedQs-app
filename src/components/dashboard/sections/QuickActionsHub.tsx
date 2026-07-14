@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -19,7 +19,7 @@ interface QuickAction {
 
 const PRIMARY_ACTIONS: QuickAction[] = [
   { label: "Ask Dr. Q", icon: BrainCircuit, desc: "AI-powered medical assistant", href: "/ai-chat", gradient: "from-primary/20 via-primary/10 to-transparent", iconBg: "bg-primary text-primary-foreground" },
-  { label: "Generate Quiz", icon: Zap, desc: "Test your knowledge instantly", href: "/quiz", gradient: "from-emerald-500/20 via-emerald-500/5 to-transparent", iconBg: "bg-emerald-500 text-white" },
+  { label: "Generate Quiz", icon: Zap, desc: "Test your knowledge instantly", href: "/quiz", gradient: "from-sky-500/20 via-sky-500/5 to-transparent", iconBg: "bg-sky-500 text-white" },
   { label: "Explain Concept", icon: BookOpen, desc: "Deep-dive into any topic", href: "/study-tools", gradient: "from-blue-500/20 via-blue-500/5 to-transparent", iconBg: "bg-blue-500 text-white" },
 ];
 
@@ -42,11 +42,11 @@ function PrimaryCard({ action, index }: { action: QuickAction; index: number }) 
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 * index, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
     >
-      <Card asChild className={cn(
-        "group relative overflow-hidden rounded-2xl border-border/40 bg-card/40 backdrop-blur-sm shadow-sm will-change-transform transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-primary/40",
-        isDrQ ? "hover:shadow-primary/10" : "hover:shadow-emerald-500/10"
-      )}>
-        <Link href={action.href}>
+      <Link href={action.href} className="group block">
+        <Card className={cn(
+          "relative overflow-hidden rounded-2xl border-border/40 bg-card/40 backdrop-blur-sm shadow-sm will-change-transform transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-primary/40",
+          isDrQ ? "hover:shadow-primary/10" : "hover:shadow-sky-500/10"
+        )}>
           <CardContent className="relative p-5 md:p-6">
             <div className={cn("absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500", action.gradient)} />
             <div className="relative flex items-center gap-4">
@@ -64,8 +64,8 @@ function PrimaryCard({ action, index }: { action: QuickAction; index: number }) 
               </div>
             </div>
           </CardContent>
-        </Link>
-      </Card>
+        </Card>
+      </Link>
     </motion.div>
   );
 }
@@ -79,8 +79,8 @@ function SecondaryCard({ action, index }: { action: QuickAction; index: number }
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 * index, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
     >
-      <Card asChild className="group overflow-hidden rounded-2xl border-border/40 bg-card/40 backdrop-blur-sm shadow-sm will-change-transform transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg">
-        <Link href={action.href}>
+      <Link href={action.href} className="group block">
+        <Card className="overflow-hidden rounded-2xl border-border/40 bg-card/40 backdrop-blur-sm shadow-sm will-change-transform transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg">
           <CardContent className="p-3.5 relative">
             <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl", action.gradient)} />
             <div className="relative flex items-center gap-3">
@@ -93,8 +93,8 @@ function SecondaryCard({ action, index }: { action: QuickAction; index: number }
               <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors duration-300">{action.label}</span>
             </div>
           </CardContent>
-        </Link>
-      </Card>
+        </Card>
+      </Link>
     </motion.div>
   );
 }

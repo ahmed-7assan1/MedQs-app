@@ -12,7 +12,7 @@ import type { DashboardData } from "@/types/dashboard";
 
 const QUICK_LINKS = [
  { icon: BrainCircuit, label: "Dr. Q", href: "/ai-chat", color: "text-primary" },
- { icon: Zap, label: "Quiz", href: "/quiz", color: "text-emerald-500" },
+ { icon: Zap, label: "Quiz", href: "/quiz", color: "text-sky-500" },
  { icon: BookOpen, label: "Library", href: "/medical-books", color: "text-violet-500" },
  { icon: Users, label: "Community", href: "/social", color: "text-rose-500" },
 ];
@@ -82,7 +82,7 @@ export function ProfileSidebar({ data }: { data: DashboardData }) {
     {[
      { label: "Streak", value: `${data.currentStreak}d`, icon: Flame, color: "text-orange-500", bg: "bg-orange-500/10" },
      { label: "XP", value: (data.rankPoints || 0).toLocaleString(), icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
-     { label: "Mastery", value: `${data.overallPct}%`, icon: Target, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+     { label: "Mastery", value: `${data.overallPct}%`, icon: Target, color: "text-sky-500", bg: "bg-sky-500/10" },
      { label: "Solved", value: (data.totalQuestions || 0).toLocaleString(), icon: GraduationCap, color: "text-violet-500", bg: "bg-violet-500/10" },
     ].map((stat, i) => {
      const Icon = stat.icon;

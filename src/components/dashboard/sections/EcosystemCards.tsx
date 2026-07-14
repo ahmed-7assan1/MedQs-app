@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -37,10 +37,10 @@ const CARDS = [
   desc: "Review flashcards optimized for long-term retention",
   icon: MessagesSquare,
   href: "/study-tools",
-  gradient: "from-emerald-500/20 to-teal-500/10",
-  border: "border-emerald-500/20",
-  iconBg: "bg-emerald-500/15 text-emerald-500",
-  iconGlow: "shadow-emerald-500/20",
+  gradient: "from-indigo-500/20 to-violet-500/10",
+  border: "border-indigo-500/20",
+  iconBg: "bg-indigo-500/15 text-indigo-500",
+  iconGlow: "shadow-indigo-500/20",
  },
  {
   id: "drawmed",
@@ -59,27 +59,27 @@ function EcosystemCard({ card }: { card: typeof CARDS[number] }) {
   const Icon = card.icon;
   const iconBgClass = card.iconBg || "bg-muted/30 text-muted-foreground";
   return (
-    <Card asChild className="group overflow-hidden rounded-2xl border-border/40 bg-gradient-to-br from-card/90 to-card/60 shadow-sm will-change-transform transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lg">
-      <Link href={card.href}>
+    <Link href={card.href} className="group block">
+      <Card className="overflow-hidden rounded-2xl border-border/40 bg-gradient-to-br from-card/90 to-card/60 shadow-sm will-change-transform transition-[transform,opacity,box-shadow] duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lg">
         <CardContent className="p-5 relative">
           <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500", card.gradient)} />
           <div className={cn("absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 ring-1", card.border)} />
           <div className="relative">
             <div className={cn(
-              "mb-3 inline-flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-0.5 group-hover:shadow-lg",
+              "mb-3 inline-flex items-center justify-center w-10 h-10 rounded-xl transition-[transform,opacity,box-shadow] duration-300 group-hover:scale-110 group-hover:-translate-y-0.5 group-hover:shadow-lg",
               iconBgClass
             )}>
               <Icon className="h-5 w-5" />
             </div>
             <h3 className="text-sm font-black text-foreground group-hover:text-primary transition-colors duration-300">{card.title}</h3>
             <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{card.desc}</p>
-            <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-primary uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1">
+            <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-primary uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-[transform,opacity,box-shadow] duration-300 group-hover:translate-x-1">
               Open <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
             </div>
           </div>
         </CardContent>
-      </Link>
-    </Card>
+      </Card>
+    </Link>
   );
 }
 

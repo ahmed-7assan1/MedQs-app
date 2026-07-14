@@ -89,10 +89,14 @@ const config: Config = {
   				'900': '#134e4a',
   				'950': '#042f2e'
   			},
-  			success: {
-  				DEFAULT: 'hsl(var(--success))',
-  				foreground: 'hsl(var(--success-foreground))'
-  			},
+   			success: {
+   				DEFAULT: 'hsl(var(--success))',
+   				foreground: 'hsl(var(--success-foreground))'
+   			},
+   			warning: {
+   				DEFAULT: 'hsl(var(--warning))',
+   				foreground: 'hsl(var(--warning-foreground))'
+   			},
   			brand: {
   				emerald: '#10b981',
   				rose: '#f43f5e',

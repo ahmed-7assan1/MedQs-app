@@ -16,15 +16,22 @@ export type ForumPostJson = {
   backgroundStyle?: string | null;
   expiresAt: string | null;
   isPinned: boolean;
+  title?: string | null;
+  category?: string | null;
+  solved?: boolean;
+  views?: number;
   author: {
     id: string;
     name: string;
     image: string | null;
     handle: string | null;
     rank?: { label: string; badge: string | null };
+    university?: string | null;
+    year?: string | null;
   };
-  _count: { likes: number; comments: number };
+  _count: { likes: number; comments: number; savedBy?: number };
   likedByMe: boolean;
+  savedByMe?: boolean;
   sharedQuestionId?: string | null;
   sharedQuestion?: any | null;
   sharedQuestionData?: any | null;
@@ -45,17 +52,24 @@ type PostRow = {
   backgroundStyle?: string | null;
   expiresAt: Date | null;
   isPinned: boolean;
+  title?: string | null;
+  category?: string | null;
+  solved?: boolean;
+  views?: number;
   author: {
     id: string;
     name: string;
     image: string | null;
     handle: string | null;
     rank?: { label: string; badge: string | null } | null;
+    university?: string | null;
+    year?: string | null;
   };
-  _count: { likes: number; comments: number };
+  _count: { likes: number; comments: number; savedBy?: number };
   sharedQuestion?: any;
   sharedQuestionData?: any;
   likedByMe?: boolean;
+  savedByMe?: boolean;
   reactions?: { type: string; userId: string }[];
 };
 
@@ -147,9 +161,10 @@ export async function loadForumPostsForUser(options: {
               image: true,
               handle: true,
               rank: { select: { label: true, badge: true } },
+              university: { select: { name: true } },
             },
           },
-          _count: { select: { likes: true, comments: true } },
+          _count: { select: { likes: true, comments: true, savedBy: true } },
           sharedQuestion: { select: { id: true, body: true, choices: true, answer: true, difficulty: true, imageUrl: true, questionType: true, explanation: true } },
           reactions: { select: { type: true, userId: true } },
         },
@@ -177,9 +192,9 @@ export async function loadForumPostsForUser(options: {
           take: limit,
           include: {
             author: {
-              select: { id: true, name: true, image: true, handle: true },
+              select: { id: true, name: true, image: true, handle: true, university: { select: { name: true } } },
             },
-            _count: { select: { likes: true, comments: true } },
+            _count: { select: { likes: true, comments: true, savedBy: true } },
             sharedQuestion: { select: { id: true, body: true, choices: true, answer: true, difficulty: true, imageUrl: true, questionType: true, explanation: true } },
             reactions: { select: { type: true, userId: true } },
           },
@@ -205,29 +220,38 @@ export async function loadForumPostsForUser(options: {
           skip,
           take: limit,
           include: {
-            author: { select: { id: true, name: true, image: true, handle: true } },
+            author: { select: { id: true, name: true, image: true, handle: true, university: { select: { name: true } } } },
           },
         });
         posts = (bare.map((p) => ({
           ...p,
-          _count: { likes: 0, comments: 0 },
+          _count: { likes: 0, comments: 0, savedBy: 0 },
         })) as unknown as PostRow[]);
       }
     }
 
     const postIds = posts.map((p) => p.id);
     let likedSet = new Set<string>();
+    let savedSet = new Set<string>();
     try {
-      const likedRows =
+      const [likedRows, savedRows] = await Promise.all([
         postIds.length === 0
-          ? []
-          : await prisma.like.findMany({
+          ? Promise.resolve([] as { postId: string }[])
+          : prisma.like.findMany({
               where: { userId, postId: { in: postIds } },
               select: { postId: true },
-            });
+            }),
+        postIds.length === 0
+          ? Promise.resolve([] as { postId: string }[])
+          : prisma.savedPost.findMany({
+              where: { userId, postId: { in: postIds } },
+              select: { postId: true },
+            }),
+      ]);
       likedSet = new Set(likedRows.map((r) => r.postId));
+      savedSet = new Set(savedRows.map((r) => r.postId));
     } catch (le) {
-      console.error("[forum-posts] like.findMany failed", le);
+      console.error("[forum-posts] like/saved.findMany failed", le);
     }
 
     // Affinity Algorithm: Sort by User Interaction (Likes given to author)
@@ -244,7 +268,7 @@ export async function loadForumPostsForUser(options: {
       id: p.id,
       content: p.content,
       imageUrl: p.imageUrl,
-      attachments: (p as any).attachments, // Explicitly pass attachments field
+      attachments: (p as any).attachments,
       interactionsDisabled: p.interactionsDisabled,
       authorId: p.authorId,
       forumId: p.forumId,
@@ -254,6 +278,10 @@ export async function loadForumPostsForUser(options: {
       isPinned: p.isPinned,
       isAnonymous: (p as any).isAnonymous,
       backgroundStyle: (p as any).backgroundStyle,
+      title: (p as any).title ?? null,
+      category: (p as any).category ?? null,
+      solved: (p as any).solved ?? false,
+      views: (p as any).views ?? 0,
       author: (p as any).isAnonymous ? {
         id: p.author.id,
         name: "عضو مجهول",
@@ -265,9 +293,12 @@ export async function loadForumPostsForUser(options: {
         image: p.author.image,
         handle: p.author.handle,
         ...(p.author.rank ? { rank: p.author.rank } : {}),
+        university: ((p.author as any).university?.name as string) ?? null,
+        year: ((p.author as any).rank?.label as string) ?? null,
       },
-      _count: p._count,
+      _count: { likes: p._count.likes, comments: p._count.comments, savedBy: (p as any)._count?.savedBy ?? 0 },
       likedByMe: likedSet.has(p.id),
+      savedByMe: savedSet.has(p.id),
       sharedQuestionId: (p as any).sharedQuestionId,
       sharedQuestion: (p as any).sharedQuestion,
       sharedQuestionData: (p as any).sharedQuestionData,

@@ -2,19 +2,69 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import ReactMarkdown from "react-markdown";
-import { markdownComponentsWithImages } from "@/components/ui/markdown-components";
-import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { SharedQuestionBlock } from "@/components/quiz/SharedQuestionBlock";
-import { VidStackPlayer } from "@/components/content/VidStackPlayer";
+import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
 import {
-  ArrowRight, Paperclip, Expand,
-  Heart, MessageSquare, X,
-  ChevronLeft, ChevronRight, Play, Users,
-  Share2, Bookmark,
+  Flame,
+  HelpCircle, BarChart3, Headphones, Link as LinkIcon,
 } from "lucide-react";
+import { ImageGallery } from "@/components/community/ImageGallery";
+import { FileCard } from "@/components/community/FileCard";
+import { FileIcon } from "@/components/community/FileIcon";
+import { VideoThumbnail } from "@/components/community/VideoThumbnail";
+
+/* ─────────────────────────────────────────────
+   Meridian SVG Icon Components
+───────────────────────────────────────────── */
+function MeridianHeart({ filled, className }: { filled?: boolean; className?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} className={className}>
+      <path d="M20.8 8.6c0 4.8-8.8 10-8.8 10s-8.8-5.2-8.8-10a4.6 4.6 0 0 1 8.8-1.8A4.6 4.6 0 0 1 20.8 8.6Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function MeridianComment({ className }: { className?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M4 19V6A2 2 0 0 1 6 4H18A2 2 0 0 1 20 6V15A2 2 0 0 1 18 17H8L4 21V19Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function MeridianBookmark({ filled, className }: { filled?: boolean; className?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} className={className}>
+      <path d="M6 3H18V21L12 17L6 21V3Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function MeridianShare({ className }: { className?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M4 12V19A2 2 0 0 0 6 21H18A2 2 0 0 0 20 19V12M16 6L12 2M12 2L8 6M12 2V15" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function MeridianFile({ className }: { className?: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M8 2H15L20 7V20A2 2 0 0 1 18 22H8A2 2 0 0 1 6 20V4A2 2 0 0 1 8 2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M14 2V7H19" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function MeridianLink({ className }: { className?: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M9 15L15 9M11 6L11.5 5.5A3.5 3.5 0 1 1 16.5 10.5L14 13M13 18L12.5 18.5A3.5 3.5 0 1 1 7.5 13.5L10 11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 /* ─────────────────────────────────────────────
    Types
@@ -23,6 +73,8 @@ interface PostAuthor {
   id: string;
   name: string;
   image: string | null;
+  university?: string | null;
+  rank?: { label?: string; badge?: string | null } | null;
 }
 
 interface PostData {
@@ -37,6 +89,58 @@ interface PostData {
   sharedQuestionData?: any;
   poll?: any;
   reactions?: { type: string; userId: string }[];
+  category?: string;
+  solved?: boolean;
+  views?: number;
+  bookmarkCount?: number;
+  title?: string;
+}
+
+/* ─────────────────────────────────────────────
+   Category color map (Meridian palette)
+───────────────────────────────────────────── */
+const CATEGORY_COLORS: Record<string, string> = {
+  anatomy: "#7c9cf0",
+  physiology: "#63b8b0",
+  pharmacology: "#b58cf0",
+  pathology: "#e0a15c",
+  surgery: "#e07c7c",
+  "internal-medicine": "#5cc2e0",
+  "study-tips": "#a3c96a",
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  anatomy: "Anatomy",
+  physiology: "Physiology",
+  pharmacology: "Pharmacology",
+  pathology: "Pathology",
+  surgery: "Surgery",
+  "internal-medicine": "Internal Medicine",
+  "study-tips": "Study Tips",
+};
+
+function badgeColor(category?: string): string {
+  return category && CATEGORY_COLORS[category] ? CATEGORY_COLORS[category] : "var(--primary)";
+}
+
+function categoryLabel(category?: string): string {
+  return category && CATEGORY_LABELS[category] ? CATEGORY_LABELS[category] : "Community";
+}
+
+const CATEGORY_CLAMP: Record<string, number> = {
+  announcement: 3,
+  anatomy: 4,
+  physiology: 4,
+  pharmacology: 5,
+  pathology: 5,
+  surgery: 6,
+  "internal-medicine": 6,
+  "study-tips": 8,
+};
+
+function clampForCategory(category?: string): string {
+  const n = category ? CATEGORY_CLAMP[category] ?? 4 : 4;
+  return `line-clamp-${n}`;
 }
 
 /* ─────────────────────────────────────────────
@@ -107,11 +211,40 @@ function getInitials(name: string): string {
     .join("");
 }
 
+function extractHashtags(text: string): string[] {
+  if (!text) return [];
+  const matches = text.match(/#[a-zA-Z0-9_\u0600-\u06FF]+/g);
+  return matches ? [...new Set(matches.map(t => t.slice(1)))] : [];
+}
+
+function extractTitle(content: string): string {
+  if (!content) return "";
+  const stripped = content.replace(/<[^>]+>/g, "").trim();
+  const firstLine = stripped.split("\n")[0];
+  return firstLine.length > 80 ? firstLine.slice(0, 77) + "..." : firstLine;
+}
+
+function extractExternalLinks(text: string): string[] {
+  if (!text) return [];
+  const urlRegex = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+  const matches = text.match(urlRegex) || [];
+  return matches.filter(url => {
+    if (extractYouTubeId(url)) return false;
+    if (url.match(/t\.me|telegram\.me|\.mp4|\.webm|\.mov|\.mp3|\.wav|\.ogg/i)) return false;
+    return true;
+  });
+}
+
+function formatCount(n: number): string {
+  if (n >= 1000) return (n / 1000).toFixed(n % 1000 >= 100 ? 1 : 0) + "k";
+  return String(n);
+}
+
 const AVATAR_GRADIENTS = [
   "from-violet-500 to-indigo-500",
   "from-rose-500 to-pink-500",
   "from-amber-500 to-orange-500",
-  "from-emerald-500 to-teal-500",
+  "from-sky-500 to-indigo-500",
   "from-sky-500 to-blue-500",
   "from-fuchsia-500 to-purple-500",
 ];
@@ -124,247 +257,30 @@ function getAvatarGradient(name: string): string {
 /* ─────────────────────────────────────────────
    Lightbox Component
 ───────────────────────────────────────────── */
-function Lightbox({
-  images,
-  startIdx,
-  onClose,
-}: {
-  images: { url: string; alt?: string }[];
-  startIdx: number;
-  onClose: () => void;
-}) {
-  const [idx, setIdx] = useState(startIdx);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") setIdx((i) => Math.max(0, i - 1));
-      if (e.key === "ArrowRight") setIdx((i) => Math.min(images.length - 1, i + 1));
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [images.length, onClose]);
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
-        onClick={onClose}
-      >
-        {/* Close */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-all"
-        >
-          <X className="h-5 w-5" />
-        </button>
-
-        {/* Counter */}
-        {images.length > 1 && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm text-white text-xs font-bold">
-            {idx + 1} / {images.length}
-          </div>
-        )}
-
-        {/* Prev */}
-        {idx > 0 && (
-          <button
-            onClick={(e) => { e.stopPropagation(); setIdx((i) => i - 1); }}
-            className="absolute left-4 h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-all"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-        )}
-
-        {/* Image */}
-        <motion.img
-          key={idx}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.2 }}
-          src={images[idx].url}
-          alt={images[idx].alt || ""}
-          className="max-h-[90vh] max-w-[90vw] rounded-xl object-contain"
-          onClick={(e) => e.stopPropagation()}
-        />
-
-        {/* Next */}
-        {idx < images.length - 1 && (
-          <button
-            onClick={(e) => { e.stopPropagation(); setIdx((i) => i + 1); }}
-            className="absolute right-4 h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-all"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        )}
-
-        {/* Thumbnails strip */}
-        {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-3 py-2 rounded-xl bg-white/10 backdrop-blur-sm">
-            {images.map((img, i) => (
-              <button
-                key={i}
-                onClick={(e) => { e.stopPropagation(); setIdx(i); }}
-                className={cn(
-                  "h-10 w-10 rounded-lg overflow-hidden border-2 transition-all",
-                  i === idx ? "border-white scale-110" : "border-transparent opacity-50 hover:opacity-80"
-                )}
-              >
-                <img src={img.url} alt="" className="h-full w-full object-cover" />
-              </button>
-            ))}
-          </div>
-        )}
-      </motion.div>
-    </AnimatePresence>
-  );
-}
-
 /* ─────────────────────────────────────────────
-   Skeleton Card
+   Skeleton Card (Meridian style)
 ───────────────────────────────────────────── */
 function SkeletonCard() {
   return (
-    <div className="w-full h-[380px] rounded-2xl border border-border/30 bg-card/50 overflow-hidden animate-pulse">
-      <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-border/10">
-        <div className="h-9 w-9 rounded-full bg-muted/40" />
-        <div className="flex-1 space-y-1.5">
-          <div className="h-3 w-24 rounded bg-muted/40" />
-          <div className="h-2 w-16 rounded bg-muted/30" />
+    <div className="w-[380px] shrink-0 h-[300px] rounded-2xl border border-border/30 bg-card/50 overflow-hidden animate-pulse">
+      <div className="flex items-start gap-3 px-5 pt-5 pb-3.5">
+        <div className="h-10 w-10 rounded-full bg-muted/40 shrink-0" />
+        <div className="flex-1 space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="h-3.5 w-28 rounded bg-muted/40" />
+            <div className="h-5 w-14 rounded-full bg-muted/30" />
+          </div>
+          <div className="h-3 w-40 rounded bg-muted/30" />
         </div>
+        <div className="h-6 w-20 rounded-full bg-muted/30 shrink-0" />
       </div>
-      <div className="p-4 space-y-3">
+      <div className="px-5 space-y-3">
+        <div className="h-4 w-3/4 rounded bg-muted/30" />
         <div className="h-3 w-full rounded bg-muted/30" />
-        <div className="h-3 w-4/5 rounded bg-muted/30" />
-        <div className="h-3 w-3/5 rounded bg-muted/20" />
-        <div className="h-40 w-full rounded-xl bg-muted/20 mt-4" />
+        <div className="h-3 w-5/6 rounded bg-muted/20" />
+        <div className="h-3 w-2/3 rounded bg-muted/20" />
+        <div className="h-3 w-4/5 rounded bg-muted/20" />
       </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   Image Grid
-───────────────────────────────────────────── */
-function ImageGrid({
-  images,
-  onOpen,
-}: {
-  images: { url: string; alt?: string }[];
-  onOpen: (i: number) => void;
-}) {
-  if (images.length === 0) return null;
-
-  if (images.length === 1) {
-    return (
-      <div
-        className="shrink-0 rounded-xl overflow-hidden cursor-pointer group relative"
-        onClick={() => onOpen(0)}
-      >
-        <img
-          src={images[0].url}
-          alt={images[0].alt || ""}
-          className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-            <Expand className="h-5 w-5 text-white" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (images.length === 2) {
-    return (
-      <div className="shrink-0 grid grid-cols-2 gap-1.5 rounded-xl overflow-hidden">
-        {images.map((img, i) => (
-          <div
-            key={i}
-            className="cursor-pointer group relative overflow-hidden rounded-lg"
-            onClick={() => onOpen(i)}
-          >
-            <img
-              src={img.url}
-              alt={img.alt || ""}
-              className="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-all duration-300" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (images.length === 3) {
-    return (
-      <div className="shrink-0 grid grid-cols-3 gap-1.5 rounded-xl overflow-hidden">
-        <div
-          className="cursor-pointer group relative overflow-hidden rounded-lg col-span-2"
-          onClick={() => onOpen(0)}
-        >
-          <img
-            src={images[0].url}
-            alt={images[0].alt || ""}
-            className="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-all duration-300" />
-        </div>
-        <div className="grid grid-rows-2 gap-1.5">
-          {images.slice(1, 3).map((img, i) => (
-            <div
-              key={i}
-              className="cursor-pointer group relative overflow-hidden rounded-lg"
-              onClick={() => onOpen(i + 1)}
-            >
-              <img
-                src={img.url}
-                alt={img.alt || ""}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-all duration-300" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="shrink-0 grid grid-cols-3 gap-1.5 rounded-xl overflow-hidden">
-      {images.slice(0, 4).map((img, i) => (
-        <div
-          key={i}
-          className={cn(
-            "cursor-pointer group relative overflow-hidden rounded-lg",
-            i === 0 ? "col-span-2 row-span-2" : ""
-          )}
-          onClick={() => onOpen(i)}
-        >
-          <img
-            src={img.url}
-            alt={img.alt || ""}
-            className={cn(
-              "w-full object-cover transition-transform duration-500 group-hover:scale-105",
-              i === 0 ? "h-44" : "h-20"
-            )}
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-all duration-300" />
-          {i === 3 && images.length > 4 && (
-            <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[1px]">
-              <span className="text-white font-black text-xl">+{images.length - 4}</span>
-            </div>
-          )}
-        </div>
-      ))}
     </div>
   );
 }
@@ -425,35 +341,40 @@ function PollBlock({ poll }: { poll: any }) {
 }
 
 /* ─────────────────────────────────────────────
-   Post Card
+   Post Card — Meridian Design (Exact Port)
 ───────────────────────────────────────────── */
 function PostCard({
   post,
   isActive,
   index,
-  onSwipeLeft,
-  onSwipeRight,
-  onSwiping,
 }: {
   post: PostData;
   isActive: boolean;
   index: number;
-  onSwipeLeft?: () => void;
-  onSwipeRight?: () => void;
-  onSwiping?: (dx: number) => void;
 }) {
-  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(post.reactions?.some(r => r.type === "LIKE") ?? false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(post._count?.likes ?? 0);
+  const [bookmarkCount, setBookmarkCount] = useState(post.bookmarkCount ?? 0);
   const [ytPlaying, setYtPlaying] = useState(false);
 
+  const title = post.title || extractTitle(post.content || "");
   const contentSrc = enhancePlainImageUrls(stripHandledUrls(post.content || ""));
   const attachments = useMemo(() => parseAttachments(post.attachments), [post.attachments]);
   const imageAttachments = attachments.filter((a: any) => detectMediaType(a.url || a) === "image");
   const videoAttachments = attachments.filter((a: any) => detectMediaType(a.url || a) === "video");
   const audioAttachments = attachments.filter((a: any) => detectMediaType(a.url || a) === "audio");
   const fileAttachments = attachments.filter((a: any) => detectMediaType(a.url || a) === "file");
+
+  const hashtags = useMemo(() => extractHashtags(post.content || ""), [post.content]);
+  const externalLinks = useMemo(() => extractExternalLinks(post.content || ""), [post.content]);
+
+  const category = post.category || "general";
+  const catColor = badgeColor(category);
+  const catLabel = categoryLabel(category);
+  const solved = post.solved ?? false;
+  const university = post.author?.university || undefined;
+  const yearLabel = post.author?.rank?.label || undefined;
 
   const inlineYouTubeId = useMemo(() => {
     if (attachments.length > 0) return null;
@@ -496,6 +417,13 @@ function PostCard({
   const mainVideoUrl =
     videoAttachments.length > 0 ? videoAttachments[0].url || videoAttachments[0] : null;
 
+  const hasVideo = !!(inlineYouTubeId || inlineTelegramUrl || mainVideoUrl);
+  const hasImages = allImages.length > 0;
+  const hasFiles = fileAttachments.length > 0;
+  const mediaTypeCount = [hasVideo, hasImages, hasFiles].filter(Boolean).length;
+  const showFileCard = hasFiles && mediaTypeCount <= 2;
+  const extraFileCount = hasFiles ? (showFileCard ? fileAttachments.length - 1 : fileAttachments.length) : 0;
+
   const avatarGrad = getAvatarGradient(post.author?.name || "?");
   const initials = getInitials(post.author?.name || "?");
 
@@ -504,316 +432,231 @@ function PostCard({
     setLikeCount((c) => (liked ? c - 1 : c + 1));
   };
 
-  /* ─── Swipe handlers ─── */
+  const handleBookmark = () => {
+    setSaved((v) => !v);
+    setBookmarkCount((c) => (saved ? c - 1 : c + 1));
+  };
+
   const cardRef = useRef<HTMLDivElement>(null);
-  const swipeState = useRef({ startX: 0, dx: 0, el: null as HTMLDivElement | null, active: false });
-
-  const handleSwipeDown = (e: React.PointerEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.closest("button,a,input,audio,video,[role='button'],textarea")) return;
-    const el = e.currentTarget as HTMLDivElement;
-    el.setPointerCapture(e.pointerId);
-    el.style.transition = "none";
-    el.style.willChange = "transform";
-    swipeState.current = { startX: e.clientX, dx: 0, el, active: true };
-  };
-
-  const handleSwipeMove = (e: React.PointerEvent) => {
-    const s = swipeState.current;
-    if (!s.active || !s.el) return;
-    s.dx = e.clientX - s.startX;
-    const rotate = s.dx * 0.03;
-    s.el.style.transform = `translateX(${s.dx}px) rotate(${Math.max(-8, Math.min(8, rotate))}deg)`;
-    onSwiping?.(s.dx);
-  };
-
-  const handleSwipeUp = (e: React.PointerEvent) => {
-    const s = swipeState.current;
-    if (!s.active || !s.el) { swipeState.current = { startX: 0, dx: 0, el: null, active: false }; return; }
-    s.active = false;
-    const dx = s.dx;
-    const el = s.el;
-    el.style.transition = "transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
-    if (dx > 80 && onSwipeRight) {
-      el.style.transform = "translateX(400px) rotate(8deg)";
-      el.style.opacity = "0";
-      setTimeout(() => { onSwipeRight?.(); onSwiping?.(0); }, 200);
-    } else if (dx < -80 && onSwipeLeft) {
-      el.style.transform = "translateX(-400px) rotate(-8deg)";
-      el.style.opacity = "0";
-      setTimeout(() => { onSwipeLeft?.(); onSwiping?.(0); }, 200);
-    } else {
-      el.style.transform = "translateX(0) rotate(0deg)";
-      el.style.opacity = "1";
-      onSwiping?.(0);
-    }
-    swipeState.current = { startX: 0, dx: 0, el: null, active: false };
-  };
-
-  const swipeHandlers = onSwipeLeft || onSwipeRight ? {
-    onPointerDown: handleSwipeDown,
-    onPointerMove: handleSwipeMove,
-    onPointerUp: handleSwipeUp,
-    onPointerCancel: handleSwipeUp,
-  } : {};
 
   return (
     <>
-      {lightboxIdx !== null && (
-        <Lightbox
-          images={allImages}
-          startIdx={lightboxIdx}
-          onClose={() => setLightboxIdx(null)}
-        />
-      )}
-
       <div
         ref={cardRef}
-        className="w-full rounded-2xl border overflow-hidden flex flex-col relative bg-card shadow-lg shadow-black/5 dark:shadow-black/20"
-        {...swipeHandlers}
-        style={{
-          height: "380px",
-          touchAction: "pan-y",
-          cursor: "grab",
-          userSelect: "none",
-          WebkitUserSelect: "none",
-        }}
+        dir="auto"
+        className="group w-[380px] shrink-0 rounded-2xl border border-border/40 bg-card shadow-lg shadow-black/5 dark:shadow-black/20 hover:-translate-y-0.5 hover:shadow-xl hover:border-border/60 transition-all duration-200 flex flex-col p-5 gap-4 h-[300px] min-h-[300px] max-h-[300px] overflow-hidden dark:bg-[#14141B]/70 dark:backdrop-blur-xl dark:border-white/[0.06]"
       >
-        {/* Logo watermark — structural part of the card */}
-        <div
-          className="absolute -bottom-24 bg-foreground/[0.06] dark:bg-foreground/[0.04] pointer-events-none select-none"
-            style={{
-              width: 360,
-              height: 360,
-              right: -120,
-            maskImage: "url(/medonex-logo.svg)",
-            maskSize: "contain",
-            maskRepeat: "no-repeat",
-            maskPosition: "center",
-            WebkitMaskImage: "url(/medonex-logo.svg)",
-            WebkitMaskSize: "contain",
-            WebkitMaskRepeat: "no-repeat",
-            WebkitMaskPosition: "center",
-          }}
-        />
-
-        {/* ── Header ── */}
-        <div className="flex items-center gap-3 px-4 pt-3.5 pb-3 border-b border-border/10 shrink-0">
+        {/* ── Header: Author + Solved Badge + Category Badge ── */}
+        <div className="relative shrink-0 flex items-start gap-3 z-10">
           {/* Avatar */}
-            <div className="relative shrink-0">
+          <div className="relative shrink-0">
             {post.author?.image ? (
               <img
                 src={post.author.image}
                 alt={post.author.name}
                 loading="lazy"
-                className="h-9 w-9 rounded-full object-cover ring-2 ring-border/20"
+                className="h-10 w-10 rounded-full object-cover ring-2 ring-border/20"
               />
             ) : (
               <div
                 className={cn(
-                  "h-9 w-9 rounded-full bg-gradient-to-br flex items-center justify-center text-white text-[11px] font-black ring-2 ring-white/10",
+                  "h-10 w-10 rounded-full bg-gradient-to-br flex items-center justify-center text-white text-[11px] font-bold ring-2 ring-white/10",
                   avatarGrad
                 )}
               >
                 {initials}
               </div>
             )}
-            {/* Online dot */}
-            <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 border-2 border-card" />
           </div>
 
           {/* Author info */}
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-bold text-foreground truncate leading-tight">
-              {post.author?.name || "Unknown"}
-            </p>
-            <p className="text-[10px] text-muted-foreground/60 leading-tight">
-              {timeAgo(post.createdAt)}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-sm font-bold text-foreground truncate">
+                {post.author?.name || "Unknown"}
+              </span>
+              {solved ? (
+                <span className="inline-flex items-center text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 leading-none">
+                  Solved
+                </span>
+              ) : (
+                <span className="inline-flex items-center text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 leading-none">
+                  Open
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">
+              {university && <span>{university}</span>}
+              {university && yearLabel && <span> · </span>}
+              {yearLabel && <span>{yearLabel}</span>}
+              {(university || yearLabel) && <span> · </span>}
+              <span>{timeAgo(post.createdAt)}</span>
             </p>
           </div>
 
-          {/* Save button */}
-          <button
-            onClick={() => setSaved((v) => !v)}
-            className={cn(
-              "h-8 w-8 rounded-lg flex items-center justify-center transition-all active:scale-90",
-              saved
-                ? "bg-amber-500/15 text-amber-500"
-                : "bg-muted/20 text-muted-foreground/50 hover:text-amber-500 hover:bg-amber-500/10"
-            )}
+          {/* Category badge */}
+          <span
+            className="shrink-0 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full leading-none"
+            style={{
+              background: `color-mix(in srgb, ${catColor} 16%, transparent)`,
+              color: catColor,
+            }}
           >
-            <Bookmark className="h-4 w-4" />
-          </button>
+            {catLabel}
+          </span>
         </div>
 
         {/* ── Body ── */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2.5 scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent w-full" style={{ maxWidth: "100%" }}>
-          {isActive ? (
-            <>
-              {/* Text */}
-              {contentSrc && (
-                <div className="text-[13px] leading-[1.8] text-foreground/90 break-words overflow-x-hidden [&_img]:max-h-[80px] [&_img]:rounded-lg [&_img]:object-cover [&_img]:mt-1 [&_p]:mb-1.5 [&_p]:leading-relaxed [&_a]:text-indigo-500 [&_a]:font-medium [&_strong]:font-bold">
-                  <ReactMarkdown components={markdownComponentsWithImages}>
-                    {contentSrc}
-                  </ReactMarkdown>
-                </div>
-              )}
+        <div className="relative w-full flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="flex flex-col gap-1.5 h-full">
+            {/* Title */}
+            {title && (
+              <h3 dir="auto" className="shrink-0 font-semibold text-foreground cursor-pointer hover:text-primary transition-colors m-0"
+                style={{ fontFamily: "'Source Serif 4', var(--font-vazirmatn), Georgia, serif", fontSize: "clamp(16px, 1.6vw, 19px)" }}>
+                {title}
+              </h3>
+            )}
 
-              {/* YouTube — thumbnail + play overlay */}
-              {inlineYouTubeId && (
-                ytPlaying ? (
-                  <div className="shrink-0 rounded-xl overflow-hidden border border-indigo-500/20 bg-gradient-to-br from-indigo-500/[0.04] to-violet-500/[0.04]">
-                    <div className="flex items-center gap-2 px-3 py-2 border-b border-indigo-500/10">
-                      <Play className="h-3 w-3 text-indigo-500" />
-                      <span className="text-[9px] font-black text-indigo-500 uppercase tracking-[0.15em]">Playing</span>
-                    </div>
-                    <div className="aspect-video bg-black">
-                      <VidStackPlayer url={`https://www.youtube.com/watch?v=${inlineYouTubeId}`} />
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => setYtPlaying(true)}
-                    className="shrink-0 rounded-xl overflow-hidden aspect-video bg-muted/20 ring-1 ring-border/20 relative cursor-pointer group"
-                  >
-                    <img
-                      src={`https://img.youtube.com/vi/${inlineYouTubeId}/maxresdefault.jpg`}
-                      alt=""
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="h-14 w-14 rounded-full bg-white/90 shadow-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <Play className="h-6 w-6 text-foreground ml-0.5" />
-                      </div>
-                    </div>
-                    <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/50 backdrop-blur-sm text-[9px] font-bold text-white/80">
-                      Video
-                    </div>
-                  </div>
-                )
-              )}
+            {/* Preview - 2 lines, always */}
+            {contentSrc && (
+              isActive ? (
+                <p dir="auto" className="shrink-0 text-xs text-muted-foreground/50 leading-relaxed line-clamp-2">
+                  {stripHandledUrls(post.content?.replace(/<[^>]*>/g, "") || "").slice(0, 200)}
+                </p>
+              ) : (
+                <p dir="auto" className={cn("shrink-0 text-[12px] text-muted-foreground/60 leading-relaxed", clampForCategory(category))} style={{ fontFamily: "var(--font-nunito), var(--font-vazirmatn), sans-serif" }}>
+                  {stripHandledUrls(post.content?.replace(/<[^>]*>/g, "") || "").slice(0, 200) || "No content"}
+                </p>
+              )
+            )}
 
-              {/* Telegram */}
-              {inlineTelegramUrl && (
-                <div className="shrink-0 rounded-xl overflow-hidden aspect-video bg-muted/20 ring-1 ring-border/20">
-                  <VidStackPlayer url={inlineTelegramUrl} />
-                </div>
-              )}
+            {/* Media section */}
+            {(hasVideo || hasImages || showFileCard) && (
+              <div className="w-full flex-1 min-h-0 max-h-[140px] flex flex-col gap-1.5 overflow-hidden">
+                {hasVideo && (
+                  <VideoThumbnail
+                    url={mainVideoUrl || inlineYouTubeId || inlineTelegramUrl || ""}
+                    onClick={() => window.open(`/social?post=${post.id}`, "_self")}
+                    className="shrink-0 max-h-[75px]"
+                  />
+                )}
+                {hasImages && (
+                  <ImageGallery
+                    images={allImages}
+                    onImageClick={() => window.open(`/social?post=${post.id}`, "_self")}
+                    className="shrink-0 flex-1 min-h-0 max-h-[90px]"
+                  />
+                )}
+                {showFileCard && (
+                  <FileCard
+                    fileName={fileAttachments[0]?.name || fileAttachments[0]?.url || "File"}
+                    fileSize={fileAttachments[0]?.size}
+                    onClick={() => window.open(`/social?post=${post.id}`, "_self")}
+                    className="shrink-0 max-h-[38px]"
+                  />
+                )}
+              </div>
+            )}
 
-              {/* Video attachment */}
-              {mainVideoUrl && (
-                <div className="shrink-0 rounded-xl overflow-hidden aspect-video bg-muted/20 ring-1 ring-border/20">
-                  <VidStackPlayer url={mainVideoUrl} />
-                </div>
-              )}
-
-              {/* Images */}
-              <ImageGrid images={allImages} onOpen={setLightboxIdx} />
-
-              {/* Poll */}
-              {post.poll && <PollBlock poll={post.poll} />}
-
-              {/* Shared question */}
+            {/* Indicators */}
+            <div className="shrink-0 flex flex-wrap gap-x-3 gap-y-0.5">
               {sharedQuestion && (
-                <div className="shrink-0 max-h-[90px] overflow-hidden rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3">
-                  <SharedQuestionBlock question={sharedQuestion} />
-                </div>
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-500">
+                  <HelpCircle className="h-3.5 w-3.5" /> Question
+                </span>
               )}
-
-              {/* Audio */}
+              {post.poll && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-500">
+                  <BarChart3 className="h-3.5 w-3.5" /> Poll
+                </span>
+              )}
               {audioAttachments.length > 0 && (
-                <div className="shrink-0 space-y-1.5">
-                  {audioAttachments.slice(0, 2).map((a: any, i: number) => (
-                    <div
-                      key={i}
-                      className="rounded-xl bg-emerald-500/8 border border-emerald-500/15 p-2.5"
-                    >
-                      <audio controls className="w-full h-8" src={a.url || a}>
-                        Your browser does not support audio.
-                      </audio>
-                    </div>
-                  ))}
-                </div>
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-500">
+                  <Headphones className="h-3.5 w-3.5" /> {audioAttachments.length} Audio
+                </span>
               )}
+              {externalLinks.length > 0 && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-500">
+                  <LinkIcon className="h-3.5 w-3.5" /> {externalLinks.length} Link{externalLinks.length !== 1 ? "s" : ""}
+                </span>
+              )}
+              {hasFiles && mediaTypeCount >= 3 && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-500">
+                  <FileIcon fileName={fileAttachments[0]?.name || "file"} /> {fileAttachments.length} file{fileAttachments.length !== 1 ? "s" : ""}
+                </span>
+              )}
+              {showFileCard && extraFileCount > 0 && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-500">
+                  <FileIcon fileName={fileAttachments[0]?.name || "file"} /> +{extraFileCount} more
+                </span>
+              )}
+            </div>
 
-              {/* Files */}
-              {fileAttachments.length > 0 && (
-                <div className="shrink-0 space-y-1.5">
-                  {fileAttachments.slice(0, 3).map((a: any, i: number) => {
-                    const fileName =
-                      a.name || a.fileName || a.url?.split("/").pop() || `file-${i + 1}`;
-                    return (
-                      <a
-                        key={i}
-                        href={a.url || a}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-500/8 border border-amber-500/15 hover:bg-amber-500/15 transition-all group"
-                      >
-                        <Paperclip className="h-4 w-4 text-amber-500 shrink-0" />
-                        <span className="text-[11px] font-medium text-foreground/70 truncate flex-1">
-                          {fileName}
-                        </span>
-                        <ArrowRight className="h-3 w-3 text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 rotate-[-45deg]" />
-                      </a>
-                    );
-                  })}
-                </div>
-              )}
-            </>
-          ) : (
-            /* Non-active: show plain preview */
-            <p className="text-[12px] text-muted-foreground/60 leading-relaxed line-clamp-8">
-              {stripHandledUrls(post.content?.replace(/<[^>]*>/g, "") || "").slice(0, 200) ||
-                "No content"}
-            </p>
-          )}
+            {/* Tags */}
+            {hashtags.length > 0 && (
+              <div className="shrink-0 flex flex-wrap gap-1.5">
+                {hashtags.slice(0, 6).map((tag, i) => (
+                  <span key={i}
+                    className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary/70 hover:bg-primary/20 transition-colors">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* ── Footer Actions ── */}
-        <div className="shrink-0 px-4 pb-3 pt-2 border-t border-border/10">
+        {/* ── Footer (Meridian style) ── */}
+        <div className="relative shrink-0 pt-4 mt-auto border-t border-border/10 z-10">
           <div className="flex items-center gap-1">
             {/* Like */}
             <button
               onClick={handleLike}
               className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all active:scale-90",
-                liked
-                  ? "text-rose-500 bg-rose-500/10"
-                  : "text-muted-foreground/50 hover:text-rose-500 hover:bg-rose-500/8"
+                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-90",
+                liked ? "text-red-500" : "text-muted-foreground/60 hover:text-red-500 hover:bg-red-500/8"
               )}
             >
-              <Heart className={cn("h-4 w-4", liked && "fill-current")} />
-              <span>{likeCount > 0 ? likeCount.toLocaleString() : ""}</span>
+              <MeridianHeart filled={liked} className="h-4 w-4" />
+              <span>{likeCount > 0 ? formatCount(likeCount) : ""}</span>
             </button>
 
             {/* Comments */}
             <Link
               href="/social"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-muted-foreground/50 hover:text-indigo-500 hover:bg-indigo-500/8 transition-all"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground/60 hover:text-indigo-500 hover:bg-indigo-500/8 transition-all"
             >
-              <MessageSquare className="h-4 w-4" />
-              <span>{post._count?.comments ? post._count.comments.toLocaleString() : ""}</span>
+              <MeridianComment className="h-4 w-4" />
+              <span>{post._count?.comments ? formatCount(post._count.comments) : ""}</span>
             </Link>
 
-            {/* Share */}
-            <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-muted-foreground/50 hover:text-sky-500 hover:bg-sky-500/8 transition-all active:scale-90">
-              <Share2 className="h-4 w-4" />
+            {/* Bookmark */}
+            <button
+              onClick={handleBookmark}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-90",
+                saved ? "text-primary" : "text-muted-foreground/60 hover:text-primary hover:bg-primary/8"
+              )}
+            >
+              <MeridianBookmark filled={saved} className="h-4 w-4" />
+              <span>{bookmarkCount > 0 ? formatCount(bookmarkCount) : ""}</span>
             </button>
 
-            {/* Spacer */}
-            <div className="flex-1" />
+            {/* Share */}
+            <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground/60 hover:text-sky-500 hover:bg-sky-500/8 transition-all active:scale-90">
+              <MeridianShare className="h-4 w-4" />
+            </button>
 
-            {/* Read more */}
-            <Link
-              href="/social"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-wider hover:bg-indigo-500/20 active:scale-95 transition-all"
-            >
-              Read more
-              <ArrowRight className="h-3 w-3" />
-            </Link>
+            {/* Spacer + Read more */}
+            <div className="flex-1" />
+            {contentSrc && (
+              <Link
+                href={`/social?post=${post.id}`}
+                className="text-xs font-semibold text-indigo-500 hover:text-indigo-400 transition-colors"
+              >
+                Read more
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -828,14 +671,6 @@ export function CommunityPostsCarousel() {
   const [posts, setPosts] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [swipeDx, setSwipeDx] = useState(0);
-
-  const nextPost = activeIdx < posts.length - 1 ? posts[activeIdx + 1] : null;
-  const prevPost = activeIdx > 0 ? posts[activeIdx - 1] : null;
-
-  const nextProgress = nextPost ? Math.max(0, Math.min(1, -swipeDx / 200)) : 0;
-  const prevProgress = prevPost ? Math.max(0, Math.min(1, swipeDx / 200)) : 0;
 
   useEffect(() => {
     let cancelled = false;
@@ -860,14 +695,15 @@ export function CommunityPostsCarousel() {
   /* ── Loading ── */
   if (loading) {
     return (
-      <div className="px-4 pt-2">
+      <div className="section-entrance">
         <div className="flex items-center gap-2 mb-3">
-          <div className="h-4 w-4 rounded bg-muted/30 animate-pulse" />
-          <div className="h-3 w-16 rounded bg-muted/30 animate-pulse" />
+          <Flame className="h-4 w-4 text-orange-500" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+            Community
+          </span>
         </div>
-        <div className="relative" style={{ minHeight: 400 }}>
-          <div className="absolute inset-0 rounded-2xl border border-border/30 bg-card/40 overflow-hidden animate-pulse" style={{ zIndex: 2 }} />
-          <div className="absolute inset-[3px] rounded-2xl border border-border/20 bg-card/30 overflow-hidden animate-pulse" style={{ zIndex: 1, opacity: 0.4 }} />
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+          <SkeletonCard />
           <SkeletonCard />
         </div>
       </div>
@@ -881,112 +717,24 @@ export function CommunityPostsCarousel() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: "easeOut" }}
-      className="px-4 pt-2"
+      className="section-entrance"
     >
-      {/* Social heading */}
+      {/* Community heading */}
       <div className="flex items-center gap-2 mb-3">
-        <Users className="h-4 w-4 text-indigo-500" />
+        <Flame className="h-4 w-4 text-orange-500" />
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-          Social
+          Community
         </span>
       </div>
 
-      {/* Card stack */}
-      <div className="relative" style={{ minHeight: 400 }}>
-        {/* Preview card — previous (swipe right reveals previous) */}
-        {prevPost && (
-          <div
-            className="absolute inset-0 rounded-2xl border border-border/30 bg-card overflow-hidden pointer-events-none select-none"
-            style={{
-              zIndex: 1,
-              transform: `scale(${0.92 + prevProgress * 0.08}) translateY(${(1 - prevProgress) * 10}px)`,
-              opacity: 0.3 + prevProgress * 0.7,
-              willChange: "transform, opacity",
-              transition: swipeDx === 0
-                ? "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease"
-                : "none",
-            }}
-          >
-            <div className="flex items-center gap-3 px-4 pt-3.5 pb-3 border-b border-border/10">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-[10px] font-black shrink-0">
-                {getInitials(prevPost.author?.name || "?")}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[12px] font-bold text-foreground/70 truncate">{prevPost.author?.name || "Unknown"}</p>
-                <p className="text-[9px] text-muted-foreground/40">{timeAgo(prevPost.createdAt)}</p>
-              </div>
-            </div>
-            <div className="p-4">
-              <p className="text-[12px] text-foreground/50 leading-relaxed line-clamp-4">
-                {stripHandledUrls(prevPost.content?.replace(/<[^>]*>/g, "") || "").slice(0, 120) || "No content"}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Preview card — next (swipe left reveals next) */}
-        {nextPost && (
-          <div
-            className="absolute inset-0 rounded-2xl border border-border/30 bg-card overflow-hidden pointer-events-none select-none"
-            style={{
-              zIndex: 2,
-              transform: `scale(${0.92 + nextProgress * 0.08}) translateY(${(1 - nextProgress) * 10}px)`,
-              opacity: 0.3 + nextProgress * 0.7,
-              willChange: "transform, opacity",
-              transition: swipeDx === 0
-                ? "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease"
-                : "none",
-            }}
-          >
-            <div className="flex items-center gap-3 px-4 pt-3.5 pb-3 border-b border-border/10">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-white text-[10px] font-black shrink-0">
-                {getInitials(nextPost.author?.name || "?")}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[12px] font-bold text-foreground/70 truncate">{nextPost.author?.name || "Unknown"}</p>
-                <p className="text-[9px] text-muted-foreground/40">{timeAgo(nextPost.createdAt)}</p>
-              </div>
-            </div>
-            <div className="p-4">
-              <p className="text-[12px] text-foreground/50 leading-relaxed line-clamp-4">
-                {stripHandledUrls(nextPost.content?.replace(/<[^>]*>/g, "") || "").slice(0, 120) || "No content"}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Current post card (swipeable) */}
-        <div style={{ position: "relative", zIndex: 10 }}>
+      {/* Horizontal scroll of fixed-width Meridian-style post cards */}
+      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+        {posts.slice(0, 6).map((post, idx) => (
           <PostCard
-            key={posts[activeIdx].id}
-            post={posts[activeIdx]}
+            key={post.id}
+            post={post}
             isActive={true}
-            index={activeIdx}
-            onSwipeLeft={() => {
-              if (activeIdx < posts.length - 1) setActiveIdx((p) => Math.min(p + 1, posts.length - 1));
-            }}
-            onSwipeRight={() => {
-              if (activeIdx > 0) setActiveIdx((p) => Math.max(p - 1, 0));
-            }}
-            onSwiping={(dx) => setSwipeDx(dx)}
-          />
-        </div>
-      </div>
-
-      {/* Navigation dots */}
-      <div className="flex items-center justify-center gap-1.5 mt-3">
-        {posts.map((_, i) => (
-          <div
-            key={i}
-            className={cn(
-              "rounded-full transition-all duration-300",
-              i === activeIdx ? "bg-indigo-500" : "bg-border/50"
-            )}
-            style={{
-              height: i === activeIdx ? 6 : 4,
-              width: i === activeIdx ? 6 : 4,
-              opacity: i === activeIdx ? 1 : 0.4,
-            }}
+            index={idx}
           />
         ))}
       </div>

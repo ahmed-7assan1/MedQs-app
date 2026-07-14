@@ -4,11 +4,9 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Play, BookOpen } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getYouTubeId, getYouTubeThumbnail } from "@/lib/video-utils";
-import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
+import { SidebarLabel } from "@/components/dashboard/shared/SidebarLabel";
 import type { LastLectureInfo } from "@/types/dashboard";
 
 const HQ_FALLBACK = "hqdefault.jpg";
@@ -17,7 +15,20 @@ export function ContinueLectureCard({ lecture }: { lecture: LastLectureInfo | nu
   const [imgError, setImgError] = useState(false);
   const [useFallbackImg, setUseFallbackImg] = useState(false);
 
-  if (!lecture) return null;
+  if (!lecture) {
+    return (
+      <div className="space-y-2">
+        <SidebarLabel icon={Play} label="Continue Lecture" />
+        <Link
+          href="/modules"
+          className="flex items-center gap-2 p-4 rounded-xl border border-border/30 bg-card/30 text-xs text-muted-foreground/50 hover:text-foreground transition-[color,opacity] duration-200"
+        >
+          <BookOpen className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+          <span>No lecture in progress. Start studying!</span>
+        </Link>
+      </div>
+    );
+  }
 
   const videoId = lecture.videoUrl ? getYouTubeId(lecture.videoUrl) : null;
   const thumbnailUrl = videoId && !imgError
@@ -27,68 +38,60 @@ export function ContinueLectureCard({ lecture }: { lecture: LastLectureInfo | nu
     : null;
 
   return (
-    <>
-    <SectionHeader icon={Play} title="Continue Lecture" />
-    <Card className="overflow-hidden border-border/40 shadow-sm min-h-[150px]">
-      <div className="relative mx-2 mt-2 aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center group/card">
-        {thumbnailUrl ? (
-          <>
-            <Image
-              src={thumbnailUrl}
-              alt={lecture.lectureTitle}
-              fill
-              className="object-cover transition-transform duration-300 group-hover/card:scale-105"
-              onError={() => {
-                if (!useFallbackImg) {
-                  setUseFallbackImg(true);
-                } else {
-                  setImgError(true);
-                }
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30">
-                <Play className="h-5 w-5 ml-0.5" />
+    <div className="space-y-3">
+      <SidebarLabel icon={Play} label="Continue Lecture" />
+      
+      <div className="rounded-xl border border-border/30 bg-card/40 backdrop-blur-sm p-3.5 shadow-sm transition-[transform,opacity,box-shadow,border-color] duration-300 hover:shadow-md hover:border-primary/30">
+        <div className="relative aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group/card mb-3.5">
+          {thumbnailUrl ? (
+            <>
+              <Image
+                src={thumbnailUrl}
+                alt={lecture.lectureTitle}
+                fill
+                className="object-cover transition-transform duration-300 group-hover/card:scale-105"
+                onError={() => {
+                  if (!useFallbackImg) {
+                    setUseFallbackImg(true);
+                  } else {
+                    setImgError(true);
+                  }
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/card:bg-black/20 transition-[transform,opacity,box-shadow,border-color] duration-300">
+                <div className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/95 text-primary-foreground shadow-lg shadow-primary/30 opacity-0 group-hover/card:opacity-100 scale-90 group-hover/card:scale-100 transition-[transform,opacity,box-shadow,border-color] duration-300">
+                  <Play className="h-4.5 w-4.5 fill-current ml-0.5" />
+                </div>
               </div>
-            </div>
-          </>
-        ) : (
-          <BookOpen className="h-10 w-10 text-muted-foreground/40" />
-        )}
-      </div>
-
-      <CardContent className="flex flex-col min-w-0 p-4">
-        <div className="min-w-0">
-          <p className="text-sm font-bold text-foreground leading-snug line-clamp-2">
-            {lecture.lectureTitle}
-          </p>
-          <div className="flex items-center gap-1.5 mt-2">
-            <Avatar className="h-4 w-4 shrink-0">
-              {lecture.channelAvatar ? (
-                <AvatarImage src={lecture.channelAvatar} alt={lecture.channelName} />
-              ) : null}
-              <AvatarFallback className="text-[7px] font-black bg-primary/10 text-primary">
-                {lecture.channelName.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-[10px] font-bold text-muted-foreground truncate">
-              {lecture.channelName}
-            </span>
-          </div>
+            </>
+          ) : (
+            <BookOpen className="h-8 w-8 text-muted-foreground/30" />
+          )}
         </div>
-
-        <Button
-          asChild
-          size="sm"
-          className="self-end mt-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-wider gap-1.5"
-        >
-          <Link href={`/modules/${lecture.moduleId}`}>
-            <Play className="h-3.5 w-3.5" /> Continue
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
-    </>
+        
+        <div className="space-y-3">
+          <div>
+            <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-none">Lecture in progress</p>
+            <h4 className="text-xs font-black text-foreground leading-snug line-clamp-2 mt-1.5">
+              {lecture.lectureTitle}
+            </h4>
+            <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wider mt-0.5">
+              {lecture.subjectName}
+            </p>
+          </div>
+          
+          <Button
+            asChild
+            size="sm"
+            className="w-full h-9 rounded-lg text-[10px] font-black uppercase tracking-wider gap-1.5 bg-primary text-primary-foreground hover:opacity-90 transition-all"
+          >
+            <Link href={`/modules/${lecture.moduleId}/lectures/${lecture.lectureId}`}>
+              <Play className="h-3 w-3 fill-current" /> Continue Studying
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

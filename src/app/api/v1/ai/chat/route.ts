@@ -353,7 +353,7 @@ export async function POST(req: NextRequest) {
     } else if (customProvider === "mistral") {
       activeCustomKey = user.personalMistralKey;
     } else if (customProvider === "deepseek") {
-      activeCustomKey = user.personalDeepseekKey || (user as any).personalDeepseekKey;
+      activeCustomKey = (user as any).personalDeepseekKey;
     } else if (customProvider === "cloudflare") {
       activeCustomKey = user.personalCloudflareKey;
     } else if (customProvider === "huggingface") {

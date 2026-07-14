@@ -1309,6 +1309,39 @@ ull\ when Redis throws. Outer try-catch catches all errors. |
 | **Recommended Solution** | Accept risk for current scale. Revisit when supporting third-party integrations. |
 | **Priority** | 18 (deferred) |
 
+### P2-9: CarouselErrorBoundary — ResetKey Stuck on Static Data Length
+
+| Field | Value |
+|---|---|
+| **Severity** | Improvement (bug in error-recovery logic) |
+| **Description** | `CarouselErrorBoundary` uses `data.items?.length` as its `resetKey`. If the data array length is the same before and after an error (common — same 6 items), the boundary's `componentDidUpdate` never fires its state reset. The error fallback persists forever even after the underlying fetch succeeds. |
+| **Root Cause** | `resetKey` is a **data-length signal**, not a **time-or-event signal**. The SWR re-fetch returns the same-length array post-recovery, so `prevProps.resetKey !== this.props.resetKey` evaluates to false. |
+| **Risk** | Low. Only triggers when: (1) a carousel fetch fails, AND (2) the next successful fetch returns the same number of items. In practice, any change in the data source (new post, removed record) would fix itself. But on a static dataset, the broken section is permanently stuck on the "temporarily unavailable" fallback until page reload. |
+| **Business Impact** | If the carousel API has a transient failure (network blip, server restart), the section stays broken until the user manually refreshes — defeating the purpose of SWR's automatic background revalidation. |
+| **User Impact** | "This section is temporarily unavailable" message persists even after the API recovers. User must hard-refresh to see the content. |
+| **Recommended Solution** | Change `resetKey` to a timestamp or incrementing counter that changes on every SWR revalidation attempt, regardless of data length change. Options: (a) pass `Date.now()` from the parent on each render, (b) use SWR's `isValidating` as part of the key, (c) use a request counter. |
+| **Estimated Difficulty** | Easy (15 min) |
+| **Files Affected** | `DashboardDesktopView.tsx` (resetKey value), optionally `CarouselErrorBoundary.tsx` (logic unchanged) |
+| **Testing Strategy** | Mock SWR to: emit error → emit success with same-length data → verify boundary resets. |
+| **Priority** | 19 |
+
+### P2-10: Dead `quickPaper` DB Query on Every Dashboard Load
+
+| Field | Value |
+|---|---|
+| **Severity** | Improvement (wasted DB query) |
+| **Description** | `fetchDashboardData()` in `dashboard-queries.ts:257-262` runs `prisma.pastPaper.findFirst(...)` and returns it as `quickPaper` in the result object. **No consumer reads this field.** It is destructured in the page (line 85 of `page.tsx`) but only 9 named fields are extracted — `quickPaper` falls into the `...rest` and is silently discarded. |
+| **Root Cause** | The field was added to the server return type during development but never wired to any client component. The `DashboardData` client type (in `@/types/dashboard.ts`) has no corresponding field. The data is fetched, serialized, and thrown away on every dashboard load. |
+| **Risk** | Very low in absolute terms (single `findFirst` with no joins), but it is a completely unnecessary DB query on the most-hit page of the application. |
+| **Business Impact** | Wastes one Prisma query per dashboard load. On Supabase free tier (30 pooler connections), every wasted query increases pool contention. |
+| **User Impact** | None directly — the query is fast (<5ms). |
+| **Technical Impact** | Adds unnecessary load to Postgres. The `pastPaper` table will grow over time; `findFirst` with no `where` on `semesterId` (correctly filtered) but the result is fruitless labor. |
+| **Recommended Solution** | Remove the `quickPaper` query from `fetchDashboardData()`, remove it from the server `DashboardData` type, and remove it from the return object. |
+| **Estimated Difficulty** | Easy (10 min) |
+| **Files Affected** | `src/lib/dashboard-queries.ts` lines 48, 257-262, 303 |
+| **Testing Strategy** | Verify dashboard renders identically before and after removal. No component references `data.quickPaper`. |
+| **Priority** | 20 |
+
 ---
 
 ## Testing Strategy
@@ -1909,6 +1942,8 @@ Every audit finding mapped to its remediation phase, disposition, and verificati
 | P2-6 | Unreachable `unstable_cache` in Forum Posts Route | Phase 10 | Fixed | Commented-out `unstable_cache` code and unused `unstable_cache` import removed from forum posts route; dead code eliminated |
 | P2-7 | TypeScript `as any` Casts for `prisma.lectureVideo` | Phase 10 | Fixed | `prisma generate` verified; `(prisma as any).lectureVideo` replaced with typed `prisma.lectureVideo` in both curriculum and search routes |
 | P2-8 | No CSRF Protection | Phase 10 (comment only) | Accepted Risk | `SameSite=Lax` cookie mitigation sufficient for current architecture; revisit when supporting third-party integrations; comment referencing plan and finding ID added in `src/lib/supabase/middleware.ts` |
+| P2-9 | CarouselErrorBoundary — ResetKey stuck on static data length | Post-Phase-7 finding (discovered during frontend design audit) | **Pending** — logged as finding; no fix applied yet | `resetKey` uses `data.items?.length` — if length unchanged after error recovery, boundary stays stuck on fallback. Fix: change to timestamp/counter that changes on every revalidation. |
+| P2-10 | Dead `quickPaper` DB query on every dashboard load | Post-Phase-7 finding (discovered during frontend design audit) | **Pending** — logged as finding; no fix applied yet | `prisma.pastPaper.findFirst()` runs on every dashboard load but result is never consumed by any component or caller. Remove query + server type field. |
 | P9-1 | Health check's `supabaseAuth` probe was structurally incapable of ever returning `"healthy"` — used `HEAD` to Supabase project root URL (`https://*.supabase.co/`) which Kong returns as **404 Not Found** (no endpoint at `/`). Check always produced `"degraded"` regardless of actual Auth availability. | Phase 9 (post-signoff fix) | Fixed — changed to `GET /auth/v1/settings`; any response from the server (including 401, 404) is treated as `"healthy"` because the goal is confirming the service is alive, not that we're authorized. Only network-level failures (timeout, DNS, connection refused) mark it `"unhealthy"`. | **✅ Verified on staging.** All three sub-checks (`database`, `redis`, `supabaseAuth`) return `"healthy"`. |
 | P9-2 | Phase 9's `apiSuccess()` wrapper changed community posts API response shape from `{ items: [...] }` to `{ data: { items: [...] } }`, but 3 consuming frontend files were never updated to unwrap the new shape. This caused the entire Community carousel to silently render nothing (empty `return null` path) despite successful 200 responses — no console errors, no error boundary activation, just a blank section where the carousel should be. Discovered during staging verification of the P2-4 error boundary fix. | Phase 9 (post-signoff fix) | Fixed — all 3 consumers updated with consistent unwrap pattern `(x as any)?.data ?? x`: `CommunityCarouselSidebar.tsx:296` (main carousel render), `CommunityPostsCarousel.tsx:847` (secondary carousel render), `DashboardDesktopView.tsx:26,29` (error boundary `resetKey`). Records and Videos carousels were unaffected — their API routes never migrated to `apiSuccess()`. | **✅ Verified on staging.** All three scenarios pass: (1) normal load shows real posts, (2) blocked request shows "temporarily unavailable", (3) unblock + client-side nav recovers and shows real content. |
 
@@ -1935,10 +1970,11 @@ These findings have been implemented and verified by code inspection (or locally
 
 | Metric | Count |
 |---|---|---|
-| Total findings | 20 |
+| Total findings | 22 |
 | Actively fixed in code | 18 |
 | Documented limitation | 1 (P2-3) |
 | Accepted risk | 1 (P2-8) |
+| Logged but not yet fixed | 2 (P2-9, P2-10) |
 | Silently missing (unaddressed) | 0 |
 
 ### Known Residual Risks (Git History)

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      include: { adminAiKeys: true, siteConfig: true },
+      include: { adminAiKeys: true },
     });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 

@@ -58,6 +58,7 @@ ${content.slice(0, 10000)}`;
 
 export async function POST(req: NextRequest) {
   const session = await auth();
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const w = await requireAdminWriter(session);
   if (!w.ok) return w.response;
 

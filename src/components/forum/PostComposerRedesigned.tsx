@@ -15,7 +15,9 @@ import {
   Trash,
   Check,
   Ghost,
-  Palette
+  Palette,
+  Tag,
+  CheckCircle
 } from "@phosphor-icons/react";
 import { useCommunityShareStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -45,11 +47,24 @@ interface Props {
       attachments?: any[];
       isAnonymous?: boolean;
       backgroundStyle?: string;
+      title?: string;
+      category?: string;
+      solved?: boolean;
     }
   ) => Promise<boolean>;
   forums?: { id: string; name: string }[];
   placeholder?: string;
 }
+
+const CATEGORY_OPTIONS = [
+  { value: "anatomy", label: "Anatomy", color: "#7c9cf0" },
+  { value: "physiology", label: "Physiology", color: "#63b8b0" },
+  { value: "pharmacology", label: "Pharmacology", color: "#b58cf0" },
+  { value: "pathology", label: "Pathology", color: "#e0a15c" },
+  { value: "surgery", label: "Surgery", color: "#e07c7c" },
+  { value: "internal-medicine", label: "Internal Medicine", color: "#5cc2e0" },
+  { value: "study-tips", label: "Study Tips", color: "#a3c96a" },
+];
 
 export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -63,6 +78,10 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
   const [selectedForumId, setSelectedForumId] = useState<string>(forums?.[0]?.id || "");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [backgroundStyle, setBackgroundStyle] = useState<string>("");
+  const [postTitle, setPostTitle] = useState("");
+  const [postCategory, setPostCategory] = useState("");
+  const [postSolved, setPostSolved] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showBackgroundPicker, setShowBackgroundPicker] = useState(false);
   const [customBgs, setCustomBgs] = useState<string[]>([]);
   const bgUploadRef = useRef<HTMLInputElement>(null);
@@ -276,9 +295,15 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
       qaAnswer,
       isAnonymous,
       backgroundStyle,
+      title: postTitle || undefined,
+      category: postCategory || undefined,
+      solved: postSolved || undefined,
     });
     if (ok) {
       setContent("");
+      setPostTitle("");
+      setPostCategory("");
+      setPostSolved(false);
       setAttachments([]);
       setIsExpanded(false);
       setSharedQuestion(null);
@@ -460,6 +485,18 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
+              {/* Title Input */}
+              {isExpanded && (
+                <div className="mx-5 mb-3">
+                  <input
+                    value={postTitle}
+                    onChange={(e) => setPostTitle(e.target.value)}
+                    placeholder="Post title (optional)"
+                    className="w-full bg-transparent border-none p-0 focus:ring-0 text-white/90 text-lg font-bold placeholder:text-white/20 leading-snug outline-none"
+                  />
+                </div>
+              )}
+
               {/* Shared Question Preview */}
               {sharedQuestion && (
                 <div className="mx-5 mb-4 relative group">
@@ -773,6 +810,46 @@ export function PostComposerRedesigned({ user, onPost, forums, placeholder }: Pr
                       </>
                     )}
                   </div>
+                  {/* Category Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowCategoryPicker(!showCategoryPicker)}
+                      type="button"
+                      title="Category"
+                      className={cn("h-10 px-3 flex items-center gap-1.5 rounded-xl transition-all text-[11px] font-black uppercase tracking-widest", postCategory ? "text-indigo-400 bg-indigo-400/10" : "text-white/30 hover:text-white hover:bg-white/5")}
+                    >
+                      <Tag size={14} weight={postCategory ? "fill" : "bold"} />
+                      <span>{postCategory ? CATEGORY_OPTIONS.find(c => c.value === postCategory)?.label || postCategory : "Category"}</span>
+                    </button>
+                    {showCategoryPicker && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setShowCategoryPicker(false)} />
+                        <div className="absolute bottom-full left-0 mb-2 bg-[#1C1B22] border border-white/10 rounded-xl p-2 shadow-2xl z-50 min-w-[180px]">
+                          {CATEGORY_OPTIONS.map((cat) => (
+                            <button
+                              key={cat.value}
+                              type="button"
+                              onClick={() => { setPostCategory(postCategory === cat.value ? "" : cat.value); setShowCategoryPicker(false); }}
+                              className={cn("w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all text-right", postCategory === cat.value ? "bg-indigo-500/20 text-indigo-300" : "text-white/60 hover:text-white hover:bg-white/5")}
+                            >
+                              <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                              {cat.label}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {/* Solved Toggle */}
+                  <button
+                    onClick={() => setPostSolved(!postSolved)}
+                    type="button"
+                    title={postSolved ? "Mark as open" : "Mark as solved"}
+                    className={cn("h-10 px-3 flex items-center gap-1.5 rounded-xl transition-all text-[11px] font-black uppercase tracking-widest", postSolved ? "text-emerald-400 bg-emerald-400/10" : "text-white/30 hover:text-white hover:bg-white/5")}
+                  >
+                    <CheckCircle size={14} weight={postSolved ? "fill" : "bold"} />
+                    <span>{postSolved ? "Solved" : "Open"}</span>
+                  </button>
                 </div>
 
                 <button
