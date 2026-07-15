@@ -4,7 +4,6 @@ import { MissionControlHero } from "@/components/dashboard/sections/MissionContr
 import { FocusPlanCard } from "@/components/dashboard/sections/FocusPlanCard";
 import { TodayQueue } from "@/components/dashboard/sections/TodayQueue";
 import { QuickActionsStrip } from "@/components/dashboard/sections/QuickActionsStrip";
-import { ContinueLearningSection } from "@/components/dashboard/sections/ContinueLearningSection";
 import { LearningHeatmap } from "@/components/dashboard/sections/LearningHeatmap";
 import { RoomsCarousel } from "@/components/dashboard/sections/RoomsCarousel";
 import { CommunityPostsCarousel } from "@/components/dashboard/CommunityPostsCarousel";
@@ -32,10 +31,7 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
       {/* 5. Core Features Links */}
       <QuickActionsStrip />
 
-      {/* 6. Course Modules Progress */}
-      <ContinueLearningSection data={data} />
-
-      {/* 7. Weekly Activity Heatmap */}
+      {/* 6. Weekly Activity Heatmap */}
       <LearningHeatmap data={data} />
     </div>
   );

@@ -1,26 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import type { DashboardData } from "@/types/dashboard";
 import { deriveTodayTasks } from "@/types/dashboard";
 import { MissionControlHero } from "@/components/dashboard/sections/MissionControlHero";
 import { FocusPlanCard } from "@/components/dashboard/sections/FocusPlanCard";
 import { TodayQueue } from "@/components/dashboard/sections/TodayQueue";
 import { QuickActionsStrip } from "@/components/dashboard/sections/QuickActionsStrip";
-import { ContinueLearningSection } from "@/components/dashboard/sections/ContinueLearningSection";
-import { SuggestedVideosCarousel } from "@/components/dashboard/sections/SuggestedVideosCarousel";
 import { RoomsCarousel } from "@/components/dashboard/sections/RoomsCarousel";
 import { CommunityPostsCarousel } from "@/components/dashboard/CommunityPostsCarousel";
 import { CarouselErrorBoundary } from "@/components/dashboard/CarouselErrorBoundary";
-import { useCurriculumVideos } from "@/lib/dashboard-fetch";
 
 export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; hasAds?: boolean }) {
-  const { data: videosData } = useCurriculumVideos();
-
-  const revalidationKeys = useRef({ videos: 0 }).current;
-
-  useEffect(() => { revalidationKeys.videos++; }, [videosData]);
-
   const todayTasks = deriveTodayTasks(data);
 
   return (
@@ -55,12 +45,6 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
             </CarouselErrorBoundary>
 
             <TodayQueue tasks={todayTasks} />
-
-            <ContinueLearningSection data={data} />
-
-            <CarouselErrorBoundary title="Videos" resetKey={revalidationKeys.videos}>
-              <SuggestedVideosCarousel />
-            </CarouselErrorBoundary>
           </div>
         </div>
       </div>

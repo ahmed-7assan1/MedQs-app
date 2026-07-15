@@ -22,19 +22,6 @@ export interface SuggestedRecord {
   subjectName: string;
 }
 
-export interface SuggestedVideo {
-  id: string;
-  videoId: string;
-  title: string;
-  thumbnail: string | null;
-  lectureId: string;
-  lectureTitle: string;
-  moduleId: string;
-  subjectName: string;
-  channelTitle: string;
-  channelThumbnail: string | null;
-}
-
 export interface PostData {
   id: string;
   content: string;
@@ -65,14 +52,6 @@ const SWR_OPTIONS = {
 export function useRecords() {
   return useSWR<PaginatedResponse<SuggestedRecord>>(
     "/api/v1/records?page=1&limit=6",
-    fetcher,
-    SWR_OPTIONS
-  );
-}
-
-export function useCurriculumVideos() {
-  return useSWR<PaginatedResponse<SuggestedVideo>>(
-    "/api/v1/videos/curriculum?page=1&limit=6",
     fetcher,
     SWR_OPTIONS
   );
