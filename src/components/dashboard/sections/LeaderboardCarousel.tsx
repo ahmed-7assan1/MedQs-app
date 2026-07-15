@@ -150,7 +150,7 @@ export const LeaderboardCarousel = memo(function LeaderboardCarousel() {
     <div>
       <SectionHeader icon={Trophy} title="Leaderboard" />
 
-      <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-2">
+      <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-2 pl-5">
         {users.map((user, idx) => (
           <UserCard key={user.id} user={user} index={idx} />
         ))}
