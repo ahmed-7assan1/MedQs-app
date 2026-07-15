@@ -5,7 +5,7 @@ import { FocusPlanCard } from "@/components/dashboard/sections/FocusPlanCard";
 import { TodayQueue } from "@/components/dashboard/sections/TodayQueue";
 import { QuickActionsStrip } from "@/components/dashboard/sections/QuickActionsStrip";
 import { LearningHeatmap } from "@/components/dashboard/sections/LearningHeatmap";
-import { RoomsCarousel } from "@/components/dashboard/sections/RoomsCarousel";
+import { LeaderboardCarousel } from "@/components/dashboard/sections/LeaderboardCarousel";
 import { CommunityPostsCarousel } from "@/components/dashboard/CommunityPostsCarousel";
 
 export function DashboardMobileView({ data }: { data: DashboardData }) {
@@ -20,7 +20,7 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
       <FocusPlanCard lastLecture={data.lastLecture ?? null} firstName={data.firstName} />
 
       {/* 3. Study Rooms */}
-      <RoomsCarousel />
+      <LeaderboardCarousel />
 
       {/* 3.5 Community Posts */}
       <CommunityPostsCarousel />

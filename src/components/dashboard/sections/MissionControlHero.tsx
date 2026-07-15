@@ -6,11 +6,7 @@ import { Bell, Sun, Moon, Sparkles, Flame, Trophy, CheckCircle2, HelpCircle, Gra
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useThemeStore, useNotificationStore } from "@/lib/store";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { NotificationsSheet } from "@/components/layout/NotificationsSheet";
 import type { DashboardData } from "@/types/dashboard";
 
 const FALLBACK_GRADIENTS = [
@@ -204,62 +200,7 @@ export const MissionControlHero = memo(function MissionControlHero({
         </div>
       </div>
 
-      <Dialog open={notifOpen} onOpenChange={setNotifOpen}>
-        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto rounded-2xl">
-          <DialogTitle className="sr-only">Notifications</DialogTitle>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-primary" />
-              <span className="text-sm font-black uppercase tracking-wider text-foreground/60">Notifications</span>
-              {unread > 0 && (
-                <span className="text-[10px] font-bold text-white bg-primary px-1.5 py-0.5 rounded-full">{unread}</span>
-              )}
-            </div>
-            {unread > 0 && (
-              <button
-                onClick={markAllRead}
-                className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
-              >
-                Mark all read
-              </button>
-            )}
-          </div>
-          {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <Bell className="h-10 w-10 mb-3 opacity-30" />
-              <p className="text-sm font-medium">No notifications yet</p>
-            </div>
-          ) : (
-            <div className="space-y-1.5">
-              {notifications.map((n) => (
-                <button
-                  key={n.id}
-                  onClick={() => markRead(n.id)}
-                  className={cn(
-                    "flex w-full items-start gap-3 p-3.5 rounded-xl text-left transition-all border",
-                    !n.read
-                      ? "bg-primary/5 border-primary/10"
-                      : "hover:bg-muted/30 border-transparent"
-                  )}
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className={cn("text-sm font-bold", !n.read ? "text-foreground" : "text-muted-foreground/70")}>
-                      {n.title}
-                    </p>
-                    <p className={cn("mt-1 text-xs leading-relaxed line-clamp-2", !n.read ? "text-muted-foreground/80" : "text-muted-foreground/50")}>
-                      {n.body}
-                    </p>
-                    <p className="mt-1.5 text-[9px] font-bold text-muted-foreground/40">
-                      {new Date(n.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <NotificationsSheet open={notifOpen} onClose={() => setNotifOpen(false)} />
     </TooltipProvider>
   );
 });

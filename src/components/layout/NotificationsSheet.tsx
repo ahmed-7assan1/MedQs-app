@@ -1,159 +1,194 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useBodyLock } from "@/hooks/useBodyLock";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useMemo } from "react";
+import { Bell, CheckCheck, Info, Megaphone, MessageSquare, Inbox } from "lucide-react";
+import { cn, formatDistanceToNow } from "@/lib/utils";
 import { useNotificationStore } from "@/lib/store";
-import { formatDistanceToNow, cn } from "@/lib/utils";
 import {
-  BellIcon,
-  XMarkIcon,
-  CheckIcon,
-  ChatBubbleLeftRightIcon,
-  SpeakerWaveIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
+  Sheet, SheetContent, SheetHeader, SheetTitle,
+} from "@/components/ui/sheet";
 
-function NotifChannelIcon({ channel }: { channel: string }) {
-  if (channel === "FORUM") return <ChatBubbleLeftRightIcon className="h-3.5 w-3.5" />;
-  if (channel === "BROADCAST") return <SpeakerWaveIcon className="h-3.5 w-3.5" />;
-  return <InformationCircleIcon className="h-3.5 w-3.5" />;
+interface ChannelStyle {
+  icon: typeof Info;
+  label: string;
+  accent: string;
+  bg: string;
+  lightBg: string;
+  border: string;
 }
 
-function NotifChannelBg({ channel }: { channel: string }) {
-  if (channel === "BROADCAST") return "bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400";
-  if (channel === "FORUM") return "bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400";
-  return "bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/40";
-}
+const CHANNEL_STYLE: Record<string, ChannelStyle> = {
+  BROADCAST: {
+    icon: Megaphone,
+    label: "Broadcasts",
+    accent: "text-amber-500",
+    bg: "bg-amber-500/10",
+    lightBg: "bg-amber-500/[0.03]",
+    border: "border-l-amber-500/40",
+  },
+  FORUM: {
+    icon: MessageSquare,
+    label: "Forum",
+    accent: "text-blue-500",
+    bg: "bg-blue-500/10",
+    lightBg: "bg-blue-500/[0.03]",
+    border: "border-l-blue-500/40",
+  },
+  OTHER: {
+    icon: Info,
+    label: "Other",
+    accent: "text-muted-foreground/40",
+    bg: "bg-muted/20",
+    lightBg: "bg-transparent",
+    border: "border-l-muted-foreground/20",
+  },
+};
 
-export function NotificationsSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const { notifications, unread, markRead, markAllRead, setNotifications } = useNotificationStore();
-  const [loading, setLoading] = useState(false);
+export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { notifications, unread, setNotifications, markRead, markAllRead } = useNotificationStore();
 
   useEffect(() => {
-    if (isOpen && notifications.length === 0) {
-      setLoading(true);
+    if (open && notifications.length === 0) {
       fetch("/api/v1/notifications")
         .then((r) => r.json())
         .then((data) => setNotifications(Array.isArray(data) ? data : []))
-        .catch(() => {})
-        .finally(() => setLoading(false));
+        .catch(() => {});
     }
-  }, [isOpen]);
+  }, [open]);
 
-  useBodyLock(isOpen);
+  const grouped = useMemo(() => {
+    const groups: Record<string, typeof notifications> = {};
+    notifications.forEach((n) => {
+      const key = n.channel || "OTHER";
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(n);
+    });
+    return groups;
+  }, [notifications]);
+
+  const isEmpty = Object.keys(grouped).length === 0;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={onClose}
-            className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm md:hidden"
-          />
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 28, stiffness: 260 }}
-            className="fixed bottom-0 left-0 right-0 z-[201] flex flex-col rounded-t-[28px] bg-card border-t border-border shadow-2xl overflow-hidden h-[88vh] md:hidden"
-          >
-            <div className="w-full flex justify-center pt-3 pb-1 shrink-0" onClick={onClose}>
-              <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-white/20" />
-            </div>
-
-            <div className="flex items-center justify-between px-5 py-2 shrink-0">
-              <div className="flex items-center gap-2">
-                <BellIcon className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
-                <span className="text-xs font-black uppercase tracking-widest text-gray-400 dark:text-white/30">Notifications</span>
-                {unread > 0 && (
-                  <span className="text-[10px] font-bold text-white bg-indigo-500 px-1.5 py-0.5 rounded-full">
-                    {unread}
-                  </span>
-                )}
+    <Sheet open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+      <SheetContent className="flex flex-col p-0 gap-0 border-l-0 sm:max-w-sm">
+        {/* ── Header ── */}
+        <SheetHeader className="shrink-0 px-5 pt-6 pb-4 border-b border-border/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                <Bell className="h-4 w-4 text-primary" />
               </div>
-              <div className="flex items-center gap-1">
-                {unread > 0 && (
-                  <button
-                    onClick={markAllRead}
-                    className="flex items-center gap-1 px-2 py-1 rounded-lg text-gray-400 dark:text-white/40 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 text-[10px] font-bold transition-all"
-                  >
-                    <CheckIcon className="h-3 w-3" /> All read
-                  </button>
-                )}
-                <button
-                  onClick={onClose}
-                  className="flex h-7 w-7 items-center justify-center rounded-full text-gray-400 dark:text-white/40 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-600 dark:hover:text-white transition-all"
-                >
-                  <XMarkIcon className="h-4 w-4" />
-                </button>
+              <div>
+                <SheetTitle className="text-sm font-bold text-foreground leading-tight">
+                  Notifications
+                </SheetTitle>
+                <p className="text-[10px] font-medium text-muted-foreground/50 mt-0.5">
+                  Stay updated with your activity
+                </p>
               </div>
             </div>
+            {unread > 0 && (
+              <span className="text-[10px] font-bold text-white bg-primary min-w-[20px] h-5 flex items-center justify-center px-1.5 rounded-full leading-none">
+                {unread}
+              </span>
+            )}
+          </div>
+          {unread > 0 && (
+            <button
+              onClick={markAllRead}
+              className="mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 hover:text-primary transition-colors self-start"
+            >
+              <CheckCheck className="h-3 w-3" />
+              Mark all as read
+            </button>
+          )}
+        </SheetHeader>
 
-            <div className="flex-1 overflow-y-auto px-5 pb-6">
-              {loading ? (
-                <div className="space-y-2 pt-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="flex gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.03] animate-pulse">
-                      <div className="h-8 w-8 rounded-xl bg-gray-200 dark:bg-white/5 shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-3 w-3/4 rounded bg-gray-200 dark:bg-white/5" />
-                        <div className="h-2.5 w-full rounded bg-gray-100 dark:bg-white/[0.02]" />
-                      </div>
+        {/* ── Body ── */}
+        <div className="flex-1 overflow-y-auto">
+          {isEmpty ? (
+            <div className="flex flex-col items-center justify-center h-full min-h-[280px] text-muted-foreground px-8">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/20 mb-4">
+                <Inbox className="h-7 w-7 opacity-30" />
+              </div>
+              <p className="text-sm font-semibold text-foreground/60">All caught up</p>
+              <p className="text-xs mt-1 text-muted-foreground/40 text-center leading-relaxed">
+                No notifications yet. Engage with the community to see updates here.
+              </p>
+            </div>
+          ) : (
+            Object.entries(grouped).map(([channel, items]) => {
+              const style = CHANNEL_STYLE[channel] || CHANNEL_STYLE.OTHER;
+              const Icon = style.icon;
+              const channelUnread = items.filter((n) => !n.read).length;
+              return (
+                <div key={channel} className={cn("px-4 py-4 border-b border-border/10 last:border-b-0", style.lightBg)}>
+                  {/* Channel header */}
+                  <div className="flex items-center gap-2 mb-3 px-1">
+                    <div className={cn("flex h-5 w-5 items-center justify-center rounded-lg", style.bg)}>
+                      <Icon className={cn("h-3 w-3", style.accent)} />
                     </div>
-                  ))}
-                </div>
-              ) : notifications.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-white/30">
-                  <BellIcon className="mb-3 h-10 w-10 opacity-30" />
-                  <p className="text-sm font-medium">No notifications yet</p>
-                  <p className="text-xs mt-1 opacity-60">Stay tuned for updates</p>
-                </div>
-              ) : (
-                <div className="space-y-1 pt-1">
-                  {notifications.map((n) => (
-                    <button
-                      key={n.id}
-                      onClick={() => markRead(n.id)}
-                      className={cn(
-                        "flex w-full items-start gap-3 p-4 rounded-2xl text-left transition-all active:scale-[0.99]",
-                        !n.read
-                          ? "bg-indigo-50 dark:bg-indigo-500/[0.06] border border-indigo-100 dark:border-indigo-500/15"
-                          : "hover:bg-gray-50 dark:hover:bg-white/[0.03] border border-transparent"
-                      )}
-                    >
-                      <div className={cn(
-                        "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl",
-                        NotifChannelBg({ channel: n.channel })
-                      )}>
-                        <NotifChannelIcon channel={n.channel} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className={cn("text-sm font-semibold", !n.read ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-white/50")}>
-                            {n.title}
+                    <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground/40">
+                      {style.label}
+                    </span>
+                    {channelUnread > 0 && (
+                      <span className={cn("text-[10px] font-bold ml-auto", style.accent)}>
+                        {channelUnread} new
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Items */}
+                  <div className="space-y-1.5">
+                    {items.map((n) => (
+                      <button
+                        key={n.id}
+                        onClick={() => markRead(n.id)}
+                        className={cn(
+                          "flex w-full items-start gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-150",
+                          "hover:bg-muted/20 active:scale-[0.99]",
+                          !n.read
+                            ? "bg-card border border-border/15 shadow-sm"
+                            : "border border-transparent"
+                        )}
+                      >
+                        {/* Colored left accent for unread */}
+                        {!n.read && (
+                          <div className="absolute left-0 top-3 bottom-3 w-0.5 rounded-full bg-primary" />
+                        )}
+                        <div className="min-w-0 flex-1 relative">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className={cn(
+                              "text-xs leading-snug",
+                              !n.read ? "font-bold text-foreground" : "font-medium text-muted-foreground/70"
+                            )}>
+                              {n.title}
+                            </p>
+                            {!n.read && (
+                              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
+                            )}
+                          </div>
+                          {n.body && (
+                            <p className={cn(
+                              "mt-0.5 text-[11px] leading-relaxed line-clamp-2",
+                              !n.read ? "text-muted-foreground/80" : "text-muted-foreground/50"
+                            )}>
+                              {n.body}
+                            </p>
+                          )}
+                          <p className="mt-1.5 text-[9px] font-medium text-muted-foreground/30">
+                            {formatDistanceToNow(new Date(n.createdAt))}
                           </p>
-                          {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-indigo-500" />}
                         </div>
-                        <p className={cn("mt-0.5 text-xs leading-relaxed line-clamp-2", !n.read ? "text-gray-600 dark:text-white/70" : "text-gray-400 dark:text-white/40")}>
-                          {n.body}
-                        </p>
-                        <p className="mt-1.5 text-[10px] font-medium text-gray-400 dark:text-white/20">
-                          {formatDistanceToNow(new Date(n.createdAt))}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+              );
+            })
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

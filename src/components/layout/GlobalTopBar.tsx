@@ -291,7 +291,7 @@ export function GlobalTopBar({ userImage, userName, userId, isAdmin, isGuest }: 
   />
 
   <NotificationsSheet
-  isOpen={notifOpen}
+  open={notifOpen}
   onClose={() => setNotifOpen(false)}
   />
  </>

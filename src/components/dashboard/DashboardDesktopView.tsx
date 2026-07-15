@@ -6,7 +6,7 @@ import { MissionControlHero } from "@/components/dashboard/sections/MissionContr
 import { FocusPlanCard } from "@/components/dashboard/sections/FocusPlanCard";
 import { TodayQueue } from "@/components/dashboard/sections/TodayQueue";
 import { QuickActionsStrip } from "@/components/dashboard/sections/QuickActionsStrip";
-import { RoomsCarousel } from "@/components/dashboard/sections/RoomsCarousel";
+import { LeaderboardCarousel } from "@/components/dashboard/sections/LeaderboardCarousel";
 import { CommunityPostsCarousel } from "@/components/dashboard/CommunityPostsCarousel";
 import { CarouselErrorBoundary } from "@/components/dashboard/CarouselErrorBoundary";
 
@@ -37,7 +37,7 @@ export function DashboardDesktopView({ data, hasAds }: { data: DashboardData; ha
             <FocusPlanCard lastLecture={data.lastLecture ?? null} firstName={data.firstName} />
 
             <CarouselErrorBoundary title="Rooms">
-              <RoomsCarousel />
+              <LeaderboardCarousel />
             </CarouselErrorBoundary>
 
             <CarouselErrorBoundary title="Community">

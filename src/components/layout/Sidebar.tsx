@@ -14,7 +14,7 @@ import { useNotificationStore, useThemeStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { MedOneXLogoMark } from "@/components/branding/MedQsLogo";
 import { PLATFORM_COPY } from "@/lib/platform-copy";
-import { GlobalSearch } from "@/components/search/GlobalSearch";
+import { NotificationsSheet } from "@/components/layout/NotificationsSheet";
 import toast from "react-hot-toast";
 
 interface NotifItem { id: string; title: string; body: string; read: boolean; createdAt: string; channel: string; }
@@ -186,9 +186,9 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
             )}
 
             {!isGuest && (
-              <div ref={notifRef} className="relative">
+              <div>
                 <button
-                  onClick={() => { if (!notifOpen) void loadNotifs(); setNotifOpen(o => !o); setUserOpen(false); }}
+                  onClick={() => setNotifOpen(true)}
                   className={cn(
                     "p-2 text-white/35 hover:text-white transition-colors relative",
                     notifOpen && "text-white"
@@ -197,19 +197,7 @@ export function Sidebar({ userName, userImage, userId, isAdmin, siteName = "MedO
                   <Bell className="h-4 w-4" />
                   {totalUnread > 0 && <span className="absolute top-2 right-2 h-1.5 w-1.5 bg-primary rounded-full" />}
                 </button>
-                {notifOpen && (
-                  <div className="absolute right-0 top-12 w-80 rounded-2xl border border-white/[0.07] bg-[#131220] shadow-2xl overflow-hidden py-2 animate-in fade-in slide-in-from-top-2">
-                    <p className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white/20">Notifications</p>
-                    <div className="max-h-64 overflow-y-auto">
-                      {notifications.map(n => (
-                        <div key={n.id} className="px-4 py-3 hover:bg-white/5 border-b border-white/[0.03]">
-                          <p className="text-[12px] font-bold text-white/90">{n.title}</p>
-                          <p className="text-[11px] text-white/40 mt-0.5">{n.body}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <NotificationsSheet open={notifOpen} onClose={() => setNotifOpen(false)} />
               </div>
             )}
 
