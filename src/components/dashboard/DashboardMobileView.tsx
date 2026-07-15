@@ -17,6 +17,7 @@ import { TodayQueue } from "@/components/dashboard/sections/TodayQueue";
 import { QuickActionsStrip } from "@/components/dashboard/sections/QuickActionsStrip";
 import { LearningHeatmap } from "@/components/dashboard/sections/LearningHeatmap";
 import { CommunityPostsCarousel } from "@/components/dashboard/CommunityPostsCarousel";
+import { LeaderboardCarousel } from "@/components/dashboard/sections/LeaderboardCarousel";
 import { generateRecommendations } from "@/components/dashboard/sections/AIRecommendations";
 import type { Recommendation } from "@/components/dashboard/sections/AIRecommendations";
 import { deriveTodayTasks } from "@/types/dashboard";
@@ -392,6 +393,19 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
           />
         </div>
       )}
+
+      {/* ════════════════════════════════════════
+          LEADERBOARD — Top students ranking
+          ════════════════════════════════════════ */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between px-5 mb-4">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">Leaderboard</span>
+          <Link href="/leaderboard" className="text-[9px] font-bold text-primary hover:text-primary/80 transition-colors">
+            See all <ChevronRight className="h-2.5 w-2.5 inline" />
+          </Link>
+        </div>
+        <LeaderboardCarousel />
+      </div>
 
       {/* ════════════════════════════════════════
           MODULES — Horizontal peek cards
