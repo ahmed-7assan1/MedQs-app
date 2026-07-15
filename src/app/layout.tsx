@@ -4,6 +4,7 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ChunkLoadRecovery } from "@/components/system/ChunkLoadRecovery";
 import { DevServiceWorkerCleanup } from "@/components/system/DevServiceWorkerCleanup";
+import { ThemeColorUpdater } from "@/components/system/ThemeColorUpdater";
 import { ErrorBoundary } from "@/components/system/ErrorBoundary";
 import { prisma } from "@/lib/prisma";
 import { ourFileRouter } from "@/lib/uploadthing";
@@ -118,7 +119,10 @@ export async function generateViewport(): Promise<Viewport> {
     width: "device-width",
     initialScale: 1,
     viewportFit: "cover",
-    themeColor: sanitizeHex(config.primaryColor),
+    themeColor: [
+      { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+      { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    ],
     colorScheme: "light dark",
   };
 }
@@ -246,9 +250,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   applyTheme(isDark);
                   var variant = localStorage.getItem('medqs-theme-variant');
                   if (variant) applyVariant(variant);
+                  var mt = document.querySelector('meta[name="theme-color"]');
+                  if (mt) mt.setAttribute('content', isDark ? '#000000' : '#ffffff');
                   window.__MEDQS_CONFIG__ = ${JSON.stringify({ siteName: config.siteName, logoUrl: config.logoUrl })};
                 } catch (e) {
                   applyTheme(false);
+                  var mt2 = document.querySelector('meta[name="theme-color"]');
+                  if (mt2) mt2.setAttribute('content', '#ffffff');
                   try {
                     window.__MEDQS_CONFIG__ = ${JSON.stringify({ siteName: config.siteName, logoUrl: config.logoUrl })};
                   } catch (_) {}
@@ -320,6 +328,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={`${fontEnglish.className} font-sans antialiased`}>
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <DevServiceWorkerCleanup />
+        <ThemeColorUpdater />
         <ChunkLoadRecovery />
         <ErrorBoundary>
           <ConfirmProvider>
