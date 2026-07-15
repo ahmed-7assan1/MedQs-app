@@ -175,14 +175,30 @@ function parseAttachments(raw: any): any[] {
   return [];
 }
 
-function detectMediaType(url: string): string {
-  if (!url) return "file";
-  const u = url.toLowerCase();
-  if (u.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)(\?.*)?$/)) return "image";
-  if (u.match(/\.(mp4|webm|mov|avi|mkv)(\?.*)?$/)) return "video";
-  if (u.match(/\.(mp3|wav|ogg|aac|flac|m4a)(\?.*)?$/)) return "audio";
-  if (u.includes("youtube.com") || u.includes("youtu.be") || u.includes("t.me") || u.includes("telegram.me"))
-    return "video";
+function detectMediaType(url: string, name?: string): string {
+  const imageExt = /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)(\?.*)?$/i;
+  const videoExt = /\.(mp4|webm|mov|avi|mkv)(\?.*)?$/i;
+  const audioExt = /\.(mp3|wav|ogg|aac|flac|m4a)(\?.*)?$/i;
+
+  const check = (s: string) => {
+    if (imageExt.test(s)) return "image";
+    if (videoExt.test(s)) return "video";
+    if (audioExt.test(s)) return "audio";
+    return null;
+  };
+
+  if (url) {
+    const r = check(url);
+    if (r) return r;
+    if (url.includes("youtube.com") || url.includes("youtu.be") || url.includes("t.me") || url.includes("telegram.me"))
+      return "video";
+  }
+
+  if (name) {
+    const r = check(name);
+    if (r) return r;
+  }
+
   return "file";
 }
 
@@ -361,10 +377,10 @@ function PostCard({
   const title = post.title || extractTitle(post.content || "");
   const contentSrc = enhancePlainImageUrls(stripHandledUrls(post.content || ""));
   const attachments = useMemo(() => parseAttachments(post.attachments), [post.attachments]);
-  const imageAttachments = attachments.filter((a: any) => detectMediaType(a.url || a) === "image");
-  const videoAttachments = attachments.filter((a: any) => detectMediaType(a.url || a) === "video");
-  const audioAttachments = attachments.filter((a: any) => detectMediaType(a.url || a) === "audio");
-  const fileAttachments = attachments.filter((a: any) => detectMediaType(a.url || a) === "file");
+  const imageAttachments = attachments.filter((a: any) => detectMediaType(a.url || a, a.name) === "image");
+  const videoAttachments = attachments.filter((a: any) => detectMediaType(a.url || a, a.name) === "video");
+  const audioAttachments = attachments.filter((a: any) => detectMediaType(a.url || a, a.name) === "audio");
+  const fileAttachments = attachments.filter((a: any) => detectMediaType(a.url || a, a.name) === "file");
 
   const hashtags = useMemo(() => extractHashtags(post.content || ""), [post.content]);
   const externalLinks = useMemo(() => extractExternalLinks(post.content || ""), [post.content]);

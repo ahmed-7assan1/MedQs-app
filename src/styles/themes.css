@@ -41,7 +41,7 @@
 }
 
 .dark[data-theme-variant="medonex-purple"] {
-  --background: 240 3% 4%;          /* #0A0A0B near-black */
+  --background: 0 0% 4%;          /* #0A0A0B near-black */
   --card: 240 16% 12%;
   --muted: 240 19% 16%;
   --border: 240 20% 22%;
@@ -112,7 +112,7 @@
 }
 
 .dark[data-theme-variant="ocean-teal"] {
-  --background: 180 48% 5%;
+  --background: 0 0% 4%;
   --card: 180 41% 9%;
   --muted: 180 38% 11%;
   --border: 180 35% 18%;
@@ -183,7 +183,7 @@
 }
 
 .dark[data-theme-variant="rose-gold"] {
-  --background: 338 100% 4%;
+  --background: 0 0% 4%;
   --card: 338 58% 7%;
   --muted: 338 45% 11%;
   --border: 342 47% 15%;
@@ -254,7 +254,7 @@
 }
 
 .dark[data-theme-variant="forest-green"] {
-  --background: 133 43% 4%;
+  --background: 0 0% 4%;
   --card: 129 37% 7%;
   --muted: 132 31% 10%;
   --border: 132 37% 16%;
@@ -325,7 +325,7 @@
 }
 
 .dark[data-theme-variant="midnight-blue"] {
-  --background: 227 60% 6%;
+  --background: 0 0% 4%;
   --card: 223 49% 10%;
   --muted: 223 51% 15%;
   --border: 220 48% 23%;
@@ -396,7 +396,7 @@
 }
 
 .dark[data-theme-variant="amber-noir"] {
-  --background: 30 100% 2%;
+  --background: 0 0% 4%;
   --card: 30 100% 5%;
   --muted: 32 100% 7%;
   --border: 31 100% 11%;
@@ -467,7 +467,7 @@
 }
 
 .dark[data-theme-variant="cyber-purple"] {
-  --background: 263 76% 3%;
+  --background: 0 0% 4%;
   --card: 264 73% 7%;
   --muted: 265 70% 11%;
   --border: 268 67% 19%;
@@ -538,7 +538,7 @@
 }
 
 .dark[data-theme-variant="arctic-gray"] {
-  --background: 213 39% 5%;
+  --background: 0 0% 4%;
   --card: 215 36% 9%;
   --muted: 217 37% 14%;
   --border: 213 38% 19%;
@@ -609,7 +609,7 @@
 }
 
 .dark[data-theme-variant="sakura-mint"] {
-  --background: 174 71% 3%;
+  --background: 0 0% 4%;
   --card: 171 47% 6%;
   --muted: 174 42% 9%;
   --border: 170 41% 15%;
@@ -680,7 +680,7 @@
 }
 
 .dark[data-theme-variant="ruby-red"] {
-  --background: 337 100% 3%;
+  --background: 0 0% 4%;
   --card: 342 100% 5%;
   --muted: 334 100% 7%;
   --border: 339 100% 12%;
@@ -751,7 +751,7 @@
 }
 
 .dark[data-theme-variant="emerald-night"] {
-  --background: 155 86% 3%;
+  --background: 0 0% 4%;
   --card: 153 73% 6%;
   --muted: 154 68% 9%;
   --border: 157 64% 14%;
@@ -822,7 +822,7 @@
 }
 
 .dark[data-theme-variant="solar-gold"] {
-  --background: 48 100% 2%;
+  --background: 0 0% 4%;
   --card: 41 100% 4%;
   --muted: 41 100% 6%;
   --border: 41 100% 11%;
@@ -893,7 +893,7 @@
 }
 
 .dark[data-theme-variant="nordic-slate"] {
-  --background: 228 45% 4%;
+  --background: 0 0% 4%;
   --card: 228 45% 9%;
   --muted: 227 44% 13%;
   --border: 225 33% 19%;
@@ -964,7 +964,7 @@
 }
 
 .dark[data-theme-variant="neon-indigo"] {
-  --background: 240 43% 4%;
+  --background: 0 0% 4%;
   --card: 240 39% 9%;
   --muted: 240 39% 13%;
   --border: 240 37% 21%;
@@ -1035,7 +1035,7 @@
 }
 
 .dark[data-theme-variant="espresso"] {
-  --background: 28 100% 3%;
+  --background: 0 0% 4%;
   --card: 22 73% 6%;
   --muted: 27 64% 9%;
   --border: 21 58% 15%;
@@ -1139,4 +1139,5 @@
   --shadow-clr: rgba(0, 0, 0, 0.5);
   --radius: 12px;
 }
+
 
