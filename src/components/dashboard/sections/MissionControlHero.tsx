@@ -74,11 +74,11 @@ export const MissionControlHero = memo(function MissionControlHero({
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl opacity-40 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl opacity-30 pointer-events-none" />
 
-        <div className="relative space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-4 min-w-0">
+        <div className="relative space-y-2 md:space-y-4">
+<div className="flex items-start justify-between sm:gap-4 gap-3">
+          <div className="flex items-center sm:gap-4 gap-3 min-w-0">
               <div className="flex flex-col items-center gap-1.5 shrink-0">
-                <div className="h-20 w-20 rounded-3xl border-2 dark:border-white/[0.05] border-slate-200 p-1 transition-all duration-500 overflow-hidden shadow-sm">
+                <div className="sm:h-20 sm:w-20 h-16 w-16 rounded-3xl border-2 dark:border-white/[0.05] border-slate-200 p-1 transition-all duration-500 overflow-hidden shadow-sm">
                   <div className="h-full w-full rounded-2xl overflow-hidden dark:bg-[#1a1a1a] bg-slate-100">
                     {data.userImage ? (
                       <img
@@ -94,7 +94,7 @@ export const MissionControlHero = memo(function MissionControlHero({
                     )}
                   </div>
                 </div>
-                <div className="w-full">
+                <div className="hidden md:block w-full">
                   <div className="h-1 w-full bg-muted-foreground/10 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
@@ -120,7 +120,7 @@ export const MissionControlHero = memo(function MissionControlHero({
                     </span>
                   )}
                 </div>
-                <h1 className="text-xl md:text-2xl font-black tracking-tight text-foreground leading-none">
+                <h1 className="text-lg md:text-2xl font-black tracking-tight text-foreground leading-none">
                   Dr. {data.firstName}
                 </h1>
                 
@@ -174,8 +174,8 @@ export const MissionControlHero = memo(function MissionControlHero({
             </div>
           </div>
 
-          <div className="border-t border-border/10 pt-3">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 md:gap-x-6">
+          <div className="md:border-t md:border-border/10 md:pt-3">
+            <div className="flex items-center justify-between md:justify-start gap-x-3 md:gap-x-6">
               {metrics.map((metric, i) => {
                 const Icon = metric.icon;
                 return (
@@ -186,9 +186,9 @@ export const MissionControlHero = memo(function MissionControlHero({
                     transition={{ duration: 0.3, delay: 0.05 * i }}
                     className="flex items-center gap-1.5"
                   >
-                    <Icon className={cn("h-3 w-3", metric.color)} />
-                    <span className="text-xs font-black text-foreground tabular-nums leading-none">{metric.value}</span>
-                    <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-wider leading-none">{metric.label}</span>
+                    <Icon className={cn("sm:h-3 sm:w-3 h-3.5 w-3.5", metric.color)} />
+                    <span className="sm:text-xs text-sm font-black text-foreground tabular-nums leading-none">{metric.value}</span>
+                    <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-wider leading-none hidden md:inline">{metric.label}</span>
                     {i < metrics.length - 1 && (
                       <span className="hidden md:block ml-2 h-3 w-px bg-border/40" />
                     )}

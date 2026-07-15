@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/dashboard/shared/SectionHeader";
 import type { DashboardData } from "@/types/dashboard";
 
-interface Recommendation {
+export interface Recommendation {
   icon: typeof Lightbulb;
   accentColor: string;
   borderColor: string;
@@ -20,7 +20,7 @@ interface Recommendation {
   actionHref?: string;
 }
 
-function generateRecommendations(data: DashboardData): Recommendation[] {
+export function generateRecommendations(data: DashboardData): Recommendation[] {
   const recs: Recommendation[] = [];
 
   if (data.currentStreak >= 3 && data.currentStreak < 7) {

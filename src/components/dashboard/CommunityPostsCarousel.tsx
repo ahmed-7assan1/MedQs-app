@@ -284,9 +284,26 @@ function getAvatarGradient(name: string): string {
 /* ─────────────────────────────────────────────
    Skeleton Card (Meridian style)
 ───────────────────────────────────────────── */
-function SkeletonCard() {
+function SkeletonCard({ compact }: { compact?: boolean }) {
+  if (compact) {
+    return (
+      <div className="w-[240px] h-[130px] shrink-0 rounded-[18px] border border-border/30 bg-card/50 overflow-hidden animate-pulse p-4">
+        <div className="flex items-start gap-3">
+          <div className="h-7 w-7 rounded-full bg-muted/40 shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 w-24 rounded bg-muted/40" />
+            <div className="h-2.5 w-full rounded bg-muted/30" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-4 w-8 rounded bg-muted/30" />
+            <div className="h-4 w-8 rounded bg-muted/30" />
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="w-[340px] shrink-0 h-[453px] rounded-2xl border border-border/30 bg-card/50 overflow-hidden animate-pulse">
+    <div className="sm:w-[340px] w-[260px] shrink-0 sm:h-[453px] h-[347px] rounded-2xl border border-border/30 bg-card/50 overflow-hidden animate-pulse">
       <div className="flex items-start gap-3 px-5 pt-5 pb-3.5">
         <div className="h-10 w-10 rounded-full bg-muted/40 shrink-0" />
         <div className="flex-1 space-y-2">
@@ -371,10 +388,12 @@ function PostCard({
   post,
   isActive,
   index,
+  compact,
 }: {
   post: PostData;
   isActive: boolean;
   index: number;
+  compact?: boolean;
 }) {
   const [liked, setLiked] = useState(post.reactions?.some(r => r.type === "LIKE") ?? false);
   const [saved, setSaved] = useState(false);
@@ -469,12 +488,51 @@ function PostCard({
 
   const cardRef = useRef<HTMLDivElement>(null);
 
+  if (compact) {
+    const preview = stripHandledUrls(post.content?.replace(/<[^>]*>/g, "") || "").slice(0, 120);
+    return (
+      <div ref={cardRef} dir="auto" className="w-[240px] h-[130px] shrink-0 rounded-[18px] border border-border/40 bg-card shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 flex flex-col p-4 overflow-hidden">
+        <div className="flex items-start gap-2.5 shrink-0">
+          <div className="relative shrink-0">
+            {post.author?.image ? (
+              <img src={post.author.image} alt={post.author.name} loading="lazy" className="h-7 w-7 rounded-full object-cover ring-2 ring-border/20" />
+            ) : (
+              <div className={cn("h-7 w-7 rounded-full bg-gradient-to-br flex items-center justify-center text-white text-[9px] font-bold ring-2 ring-white/10", avatarGrad)}>
+                {initials}
+              </div>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <span className="text-xs font-bold text-foreground truncate block">{post.author?.name || "Unknown"}</span>
+            <span className="text-[9px] text-muted-foreground/60">{timeAgo(post.createdAt)}</span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={handleLike} className="flex items-center gap-1 text-muted-foreground/60 hover:text-red-500 transition-colors">
+              <MeridianHeart filled={liked} className="h-3.5 w-3.5" />
+              {likeCount > 0 && <span className="text-[10px] font-bold">{formatCount(likeCount)}</span>}
+            </button>
+            <Link href="/social" className="flex items-center gap-1 text-muted-foreground/60 hover:text-indigo-500 transition-colors">
+              <MeridianComment className="h-3.5 w-3.5" />
+              {post._count?.comments ? <span className="text-[10px] font-bold">{formatCount(post._count.comments)}</span> : null}
+            </Link>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground/70 leading-relaxed line-clamp-1 mt-2 flex-1">
+          {preview || "No content"}
+        </p>
+        <Link href={`/social?post=${post.id}`} className="text-[9px] font-bold text-indigo-500 hover:text-indigo-400 transition-colors mt-auto">
+          Read more →
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <>
       <div
         ref={cardRef}
         dir="auto"
-        className="group w-[340px] shrink-0 rounded-2xl border border-border/40 bg-card shadow-lg shadow-black/5 dark:shadow-black/20 hover:-translate-y-0.5 hover:shadow-xl hover:border-border/60 transition-all duration-200 flex flex-col p-5 gap-4 h-[453px] min-h-[453px] max-h-[453px] overflow-hidden dark:bg-[#14141B]/70 dark:backdrop-blur-xl dark:border-white/[0.06]"
+        className="group sm:w-[340px] w-[260px] shrink-0 rounded-2xl border border-border/40 bg-card shadow-lg shadow-black/5 dark:shadow-black/20 hover:-translate-y-0.5 hover:shadow-xl hover:border-border/60 transition-all duration-200 flex flex-col p-5 gap-4 sm:h-[453px] sm:min-h-[453px] sm:max-h-[453px] h-[347px] min-h-[347px] max-h-[347px] overflow-hidden dark:bg-[#14141B]/70 dark:backdrop-blur-xl dark:border-white/[0.06]"
       >
         {/* ── Header: Author + Solved Badge + Category Badge ── */}
         <div className="relative shrink-0 flex items-start gap-3 z-10">
@@ -699,10 +757,12 @@ function PostCard({
 /* ─────────────────────────────────────────────
    Main Carousel
 ───────────────────────────────────────────── */
-export function CommunityPostsCarousel() {
+export function CommunityPostsCarousel({ variant, maxPosts }: { variant?: "default" | "compact"; maxPosts?: number } = {}) {
   const [posts, setPosts] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const isCompact = variant === "compact";
+  const limit = maxPosts ?? (isCompact ? 5 : 6);
 
   useEffect(() => {
     let cancelled = false;
@@ -735,8 +795,8 @@ export function CommunityPostsCarousel() {
           </span>
         </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-          <SkeletonCard />
-          <SkeletonCard />
+          <SkeletonCard compact={isCompact} />
+          <SkeletonCard compact={isCompact} />
         </div>
       </div>
     );
@@ -759,14 +819,15 @@ export function CommunityPostsCarousel() {
         </span>
       </div>
 
-      {/* Horizontal scroll of fixed-width Meridian-style post cards */}
+      {/* Horizontal scroll of post cards */}
       <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-        {posts.slice(0, 6).map((post, idx) => (
+        {posts.slice(0, limit).map((post, idx) => (
           <PostCard
             key={post.id}
             post={post}
             isActive={true}
             index={idx}
+            compact={isCompact}
           />
         ))}
       </div>

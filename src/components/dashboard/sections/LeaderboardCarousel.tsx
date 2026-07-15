@@ -56,7 +56,7 @@ function UserCard({ user, index }: { user: LeaderboardUser; index: number }) {
       className="flex flex-col items-center gap-2 shrink-0 group cursor-pointer"
     >
       <div className={cn(
-        "h-20 w-20 rounded-3xl border-2 p-1 group-hover:rotate-3 transition-all duration-500 overflow-hidden shadow-sm",
+        "sm:h-20 sm:w-20 h-16 w-16 rounded-3xl border-2 p-1 group-hover:rotate-3 transition-all duration-500 overflow-hidden shadow-sm",
         borderColor
       )}>
         <div className="relative h-full w-full rounded-2xl overflow-hidden dark:bg-[#1a1a1a] bg-slate-100">
@@ -102,7 +102,7 @@ function LeaderboardSkeleton() {
       <div className="flex items-center gap-6">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex flex-col items-center gap-2 shrink-0">
-            <div className="h-20 w-20 rounded-3xl bg-muted/20" />
+            <div className="sm:h-20 sm:w-20 h-16 w-16 rounded-3xl bg-muted/20" />
             <div className="h-2.5 w-16 rounded bg-muted/30" />
             <div className="h-2 w-12 rounded bg-muted/20" />
           </div>

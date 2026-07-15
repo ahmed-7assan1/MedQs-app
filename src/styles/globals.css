@@ -2541,5 +2541,79 @@ select,
   gap: 0.75rem;
 }
 
+/* ═══════════════════════════════════════════════════════
+   HOME SCREEN — Premium Mobile Dashboard (2026)
+   ═══════════════════════════════════════════════════════ */
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 20px;
+  margin-bottom: 16px;
+}
 
+.home-hero-wrapper {
+  border-radius: 24px;
+  overflow: hidden;
+  background: hsl(var(--card) / 0.6);
+  border: 0;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
 
+.home-hero-wrapper .focus-plan-card {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.home-hero-wrapper .focus-plan-card > div {
+  padding-bottom: 0 !important;
+}
+
+.home-module-card {
+  width: 140px;
+  height: 170px;
+  border-radius: 20px;
+  background: hsl(var(--card) / 0.6);
+  border: 0;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-module-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.home-module-card:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.home-featured-card {
+  height: 180px;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.home-no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.home-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Premium Skeleton Shimmer ── */
+@keyframes home-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.home-skeleton {
+  background: linear-gradient(90deg, hsl(var(--muted) / 0.3) 25%, hsl(var(--muted) / 0.1) 50%, hsl(var(--muted) / 0.3) 75%);
+  background-size: 200% 100%;
+  animation: home-shimmer 1.5s ease-in-out infinite;
+}
