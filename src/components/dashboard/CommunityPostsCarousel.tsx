@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
+import { enhancePlainImageUrls, normalizeImageUrl } from "@/lib/markdown-helpers";
 import {
   Flame,
   HelpCircle, BarChart3, Headphones, Link as LinkIcon,
@@ -256,6 +256,14 @@ function formatCount(n: number): string {
   return String(n);
 }
 
+const RANK_COLORS: Record<string, string> = {
+  Newbie: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+  Active: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  Contributor: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
+  Expert: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  Elite: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+};
+
 const AVATAR_GRADIENTS = [
   "from-violet-500 to-indigo-500",
   "from-rose-500 to-pink-500",
@@ -278,7 +286,7 @@ function getAvatarGradient(name: string): string {
 ───────────────────────────────────────────── */
 function SkeletonCard() {
   return (
-    <div className="w-[380px] shrink-0 h-[300px] rounded-2xl border border-border/30 bg-card/50 overflow-hidden animate-pulse">
+    <div className="w-[340px] shrink-0 h-[453px] rounded-2xl border border-border/30 bg-card/50 overflow-hidden animate-pulse">
       <div className="flex items-start gap-3 px-5 pt-5 pb-3.5">
         <div className="h-10 w-10 rounded-full bg-muted/40 shrink-0" />
         <div className="flex-1 space-y-2">
@@ -377,9 +385,9 @@ function PostCard({
   const title = post.title || extractTitle(post.content || "");
   const contentSrc = enhancePlainImageUrls(stripHandledUrls(post.content || ""));
   const attachments = useMemo(() => parseAttachments(post.attachments), [post.attachments]);
-  const imageAttachments = attachments.filter((a: any) => detectMediaType(a.url || a, a.name) === "image");
-  const videoAttachments = attachments.filter((a: any) => detectMediaType(a.url || a, a.name) === "video");
-  const audioAttachments = attachments.filter((a: any) => detectMediaType(a.url || a, a.name) === "audio");
+  const imageAttachments = attachments.filter((a: any) => a.type === "image" || detectMediaType(a.url || a, a.name) === "image");
+  const videoAttachments = attachments.filter((a: any) => a.type === "video" || detectMediaType(a.url || a, a.name) === "video");
+  const audioAttachments = attachments.filter((a: any) => a.type === "audio" || detectMediaType(a.url || a, a.name) === "audio");
   const fileAttachments = attachments.filter((a: any) => detectMediaType(a.url || a, a.name) === "file");
 
   const hashtags = useMemo(() => extractHashtags(post.content || ""), [post.content]);
@@ -423,22 +431,28 @@ function PostCard({
     return null;
   }, [post.sharedQuestion, post.sharedQuestionData]);
 
-  const allImages = useMemo(() => {
-    const imgs: { url: string; alt?: string }[] = [];
-    if (post.imageUrl) imgs.push({ url: post.imageUrl });
-    imageAttachments.forEach((a: any) => imgs.push({ url: a.url || a, alt: a.name || a.alt }));
-    return imgs;
-  }, [post.imageUrl, imageAttachments]);
+  const mediaItems = useMemo(() => {
+    const items: { type: "image" | "video" | "file"; url: string; name?: string; size?: number }[] = [];
+    const seen = new Set<string>();
 
-  const mainVideoUrl =
-    videoAttachments.length > 0 ? videoAttachments[0].url || videoAttachments[0] : null;
+    const add = (url: string, type: "image" | "video" | "file", extra?: { name?: string; size?: number }) => {
+      const normalized = normalizeImageUrl(url);
+      if (!normalized || seen.has(normalized)) return;
+      seen.add(normalized);
+      items.push({ type, url: normalized, ...extra });
+    };
 
-  const hasVideo = !!(inlineYouTubeId || inlineTelegramUrl || mainVideoUrl);
-  const hasImages = allImages.length > 0;
-  const hasFiles = fileAttachments.length > 0;
-  const mediaTypeCount = [hasVideo, hasImages, hasFiles].filter(Boolean).length;
-  const showFileCard = hasFiles && mediaTypeCount <= 2;
-  const extraFileCount = hasFiles ? (showFileCard ? fileAttachments.length - 1 : fileAttachments.length) : 0;
+    if (post.imageUrl) add(post.imageUrl, "image");
+    imageAttachments.forEach((a: any) => add(a.url || a, "image", { name: a.name || a.alt }));
+    videoAttachments.forEach((a: any) => add(a.url || a, "video"));
+    if (inlineYouTubeId) add(inlineYouTubeId, "video");
+    if (inlineTelegramUrl) add(inlineTelegramUrl, "video");
+    fileAttachments.forEach((a: any) => add(a.url || a, "file", { name: a.name || "File", size: a.size }));
+    return items;
+  }, [post.imageUrl, imageAttachments, videoAttachments, inlineYouTubeId, inlineTelegramUrl, fileAttachments]);
+
+  const hasMedia = mediaItems.length > 0;
+  const mediaOverflow = mediaItems.length > 3 ? mediaItems.length - 3 : 0;
 
   const avatarGrad = getAvatarGradient(post.author?.name || "?");
   const initials = getInitials(post.author?.name || "?");
@@ -460,7 +474,7 @@ function PostCard({
       <div
         ref={cardRef}
         dir="auto"
-        className="group w-[380px] shrink-0 rounded-2xl border border-border/40 bg-card shadow-lg shadow-black/5 dark:shadow-black/20 hover:-translate-y-0.5 hover:shadow-xl hover:border-border/60 transition-all duration-200 flex flex-col p-5 gap-4 h-[300px] min-h-[300px] max-h-[300px] overflow-hidden dark:bg-[#14141B]/70 dark:backdrop-blur-xl dark:border-white/[0.06]"
+        className="group w-[340px] shrink-0 rounded-2xl border border-border/40 bg-card shadow-lg shadow-black/5 dark:shadow-black/20 hover:-translate-y-0.5 hover:shadow-xl hover:border-border/60 transition-all duration-200 flex flex-col p-5 gap-4 h-[453px] min-h-[453px] max-h-[453px] overflow-hidden dark:bg-[#14141B]/70 dark:backdrop-blur-xl dark:border-white/[0.06]"
       >
         {/* ── Header: Author + Solved Badge + Category Badge ── */}
         <div className="relative shrink-0 flex items-start gap-3 z-10">
@@ -491,34 +505,26 @@ function PostCard({
               <span className="text-sm font-bold text-foreground truncate">
                 {post.author?.name || "Unknown"}
               </span>
-              {solved ? (
-                <span className="inline-flex items-center text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 leading-none">
-                  Solved
-                </span>
-              ) : (
-                <span className="inline-flex items-center text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 leading-none">
-                  Open
-                </span>
-              )}
             </div>
             <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">
               {university && <span>{university}</span>}
-              {university && yearLabel && <span> · </span>}
-              {yearLabel && <span>{yearLabel}</span>}
               {(university || yearLabel) && <span> · </span>}
               <span>{timeAgo(post.createdAt)}</span>
             </p>
           </div>
 
-          {/* Category badge */}
+          {/* Rank badge */}
           <span
-            className="shrink-0 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full leading-none"
-            style={{
-              background: `color-mix(in srgb, ${catColor} 16%, transparent)`,
-              color: catColor,
-            }}
+            className={cn(
+              "shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full leading-none",
+              yearLabel && RANK_COLORS[yearLabel]
+                ? RANK_COLORS[yearLabel]
+                : solved
+                  ? "bg-emerald-500/10 text-emerald-500"
+                  : "bg-amber-500/10 text-amber-500"
+            )}
           >
-            {catLabel}
+            {yearLabel || (solved ? "Solved" : "Open")}
           </span>
         </div>
 
@@ -546,34 +552,6 @@ function PostCard({
               )
             )}
 
-            {/* Media section */}
-            {(hasVideo || hasImages || showFileCard) && (
-              <div className="w-full flex-1 min-h-0 max-h-[140px] flex flex-col gap-1.5 overflow-hidden">
-                {hasVideo && (
-                  <VideoThumbnail
-                    url={mainVideoUrl || inlineYouTubeId || inlineTelegramUrl || ""}
-                    onClick={() => window.open(`/social?post=${post.id}`, "_self")}
-                    className="shrink-0 max-h-[75px]"
-                  />
-                )}
-                {hasImages && (
-                  <ImageGallery
-                    images={allImages}
-                    onImageClick={() => window.open(`/social?post=${post.id}`, "_self")}
-                    className="shrink-0 flex-1 min-h-0 max-h-[90px]"
-                  />
-                )}
-                {showFileCard && (
-                  <FileCard
-                    fileName={fileAttachments[0]?.name || fileAttachments[0]?.url || "File"}
-                    fileSize={fileAttachments[0]?.size}
-                    onClick={() => window.open(`/social?post=${post.id}`, "_self")}
-                    className="shrink-0 max-h-[38px]"
-                  />
-                )}
-              </div>
-            )}
-
             {/* Indicators */}
             <div className="shrink-0 flex flex-wrap gap-x-3 gap-y-0.5">
               {sharedQuestion && (
@@ -596,14 +574,14 @@ function PostCard({
                   <LinkIcon className="h-3.5 w-3.5" /> {externalLinks.length} Link{externalLinks.length !== 1 ? "s" : ""}
                 </span>
               )}
-              {hasFiles && mediaTypeCount >= 3 && (
+              {fileAttachments.length > 0 && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-500">
                   <FileIcon fileName={fileAttachments[0]?.name || "file"} /> {fileAttachments.length} file{fileAttachments.length !== 1 ? "s" : ""}
                 </span>
               )}
-              {showFileCard && extraFileCount > 0 && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-500">
-                  <FileIcon fileName={fileAttachments[0]?.name || "file"} /> +{extraFileCount} more
+              {mediaOverflow > 0 && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground/50">
+                  +{mediaOverflow} more
                 </span>
               )}
             </div>
@@ -617,6 +595,44 @@ function PostCard({
                     #{tag}
                   </span>
                 ))}
+              </div>
+            )}
+
+            {/* Media section — unified view, max 3 items */}
+            {hasMedia && (
+              <div className="w-full mt-auto pt-2 flex gap-[2px] rounded-lg overflow-hidden" style={{ height: "85px" }}>
+                {mediaItems.slice(0, 3).map((item, i) => {
+                  const isOverflow = i === 2 && mediaOverflow > 0;
+                  return (
+                    <div
+                      key={i}
+                      className="relative flex-1 min-w-0 overflow-hidden rounded-md bg-muted/20"
+                      onClick={() => window.open(`/social?post=${post.id}`, "_self")}
+                    >
+                      {item.type === "image" ? (
+                        <img
+                          src={item.url}
+                          alt={item.name || ""}
+                          loading="lazy"
+                          className="w-full h-full object-contain"
+                        />
+                      ) : item.type === "video" ? (
+                        <VideoThumbnail url={item.url} className="w-full h-full" />
+                      ) : (
+                        <FileCard
+                          fileName={item.name || "File"}
+                          fileSize={item.size != null ? String(item.size) : undefined}
+                          className="w-full h-full"
+                        />
+                      )}
+                      {isOverflow && (
+                        <div className="absolute inset-0 bg-black/55 flex items-center justify-center rounded-md">
+                          <span className="text-white text-lg font-bold">+{mediaOverflow}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
