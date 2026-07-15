@@ -129,7 +129,7 @@ export const LeaderboardCarousel = memo(function LeaderboardCarousel() {
   if (!users.length) {
     return (
       <div>
-        <SectionHeader icon={Trophy} title="Leaderboard" />
+      <SectionHeader icon={Trophy} title="🏆 Top Learners" className="pl-5" />
         <Button variant="outline" asChild className="w-full p-0 h-auto rounded-xl border-dashed bg-card/30 hover:bg-card/50">
           <Link href="/leaderboard" className="flex items-center justify-between p-5">
             <div className="flex items-center gap-3">
@@ -148,7 +148,7 @@ export const LeaderboardCarousel = memo(function LeaderboardCarousel() {
 
   return (
     <div>
-      <SectionHeader icon={Trophy} title="Leaderboard" />
+        <SectionHeader icon={Trophy} title="🏆 Top Learners" />
 
       <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-2 pl-5">
         {users.map((user, idx) => (

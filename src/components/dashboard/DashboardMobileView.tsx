@@ -398,12 +398,6 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
           LEADERBOARD — Top students ranking
           ════════════════════════════════════════ */}
       <div className="mb-8">
-        <div className="flex items-center justify-between px-5 mb-4">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">Leaderboard</span>
-          <Link href="/leaderboard" className="text-[9px] font-bold text-primary hover:text-primary/80 transition-colors">
-            See all <ChevronRight className="h-2.5 w-2.5 inline" />
-          </Link>
-        </div>
         <LeaderboardCarousel />
       </div>
 
