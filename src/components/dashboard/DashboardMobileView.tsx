@@ -285,6 +285,25 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
 
   const moduleProgress = data.moduleProgress || [];
   const avatarLetter = data.firstName.charAt(0).toUpperCase();
+  const [firstToday, setFirstToday] = useState(false);
+
+  useEffect(() => {
+    const today = new Date().toDateString();
+    const last = localStorage.getItem("last-visit");
+    if (last !== today) {
+      localStorage.setItem("last-visit", today);
+      setFirstToday(true);
+    }
+  }, []);
+
+  const greeting = (() => {
+    if (data.lastLecture) return "Continue learning,";
+    if (firstToday) return "Welcome back,";
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning,";
+    if (h < 17) return "Good afternoon,";
+    return "Good evening,";
+  })();
 
   return (
     <div className="md:hidden pb-24 scroll-smooth">
@@ -292,13 +311,11 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
           HEADER — Compact top bar
           ════════════════════════════════════════ */}
       <div className="home-header">
-        <div className="flex items-center gap-2.5 flex-1 min-w-0">
-          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 text-primary shrink-0">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 block leading-none">MedOneX</span>
-            <span className="text-sm font-bold text-foreground block truncate leading-tight">{data.greeting}, {data.firstName}</span>
+        <div className="flex flex-col flex-1 min-w-0">
+          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 leading-none">MEDONEX</span>
+          <div className="mt-0.5">
+            <p className="text-sm font-medium text-foreground/80 leading-tight">{greeting}</p>
+            <p className="text-sm font-black text-foreground leading-none -mt-px">{data.firstName} 👋</p>
           </div>
         </div>
 
