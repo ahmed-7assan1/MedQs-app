@@ -285,38 +285,19 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
 
   const moduleProgress = data.moduleProgress || [];
   const avatarLetter = data.firstName.charAt(0).toUpperCase();
-  const [firstToday, setFirstToday] = useState(false);
-
-  useEffect(() => {
-    const today = new Date().toDateString();
-    const last = localStorage.getItem("last-visit");
-    if (last !== today) {
-      localStorage.setItem("last-visit", today);
-      setFirstToday(true);
-    }
-  }, []);
-
-  const greeting = (() => {
-    if (data.lastLecture) return "Continue learning,";
-    if (firstToday) return "Welcome back,";
-    const h = new Date().getHours();
-    if (h < 12) return "Good morning,";
-    if (h < 17) return "Good afternoon,";
-    return "Good evening,";
-  })();
 
   return (
     <div className="md:hidden pb-24 scroll-smooth">
       {/* ════════════════════════════════════════
           HEADER — Compact top bar
           ════════════════════════════════════════ */}
-      <div className="home-header">
-        <div className="flex flex-col flex-1 min-w-0">
+      <div className="home-header sticky top-0 z-10 bg-background/95 backdrop-blur-sm pt-1">
+        <div className="flex-1 min-w-0">
           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 leading-none">MEDONEX</span>
-          <div className="mt-0.5">
-            <p className="text-sm font-medium text-foreground/80 leading-tight">{greeting}</p>
-            <p className="text-sm font-black text-foreground leading-none -mt-px">{data.firstName} 👋</p>
-          </div>
+          <p className="text-sm mt-0.5 leading-tight">
+            <span className="font-medium text-foreground/80">Hello</span>
+            <span className="font-black text-foreground"> {data.firstName} 👋</span>
+          </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
