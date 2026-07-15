@@ -357,7 +357,7 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
           { pct: streakData.pct, icon: Flame, value: streakData.label, sublabel: "Streak", color: "#F97316", bgColor: "rgba(249,115,22,0.15)" },
         ];
         return (
-          <div className="px-5 mb-6">
+          <div className="px-5 mb-6 pt-3">
             <div className="flex items-center justify-between bg-card/30 rounded-2xl px-4 py-3 border border-border/10">
               {rings.map((ring) => (
                 <ProgressRing key={ring.sublabel} {...ring} />
