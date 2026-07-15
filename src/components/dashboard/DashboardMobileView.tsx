@@ -291,7 +291,7 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
       {/* ════════════════════════════════════════
           HEADER — Compact top bar
           ════════════════════════════════════════ */}
-      <div className="home-header sticky top-0 z-10 bg-background/95 backdrop-blur-sm pt-1">
+      <div className="home-header fixed top-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm pt-1">
         <div className="flex-1 min-w-0">
           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 leading-none">MEDONEX</span>
           <p className="text-sm mt-0.5 leading-tight">
@@ -343,6 +343,7 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
           </button>
         </div>
       </div>
+      <div className="h-16" /> {/* spacer for fixed header */}
 
       {/* ════════════════════════════════════════
           ACHIEVEMENT RINGS — Progress indicators
