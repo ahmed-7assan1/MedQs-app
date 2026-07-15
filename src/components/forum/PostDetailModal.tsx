@@ -383,6 +383,8 @@ export function PostDetailModal({
   const postTime = getTimeAgo(post.createdAt);
 
   const postText = post.content || post.text || "";
+  const telegramLinkRegex = /https?:\/\/(?:www\.)?(?:t\.me|telegram\.me)\/([a-zA-Z0-9_]+)\/(\d+)/gi;
+  const stripTelegramLinks = (text: string) => text.replace(telegramLinkRegex, "").replace(/\n{2,}/g, "\n").trim();
   const hashtags = post.hashtags || (postText.match(/#[a-zA-Z0-9_]+/g) || []);
   const ytIds = extractYouTubeIds(post.content || post.text || "");
   const ytId = ytIds[activeYtIndex] || null;
@@ -593,7 +595,7 @@ export function PostDetailModal({
                   <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                     {postText && (
                       <div>
-                        <p dir="auto" style={{ margin: 0, fontSize: 15, color: T.text, lineHeight: 1.8, whiteSpace: "pre-line" }}>{stripYouTubeLinks(postText)}</p>
+                        <p dir="auto" style={{ margin: 0, fontSize: 15, color: T.text, lineHeight: 1.8, whiteSpace: "pre-line" }}>{stripTelegramLinks(stripYouTubeLinks(postText))}</p>
                         {hashtags.length > 0 && (
                           <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
                             {hashtags.map((h: string) => (

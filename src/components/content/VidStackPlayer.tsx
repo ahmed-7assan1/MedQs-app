@@ -301,5 +301,8 @@ function resolveStreamUrl(url: string): string {
   if (url.includes(".m3u8")) return url;
   const driveId = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([^/&?]+)/)?.[1];
   if (driveId) return `/api/v1/drive/stream?id=${driveId}`;
+  if (url.includes('t.me/') || url.includes('telegram.me/')) {
+    return `/api/v1/telegram/stream-public-post?url=${encodeURIComponent(url)}`;
+  }
   return url;
 }

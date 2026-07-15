@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { verifyMobileToken } from '@/lib/supabase/auth-helpers';
+import { getTelegramClient } from "@/lib/telegram-client";
+import { Api } from "telegram/tl";
+import bigInt from "big-integer";
 
 export const maxDuration = 300; // Allow long-lived streams on Vercel Pro
 export const dynamic = "force-dynamic";
@@ -8,11 +11,100 @@ export const dynamic = "force-dynamic";
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 
 /**
+ * 📽️ MTProto Fallback Streamer
+ * Streams chunks of the file directly from Telegram datacenters for files >20MB.
+ */
+async function streamViaMTProto(chatId: string, messageId: number, rangeHeader: string | null): Promise<NextResponse> {
+  try {
+    const client = await getTelegramClient();
+
+    // Build the peer entity — strip Bot API's -100 prefix for supergroups
+    let peer: Api.TypePeer;
+    if (chatId.startsWith("-100")) {
+      const channelId = chatId.replace("-100", "");
+      peer = new Api.PeerChannel({ channelId: bigInt(channelId) });
+    } else if (chatId.startsWith("-")) {
+      peer = new Api.PeerChat({ chatId: bigInt(chatId.replace("-", "")) });
+    } else {
+      peer = new Api.PeerUser({ userId: bigInt(chatId) });
+    }
+
+    const messages = await client.getMessages(peer, { ids: [messageId] });
+    const msg = messages?.[0];
+
+    if (!msg || !msg.media || !msg.media.className.includes("MessageMediaDocument")) {
+      return NextResponse.json({ error: "No document found in MTProto" }, { status: 404 });
+    }
+
+    const document = (msg.media as any).document;
+    if (!document) {
+      return NextResponse.json({ error: "No document found" }, { status: 404 });
+    }
+
+    const totalSize = Number(document.size);
+    const mimeType = document.mimeType || "video/mp4";
+
+    let start = 0;
+    let end = totalSize - 1;
+
+    if (rangeHeader) {
+      const parts = rangeHeader.replace(/bytes=/, "").split("-");
+      if (parts[0]) start = parseInt(parts[0], 10);
+      if (parts[1]) end = parseInt(parts[1], 10);
+    }
+
+    if (start >= totalSize) {
+       return new NextResponse(null, { status: 416, headers: { "Content-Range": `bytes */${totalSize}` }});
+    }
+
+    const chunkSize = end - start + 1;
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of client.iterDownload({
+            file: document,
+            // @ts-ignore
+            offset: bigInt(start),
+            limit: chunkSize,
+            requestSize: 1024 * 1024,
+          })) {
+            controller.enqueue(chunk);
+          }
+          controller.close();
+        } catch (err) {
+          console.error("[MTProto Streaming Error]:", err);
+          controller.error(err);
+        }
+      }
+    });
+
+    const headers = new Headers({
+      "Content-Type": mimeType,
+      "Accept-Ranges": "bytes",
+      "Content-Range": `bytes ${start}-${end}/${totalSize}`,
+      "Content-Length": chunkSize.toString(),
+      "Cache-Control": "public, max-age=3600",
+      "X-Content-Type-Options": "nosniff",
+    });
+
+    return new NextResponse(stream, {
+      status: rangeHeader ? 206 : 200,
+      headers,
+    });
+  } catch (error: any) {
+    console.error("[MTProto Fallback Error]:", error);
+    return NextResponse.json({ error: "MTProto streaming failed" }, { status: 500 });
+  }
+}
+
+/**
  * 📽️ Telegram Video Streaming Proxy
  * 
  * Uses the Telegram Bot API to stream video files directly.
  * Supports Byte-Range Requests (206 Partial Content) so the
  * browser's video player can seek anywhere without buffering.
+ * Falls back to MTProto (gramjs) for files exceeding the 20MB Bot API limit.
  * 
  * Flow:
  *   1. Student visits lecture page
@@ -111,16 +203,9 @@ export async function GET(
 
     if (!getFileData.ok || !getFileData.result?.file_path) {
       // File is larger than 20MB — Bot API can't download it
-      // Return a friendly error with instructions
-      return NextResponse.json(
-        {
-          error: "FILE_TOO_LARGE",
-          message:
-            "This video exceeds the Telegram Bot API 20MB limit. Please upgrade to MTProto (gramjs) streaming.",
-          fileId,
-        },
-        { status: 413 }
-      );
+      // Fall back to MTProto (gramjs) for direct Telegram datacenter streaming
+      const rangeHeader = req.headers.get("range");
+      return await streamViaMTProto(chatId, parseInt(messageId, 10), rangeHeader);
     }
 
     const filePath = getFileData.result.file_path;
