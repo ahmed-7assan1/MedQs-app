@@ -129,8 +129,8 @@ export const LeaderboardCarousel = memo(function LeaderboardCarousel() {
     return (
       <div>
       <div className="mb-5 pl-8">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">🏆 Top Learners</h2>
-        <p className="text-[10px] font-medium text-muted-foreground/50 mt-0.5">See who's leading this week</p>
+        <h2 className="text-[8px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">🏆 Top Learners</h2>
+        <p className="text-[7px] sm:text-[10px] font-medium text-muted-foreground/50 mt-0.5">See who's leading this week</p>
       </div>
         <Button variant="outline" asChild className="w-full p-0 h-auto rounded-xl border-dashed bg-card/30 hover:bg-card/50">
           <Link href="/leaderboard" className="flex items-center justify-between p-5">
@@ -151,8 +151,8 @@ export const LeaderboardCarousel = memo(function LeaderboardCarousel() {
   return (
     <div>
       <div className="mb-5 pl-8">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">🏆 Top Learners</h2>
-        <p className="text-[10px] font-medium text-muted-foreground/50 mt-0.5">See who's leading this week</p>
+        <h2 className="text-[8px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">🏆 Top Learners</h2>
+        <p className="text-[7px] sm:text-[10px] font-medium text-muted-foreground/50 mt-0.5">See who's leading this week</p>
       </div>
 
       <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-2 pl-5">
