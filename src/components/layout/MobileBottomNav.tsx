@@ -183,70 +183,29 @@ export function MobileBottomNav() {
 
  return (
  <>
-  {/* Tab bar — slides on scroll */}
+  {/* Gradient backdrop — fixed at bottom, behind nav */}
+  <div
+    className={cn(
+      "fixed bottom-0 left-0 right-0 pointer-events-none z-40 transition-opacity duration-300",
+      (visible || isComposerOpen) ? "opacity-100" : "opacity-0"
+    )}
+    style={{
+      height: "calc(62px + env(safe-area-inset-bottom, 0px) + 3.5rem)",
+      background: "linear-gradient(to top, hsl(var(--background)), transparent)",
+    }}
+  />
+
+  {/* Nav bar */}
   <div
   className={cn(
-   "md:hidden fixed bottom-0 left-0 right-0 z-max",
+   "md:hidden fixed bottom-3 left-3 right-3 z-max backdrop-blur-xl transition-transform duration-300 ease-in-out pb-[env(safe-area-inset-bottom,0px)]",
    isComposerOpen
-   ? "bg-background/80 pb-[env(safe-area-inset-bottom,0px)]"
-   :   "bg-white/85 dark:bg-black/85 rounded-t-2xl border-t border-gray-200/50 dark:border-white/[0.05] shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)] pb-[env(safe-area-inset-bottom,0px)]",
-   (visible || isComposerOpen) ? "translate-y-0" : "translate-y-full"
+   ? "bg-background/80"
+   :   "bg-white/85 dark:bg-black/85 shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)]",
+   isGridOpen ? "rounded-t-none rounded-b-2xl" : "rounded-2xl",
+   (visible || isComposerOpen || isGridOpen) ? "translate-y-0" : "translate-y-full"
   )}
   >
-  {/* More pages sheet inside nav */}
-  <AnimatePresence>
-   {isGridOpen && (
-   <motion.div
-    initial={{ y: "100%" }}
-    animate={{ y: 0 }}
-    exit={{ y: "100%" }}
-    transition={{ type: "spring", damping: 28, stiffness: 260 }}
-    className="absolute left-0 right-0 z-10 overflow-y-auto bg-white/90 dark:bg-black/90"
-    style={{ bottom: "100%", maxHeight: "55vh" }}
-   >
-    <div className="flex flex-col items-center pt-3 pb-6">
-    <div className="mb-5 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/20" />
-    <div className="grid grid-cols-3 gap-y-6 gap-x-2 px-6 w-full max-w-sm">
-     {EXTRA_PAGES.map((page) => {
-     const PageIcon = page.icon;
-     const isActive = page.match(pathname);
-     return (
-      <button
-      key={page.href}
-      type="button"
-      onClick={() => {
-       setIsGridOpen(false);
-       router.push(page.href);
-      }}
-      className="flex flex-col items-center gap-1.5 active:scale-90 transition-transform duration-200"
-      >
-      <span
-       className={cn(
-       "flex h-12 w-12 items-center justify-center rounded-xl transition-colors",
-       isActive
-        ? "bg-primary/10 text-primary"
-        : "bg-muted/40 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-       )}
-      >
-       <PageIcon className="h-6 w-6" />
-      </span>
-      <span
-       className={cn(
-       "text-[11px] font-medium text-center leading-tight",
-       isActive ? "text-primary" : "text-muted-foreground"
-       )}
-      >
-       {page.label}
-      </span>
-      </button>
-     );
-     })}
-    </div>
-    </div>
-   </motion.div>
-   )}
-  </AnimatePresence>
-
   <div className="flex items-center justify-around h-[62px] px-1 relative z-20">
    {TABS.slice(0, 2).map((tab) => (
    <TabItem key={tab.href} tab={tab} pathname={pathname} />
@@ -310,12 +269,67 @@ export function MobileBottomNav() {
    )}
 
    {TABS.slice(2).map((tab) => (
-   <TabItem key={tab.href} tab={tab} pathname={pathname} />
+    <TabItem key={tab.href} tab={tab} pathname={pathname} />
    ))}
   </div>
   </div>
 
-  {/* Backdrop for More pages */}
+  {/* Grid drawer — separate sibling, directly above nav */}
+  <AnimatePresence>
+   {isGridOpen && (
+   <motion.div
+    initial={{ y: 12, opacity: 0 }}
+    animate={{ y: 0, opacity: 1 }}
+    exit={{ y: 12, opacity: 0 }}
+    transition={{ type: "spring", damping: 24, stiffness: 220 }}
+    className="md:hidden fixed left-3 right-3 z-max overflow-y-auto bg-white/85 dark:bg-black/85 backdrop-blur-xl rounded-t-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)]"
+    style={{ bottom: "calc(12px + 62px + env(safe-area-inset-bottom, 0px))", maxHeight: "55vh" }}
+    onClick={() => setIsGridOpen(false)}
+   >
+    <div className="flex flex-col items-center pt-3 pb-2" onClick={(e) => e.stopPropagation()}>
+    <div className="mb-5 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/20" />
+    <div className="grid grid-cols-3 gap-y-6 gap-x-2 px-6 w-full max-w-sm">
+     {EXTRA_PAGES.map((page) => {
+     const PageIcon = page.icon;
+     const isActive = page.match(pathname);
+     return (
+      <button
+      key={page.href}
+      type="button"
+      onClick={() => {
+       setIsGridOpen(false);
+       router.push(page.href);
+      }}
+      className="flex flex-col items-center gap-1.5 active:scale-90 transition-transform duration-200"
+      >
+      <span
+       className={cn(
+       "flex h-12 w-12 items-center justify-center rounded-xl transition-colors",
+       isActive
+        ? "bg-primary/10 text-primary"
+        : "bg-muted/40 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+       )}
+      >
+       <PageIcon className="h-6 w-6" />
+      </span>
+      <span
+       className={cn(
+       "text-[11px] font-medium text-center leading-tight",
+       isActive ? "text-primary" : "text-muted-foreground"
+       )}
+      >
+       {page.label}
+      </span>
+      </button>
+     );
+     })}
+    </div>
+    </div>
+   </motion.div>
+   )}
+  </AnimatePresence>
+
+  {/* Full-screen blur backdrop — behind nav+grid, blurs page content */}
   <AnimatePresence>
   {isGridOpen && (
    <motion.div
@@ -323,8 +337,7 @@ export function MobileBottomNav() {
    animate={{ opacity: 1 }}
    exit={{ opacity: 0 }}
    transition={{ duration: 0.2 }}
-   className="fixed left-0 right-0 top-0 z-max bg-black/70"
-   style={{ bottom: "calc(62px + env(safe-area-inset-bottom, 0px))" }}
+   className="fixed inset-0 z-50 backdrop-blur-lg bg-black/5"
    onClick={() => setIsGridOpen(false)}
    />
   )}
