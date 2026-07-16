@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { enhancePlainImageUrls, normalizeImageUrl } from "@/lib/markdown-helpers";
 import {
   Flame,
+  MessageCircle,
   HelpCircle, BarChart3, Headphones, Link as LinkIcon,
 } from "lucide-react";
 import { ImageGallery } from "@/components/community/ImageGallery";
@@ -788,10 +789,10 @@ export function CommunityPostsCarousel({ variant, maxPosts }: { variant?: "defau
   if (loading) {
     return (
       <div className="section-entrance">
-      <div className="flex items-center gap-2 mb-5 pt-5">
-          <Flame className="h-4 w-4 text-orange-500" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-            Community
+      <div className="flex items-center gap-2 mb-5 pt-5 pl-5">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10">
+            <MessageCircle className="h-3 w-3 text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-wider text-primary">Community</span>
           </span>
         </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 pl-5">
@@ -812,10 +813,10 @@ export function CommunityPostsCarousel({ variant, maxPosts }: { variant?: "defau
       className="section-entrance"
     >
       {/* Community heading */}
-        <div className="flex items-center gap-2 mb-5 pt-5">
-        <Flame className="h-4 w-4 text-orange-500" />
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-          Community
+        <div className="flex items-center gap-2 mb-5 pt-5 pl-5">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10">
+          <MessageCircle className="h-3 w-3 text-primary" />
+          <span className="text-[10px] font-black uppercase tracking-wider text-primary">Community</span>
         </span>
       </div>
 

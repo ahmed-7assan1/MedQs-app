@@ -14,7 +14,8 @@ import { cn } from "@/lib/utils";
 import { useThemeStore, useNotificationStore } from "@/lib/store";
 import { NotificationsSheet } from "@/components/layout/NotificationsSheet";
 import { QuickActionsStrip } from "@/components/dashboard/sections/QuickActionsStrip";
-import { CommunityPostsCarousel } from "@/components/dashboard/CommunityPostsCarousel";
+import dynamic from "next/dynamic";
+const CommunityPostsCarousel = dynamic(() => import("@/components/dashboard/CommunityPostsCarousel").then(mod => ({ default: mod.CommunityPostsCarousel })), { ssr: false });
 import { CarouselErrorBoundary } from "@/components/dashboard/CarouselErrorBoundary";
 import { LeaderboardCarousel } from "@/components/dashboard/sections/LeaderboardCarousel";
 import { generateRecommendations } from "@/components/dashboard/sections/AIRecommendations";
@@ -52,13 +53,21 @@ function ProgressRing({
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ - (pct / 100) * circ;
+  const circleRef = useRef<SVGCircleElement>(null);
+
+  useEffect(() => {
+    if (circleRef.current) {
+      circleRef.current.style.strokeDashoffset = String(offset);
+    }
+  }, [offset]);
 
   return (
     <div className="flex flex-col items-center gap-1 shrink-0">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
           <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={bgColor} strokeWidth={stroke} strokeLinecap="round" />
-          <motion.circle
+          <circle
+            ref={circleRef}
             cx={size / 2}
             cy={size / 2}
             r={r}
@@ -67,9 +76,8 @@ function ProgressRing({
             strokeWidth={stroke}
             strokeLinecap="round"
             strokeDasharray={circ}
-            initial={{ strokeDashoffset: circ }}
-            animate={{ strokeDashoffset: offset }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            strokeDashoffset={circ}
+            style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1)" }}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center" style={{ color }}>
@@ -288,7 +296,7 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
       {/* ════════════════════════════════════════
           HEADER — Compact top bar
           ════════════════════════════════════════ */}
-      <div className="home-header fixed top-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm py-1">
+      <div className="home-header fixed top-0 left-0 right-0 z-10 bg-background py-1">
         <div className="flex-1 min-w-0">
           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground leading-none">MEDONEX</span>
           <p className="text-sm mt-0.5 leading-tight">
@@ -400,7 +408,7 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
       {/* ════════════════════════════════════════
           COMMUNITY — Compact horizontal cards
           ════════════════════════════════════════ */}
-      <div className="mb-8">
+      <div className="mb-8" style={{ contentVisibility: "auto", containIntrinsicSize: "400px" }}>
         <CarouselErrorBoundary title="Community">
           <CommunityPostsCarousel />
         </CarouselErrorBoundary>
@@ -409,7 +417,7 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
       {/* ════════════════════════════════════════
           QUICK ACTIONS
           ════════════════════════════════════════ */}
-      <div className="px-5 mb-8">
+      <div className="px-5 mb-8" style={{ contentVisibility: "auto", containIntrinsicSize: "200px" }}>
         <QuickActionsStrip />
       </div>
 

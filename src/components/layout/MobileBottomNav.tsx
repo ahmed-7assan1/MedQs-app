@@ -119,6 +119,7 @@ export function MobileBottomNav() {
  const router = useRouter();
  const [visible, setVisible] = useState(true);
  const lastScrollY = useRef(0);
+ const lastVisibleRef = useRef(true);
  const isComposerOpen = useCommunityStore((s) => s.isComposerOpen);
  const openComposer = useCommunityStore((s) => s.openComposer);
  const isSocial = pathname.startsWith("/social") || pathname.startsWith("/community");
@@ -142,22 +143,31 @@ export function MobileBottomNav() {
 
    const scrollBottom = window.innerHeight + window.scrollY;
    if (cachedScrollHeight - scrollBottom < BOTTOM_THRESHOLD) {
-   setVisible(true);
-   lastScrollY.current = currentScrollY;
-   ticking = false;
-   return;
+    if (!lastVisibleRef.current) {
+     lastVisibleRef.current = true;
+     setVisible(true);
+    }
+    lastScrollY.current = currentScrollY;
+    ticking = false;
+    return;
    }
 
    if (Math.abs(diff) < SCROLL_THRESHOLD) {
-   lastScrollY.current = currentScrollY;
-   ticking = false;
-   return;
+    lastScrollY.current = currentScrollY;
+    ticking = false;
+    return;
    }
 
    if (diff > 0 && currentScrollY > 60) {
-   setVisible(false);
+    if (lastVisibleRef.current) {
+     lastVisibleRef.current = false;
+     setVisible(false);
+    }
    } else if (diff < 0) {
-   setVisible(true);
+    if (!lastVisibleRef.current) {
+     lastVisibleRef.current = true;
+     setVisible(true);
+    }
    }
 
    lastScrollY.current = currentScrollY;
@@ -198,7 +208,7 @@ export function MobileBottomNav() {
   {/* Nav bar */}
   <div
   className={cn(
-   "md:hidden fixed bottom-3 left-3 right-3 z-max backdrop-blur-xl transition-transform duration-300 ease-in-out pb-[env(safe-area-inset-bottom,0px)]",
+   "md:hidden fixed bottom-3 left-3 right-3 z-max backdrop-blur transition-transform duration-300 ease-in-out pb-[env(safe-area-inset-bottom,0px)]",
    isComposerOpen
    ? "bg-background/80"
    :   "bg-white/85 dark:bg-black/85 shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)]",
@@ -282,7 +292,7 @@ export function MobileBottomNav() {
     animate={{ y: 0, opacity: 1 }}
     exit={{ y: 12, opacity: 0 }}
     transition={{ type: "spring", damping: 24, stiffness: 220 }}
-    className="md:hidden fixed left-3 right-3 z-max overflow-y-auto bg-white/85 dark:bg-black/85 backdrop-blur-xl rounded-t-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)]"
+    className="md:hidden fixed left-3 right-3 z-max overflow-y-auto bg-white/85 dark:bg-black/85 backdrop-blur rounded-t-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)]"
     style={{ bottom: "calc(12px + 62px + env(safe-area-inset-bottom, 0px))", maxHeight: "55vh" }}
     onClick={() => setIsGridOpen(false)}
    >
@@ -337,7 +347,7 @@ export function MobileBottomNav() {
    animate={{ opacity: 1 }}
    exit={{ opacity: 0 }}
    transition={{ duration: 0.2 }}
-   className="fixed inset-0 z-50 backdrop-blur-lg bg-black/5"
+    className="fixed inset-0 z-50 backdrop-blur-sm bg-black/5"
    onClick={() => setIsGridOpen(false)}
    />
   )}
