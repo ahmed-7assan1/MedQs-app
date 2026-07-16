@@ -81,7 +81,7 @@ export const StudyTimer = () => {
         </div>
         <Popover>
           <PopoverTrigger asChild>
-            <button className="text-[10px] font-bold text-foreground/40 hover:text-foreground uppercase tracking-wider">
+            <button className="text-[10px] font-bold text-foreground/70 hover:text-foreground uppercase tracking-wider">
               {mode}
             </button>
           </PopoverTrigger>
@@ -130,13 +130,13 @@ export const StudyTimer = () => {
             </button>
           )}
           {state !== "idle" && (
-            <button onClick={reset} className="p-1.5 rounded-lg bg-muted text-foreground/50 hover:text-foreground transition-all">
+            <button onClick={reset} className="p-1.5 rounded-lg bg-muted text-foreground hover:text-foreground transition-all">
               <RotateCcw size={14} />
             </button>
           )}
         </div>
 
-        <p className="text-[9px] font-bold text-foreground/30 uppercase tracking-wider">
+        <p className="text-[9px] font-bold text-foreground/60 uppercase tracking-wider">
           {sessions} session{sessions !== 1 ? "s" : ""} today
         </p>
       </div>

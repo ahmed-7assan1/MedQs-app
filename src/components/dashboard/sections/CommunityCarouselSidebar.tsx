@@ -124,7 +124,7 @@ function PostCardBody({ post }: { post: PostData }) {
   return (
     <div className="flex-1 overflow-y-auto px-3.5 py-2.5 flex flex-col gap-2 scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent">
       {contentSrc && (
-        <p className="text-xs leading-relaxed text-foreground/85 line-clamp-4" dir="auto">
+        <p className="text-xs leading-relaxed text-foreground line-clamp-4" dir="auto">
           {contentSrc.replace(/<[^>]*>/g, "").slice(0, 250)}
         </p>
       )}
@@ -198,7 +198,7 @@ function PostCard({ post }: { post: PostData }) {
             <p className="text-xs font-bold text-foreground truncate leading-tight">
               {post.author?.name || "Unknown"}
             </p>
-            <p className="text-[10px] text-muted-foreground/60 leading-tight">
+            <p className="text-[10px] text-muted-foreground leading-tight">
               @{post.author?.name?.toLowerCase().replace(/\s+/g, "") || "unknown"} &middot; {timeAgo(post.createdAt)}
             </p>
           </div>
@@ -208,13 +208,13 @@ function PostCard({ post }: { post: PostData }) {
 
         <div className="shrink-0 px-3.5 pb-3 pt-2 border-t border-border/10">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-muted-foreground/50">
+            <div className="flex items-center gap-1 text-muted-foreground">
               <Heart className="h-3 w-3" />
               <span className="text-[10px] font-bold">
                 {post._count?.likes && post._count.likes > 0 ? post._count.likes.toLocaleString() : ""}
               </span>
             </div>
-            <div className="flex items-center gap-1 text-muted-foreground/50">
+            <div className="flex items-center gap-1 text-muted-foreground">
               <MessageSquare className="h-3 w-3" />
               <span className="text-[10px] font-bold">
                 {post._count?.comments && post._count.comments > 0 ? post._count.comments.toLocaleString() : ""}
@@ -304,13 +304,13 @@ export function CommunityCarouselSidebar({ sidebarOpen }: { sidebarOpen?: boolea
         <Button variant="outline" asChild className="w-full p-0 h-auto rounded-xl border-dashed bg-card/30 hover:bg-card/50">
           <Link href="/social" className="flex items-center justify-between p-5">
             <div className="flex items-center gap-3">
-              <MessageCircle className="h-7 w-7 text-muted-foreground/30" />
+              <MessageCircle className="h-7 w-7 text-muted-foreground/50" />
               <div>
                 <p className="text-sm font-bold text-foreground">No community posts yet</p>
                 <p className="text-xs text-muted-foreground">Be the first to share something</p>
               </div>
             </div>
-            <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
+            <ArrowRight className="h-4 w-4 text-muted-foreground" />
           </Link>
         </Button>
       </div>

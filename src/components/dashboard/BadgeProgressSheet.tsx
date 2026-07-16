@@ -120,7 +120,7 @@ export function BadgeProgressSheet({
                   <div className="flex items-center gap-3 mb-2.5 relative z-10">
                     <div className={cn(
                       "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-lg",
-                      earned ? badge.gradient : "from-muted/30 to-muted/10 text-muted-foreground/50"
+                      earned ? badge.gradient : "from-muted/30 to-muted/10 text-muted-foreground"
                     )}>
                       <BadgeIcon className={cn("h-4 w-4", earned && `bss-icon-${badge.id}`)} />
                     </div>
@@ -144,11 +144,11 @@ export function BadgeProgressSheet({
                   </div>
 
                   <div className="flex items-center justify-between mt-1.5 relative z-10">
-                    <p className="text-[9px] font-semibold text-muted-foreground/60">
+                    <p className="text-[9px] font-semibold text-muted-foreground">
                       {earned ? "Earned" : `${progress}%`}
                     </p>
                     {!earned && (
-                      <p className="text-[9px] text-muted-foreground/50 text-right max-w-[60%] truncate">{getBadgeHint(badge.id)}</p>
+                      <p className="text-[9px] text-muted-foreground text-right max-w-[60%] truncate">{getBadgeHint(badge.id)}</p>
                     )}
                   </div>
                   </CardContent>

@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma, withRetry } from "@/lib/prisma";
 import { getCachedDashboardData, getCachedRankInfo } from "@/lib/dashboard-queries";
-import { last7DayKeys } from "@/lib/dashboard-stats";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import type { DashboardData, ModuleProgressItem, QuizCardData, LastLectureInfo } from "@/types/dashboard";
 import type { Metadata } from "next";
@@ -21,7 +20,6 @@ interface DashboardRawData {
   recentQuizzes: QuizCardData[];
   todayItemCount: number;
   streak: number;
-  weekCounts: number[];
   moduleProgress: ModuleProgressItem[];
   totalQuestions: number;
   totalCorrect: number;
@@ -56,15 +54,13 @@ export default async function DashboardPage() {
   }
 
   const userId = user.id;
-  const chartDays = last7DayKeys();
-  const chartDayKeyStrings = chartDays.map((d) => d.key);
 
   let dashData: DashboardRawData | null = null;
   let rankInfo: RankInfoData | null = null;
 
   try {
     [dashData, rankInfo] = await withRetry(() => Promise.all([
-      getCachedDashboardData(userId, chartDayKeyStrings),
+      getCachedDashboardData(userId),
       getCachedRankInfo(userId),
     ]), 2);
   } catch (err) {
@@ -76,17 +72,13 @@ export default async function DashboardPage() {
     totalCorrect: 0,
     todayItemCount: 0,
     streak: 0,
-    weekCounts: [],
     moduleProgress: [],
     lastLectureActivity: null,
     recentQuizzes: [],
     user: null,
   };
-  const { totalQuestions, totalCorrect, todayItemCount, streak: currentStreak, weekCounts, moduleProgress, lastLectureActivity, recentQuizzes } = dashData || fallback;
+  const { totalQuestions, totalCorrect, todayItemCount, streak: currentStreak, moduleProgress, lastLectureActivity, recentQuizzes } = dashData || fallback;
 
-  const activityArr = chartDays.length
-    ? chartDays.map((d, i) => ({ day: d.shortLabel, count: weekCounts[i] || 0 }))
-    : [];
   const overallPct = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
   const dailyTarget = 50;
   const dailyPct = Math.min(100, Math.round((todayItemCount / dailyTarget) * 100));
@@ -168,7 +160,6 @@ export default async function DashboardPage() {
     dailyTarget,
     totalQuestions,
     moduleProgress: moduleProgress || [],
-    activityArr: activityArr || [],
     progressToNext,
     isProfileIncomplete,
     ads: ads.length ? ads : undefined,

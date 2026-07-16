@@ -173,7 +173,7 @@ export function SpacedRepetitionCards() {
         </div>
         <Card className="bg-card/20 border-dashed">
           <CardContent className="h-[60px] flex items-center justify-center">
-          <p className="text-[11px] font-bold text-muted-foreground/50">Dismissed. Tap Show to reveal.</p>
+          <p className="text-[11px] font-bold text-muted-foreground">Dismissed. Tap Show to reveal.</p>
           </CardContent>
         </Card>
       </div>
@@ -197,7 +197,7 @@ export function SpacedRepetitionCards() {
           }}
         >
           <CardContent className="p-4 min-h-[56px]">
-            <p className="text-xs font-bold text-foreground/40 line-clamp-1">{card.front}</p>
+            <p className="text-xs font-bold text-foreground line-clamp-1">{card.front}</p>
           </CardContent>
         </Card>
       ))}
@@ -211,7 +211,7 @@ export function SpacedRepetitionCards() {
             "absolute -top-2 -right-2 z-20 h-8 w-8 rounded-full flex items-center justify-center transition-all shadow-lg active:scale-90",
             saved.has(currentId)
               ? "bg-primary text-primary-foreground shadow-primary/30"
-              : "bg-background border border-border text-muted-foreground/60 hover:text-primary hover:border-indigo-300"
+              : "bg-background border border-border text-muted-foreground hover:text-primary hover:border-indigo-300"
           )}
         >
           <Bookmark className={cn("h-4 w-4", saved.has(currentId) ? "fill-current" : "")} />
@@ -251,7 +251,7 @@ export function SpacedRepetitionCards() {
                       {current.from === "random" ? "Explore" : current.subjectName}
                     </span>
                   </div>
-                  <span className="text-[9px] font-bold text-muted-foreground/40 tabular-nums">
+                  <span className="text-[9px] font-bold text-muted-foreground tabular-nums">
                     {currentIdx + 1}/{orderedCards.length}
                   </span>
                 </div>
@@ -259,7 +259,7 @@ export function SpacedRepetitionCards() {
                   <p className="text-sm font-black text-foreground leading-relaxed">
                     {current.front}
                   </p>
-                  <p className="text-[9px] text-muted-foreground/40 mt-3">Tap to reveal</p>
+                  <p className="text-[9px] text-muted-foreground mt-3">Tap to reveal</p>
                 </div>
                 </CardContent>
               </Card>
@@ -278,7 +278,7 @@ export function SpacedRepetitionCards() {
                     <CheckCircle className="h-3.5 w-3.5 text-sky-500" />
                     <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Answer</span>
                   </div>
-                  <span className="text-[9px] font-bold text-muted-foreground/40 tabular-nums">
+                  <span className="text-[9px] font-bold text-muted-foreground tabular-nums">
                     {currentIdx + 1}/{orderedCards.length}
                   </span>
                 </div>
@@ -286,7 +286,7 @@ export function SpacedRepetitionCards() {
                   <p className="text-sm font-bold text-foreground leading-relaxed flex-1">
                     {current.back}
                   </p>
-                  <p className="text-[9px] text-muted-foreground/40 mt-1">
+                  <p className="text-[9px] text-muted-foreground mt-1">
                     {current.lectureTitle}
                   </p>
                 </div>
@@ -349,7 +349,7 @@ export function SpacedRepetitionCards() {
             <button onClick={() => fetchCards(true)} className="text-[9px] font-bold text-primary dark:text-primary uppercase tracking-widest">
               Refresh
             </button>
-            <button onClick={dismissAll} className="h-6 w-6 rounded-full hover:bg-muted/40 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+            <button onClick={dismissAll} className="h-6 w-6 rounded-full hover:bg-muted/40 flex items-center justify-center text-muted-foreground hover:text-muted-foreground transition-colors">
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -377,10 +377,10 @@ export function SpacedRepetitionCards() {
                 <p className="text-xl font-black text-foreground tracking-tight">
                   Med<span className="text-primary">Onex</span>
                 </p>
-                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] mt-1">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] mt-1">
                   Your AI Medical Companion
                 </p>
-                <p className="text-[10px] text-muted-foreground/40 mt-3">Tap to discover</p>
+                <p className="text-[10px] text-muted-foreground mt-3">Tap to discover</p>
                 </CardContent>
               </Card>
               <Card
@@ -428,7 +428,7 @@ export function SpacedRepetitionCards() {
           <button onClick={() => fetchCards(true)} className="text-[9px] font-bold text-primary dark:text-primary uppercase tracking-widest">
             Refresh
           </button>
-          <button onClick={dismissAll} className="h-6 w-6 rounded-full hover:bg-muted/40 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground transition-colors" title="Dismiss">
+          <button onClick={dismissAll} className="h-6 w-6 rounded-full hover:bg-muted/40 flex items-center justify-center text-muted-foreground hover:text-muted-foreground transition-colors" title="Dismiss">
             <X className="h-3.5 w-3.5" />
           </button>
         </div>

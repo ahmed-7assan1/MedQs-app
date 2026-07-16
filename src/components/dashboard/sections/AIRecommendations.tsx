@@ -146,7 +146,7 @@ export const AIRecommendations = memo(function AIRecommendations({ data }: { dat
                       <div className="flex items-start justify-between gap-4 flex-wrap sm:flex-nowrap">
                         <div className="space-y-1">
                           <p className="text-xs font-black text-foreground leading-none">{rec.title}</p>
-                          <p className="text-[11px] text-muted-foreground/60 leading-relaxed">{rec.desc}</p>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">{rec.desc}</p>
                         </div>
                         {rec.action && rec.actionHref && (
                           <Button

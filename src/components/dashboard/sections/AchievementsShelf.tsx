@@ -104,12 +104,12 @@ export function AchievementsShelf({ data }: { data: DashboardData }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xl font-black text-foreground tabular-nums">{data.currentStreak} day{data.currentStreak !== 1 ? "s" : ""}</p>
-                  <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-wider">{emoji.label}</p>
+                  <p className="text-[9px] font-bold text-foreground/70 uppercase tracking-wider">{emoji.label}</p>
                 </div>
               </div>
               {nextMilestone && (
                 <div className="mt-3">
-                  <div className="flex justify-between text-[9px] font-bold text-foreground/30 mb-1">
+                  <div className="flex justify-between text-[9px] font-bold text-foreground/60 mb-1">
                     <span>Next: {nextMilestone}d</span>
                     <span>{Math.round(streakProgress)}%</span>
                   </div>
@@ -149,11 +149,11 @@ export function AchievementsShelf({ data }: { data: DashboardData }) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xl font-black text-foreground tabular-nums">{(data.totalQuestions || 0).toLocaleString()}</p>
-              <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-wider">Questions Solved</p>
+              <p className="text-[9px] font-bold text-foreground/70 uppercase tracking-wider">Questions Solved</p>
             </div>
             <Button variant="ghost" size="sm" asChild className="h-8 w-8 rounded-lg bg-muted/30 border border-border/50 hover:bg-muted/50 shrink-0">
               <Link href="/leaderboard">
-                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
               </Link>
             </Button>
           </Card>
@@ -191,7 +191,7 @@ export function AchievementsShelf({ data }: { data: DashboardData }) {
                   <div className={cn("flex items-center justify-center w-7 h-7 rounded-lg shrink-0", badge.unlocked ? "bg-current/10" : "bg-muted/30")}>
                     <Icon className={cn("h-3.5 w-3.5", badge.color)} />
                   </div>
-                  <span className={cn("text-[10px] font-bold leading-tight", badge.unlocked ? "text-foreground/80" : "text-muted-foreground/50")}>
+                  <span className={cn("text-[10px] font-bold leading-tight", badge.unlocked ? "text-foreground" : "text-muted-foreground")}>
                     {badge.label}
                   </span>
                 </CardContent>

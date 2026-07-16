@@ -51,7 +51,7 @@ export function LeaderboardSidebar() {
       <div className="space-y-3">
         <SidebarLabel icon={Trophy} label="Top Students" />
         <div className="p-4 rounded-xl border border-dashed border-border/40 bg-card/20 text-center">
-          <p className="text-[11px] font-bold text-muted-foreground/60">No student activity logged yet</p>
+          <p className="text-[11px] font-bold text-muted-foreground">No student activity logged yet</p>
         </div>
       </div>
     );

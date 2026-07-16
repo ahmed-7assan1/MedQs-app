@@ -41,7 +41,6 @@ export type DashboardData = {
   }>;
   todayItemCount: number;
   streak: number;
-  weekCounts: number[];
   moduleProgress: ModuleProgressItem[];
   totalQuestions: number;
   totalCorrect: number;
@@ -100,37 +99,6 @@ async function computeStreakFromDb(userId: string): Promise<number> {
   }
 
   return streak;
-}
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Weekly activity — count items per day (last 7 days)
-// ──────────────────────────────────────────────────────────────────────────────
-
-async function getWeeklyActivity(
-  userId: string,
-  chartDayKeys: string[]
-): Promise<number[]> {
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 6);
-  weekAgo.setHours(0, 0, 0, 0);
-
-  const rows = await prisma.$queryRaw<Array<{ day: string; cnt: bigint }>>(
-    Prisma.sql`
-      SELECT
-        TO_CHAR(a."createdAt" AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS day,
-        COUNT(i.id) AS cnt
-      FROM "QuizAttemptItem" i
-      JOIN "QuizAttempt" a ON a.id = i."attemptId"
-      WHERE a."userId" = ${userId}
-        AND a."createdAt" >= ${weekAgo}
-      GROUP BY day
-    `
-  );
-
-  return chartDayKeys.map((k) => {
-    const found = rows.find((r) => r.day === k);
-    return found ? Number(found.cnt) : 0;
-  });
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -198,15 +166,14 @@ async function getModuleProgress(userId: string, semesterId: string): Promise<Mo
 // ──────────────────────────────────────────────────────────────────────────────
 
 export async function fetchDashboardData(
-  userId: string,
-  chartDayKeys: string[]
+  userId: string
 ): Promise<Omit<DashboardData, "rankInfo">> {
 
   const dayStart = new Date();
   dayStart.setHours(0, 0, 0, 0);
 
   // Run independent queries in parallel
-  const [user, todayItemCount, streak, weekCounts, lastLectureActivity] =
+  const [user, todayItemCount, streak, lastLectureActivity] =
     await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
@@ -222,7 +189,6 @@ export async function fetchDashboardData(
         where: { attempt: { userId, createdAt: { gte: dayStart } } },
       }),
       computeStreakFromDb(userId),
-      getWeeklyActivity(userId, chartDayKeys),
       // P2-3: Prisma sorts ALL lecture videos client-side when using include with nested orderBy.
       // Per-lecture video count is small (1-5), so this is acceptable. Revisit only if per-lecture
       // video count exceeds 50. See dashboard-backend-remediation-plan.md P2-3 for details.
@@ -296,7 +262,6 @@ export async function fetchDashboardData(
     })),
     todayItemCount,
     streak,
-    weekCounts,
     moduleProgress,
     totalQuestions,
     totalCorrect,
@@ -306,8 +271,8 @@ export async function fetchDashboardData(
 }
 
 export const getCachedDashboardData = unstable_cache(
-  async (userId: string, chartDayKeys: string[]) => {
-    return fetchDashboardData(userId, chartDayKeys);
+  async (userId: string) => {
+    return fetchDashboardData(userId);
   },
   ["dashboard-data"],
   { revalidate: CACHE_TTL.DASHBOARD, tags: [CACHE_TAGS.DASHBOARD] }

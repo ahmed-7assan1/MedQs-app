@@ -68,7 +68,7 @@ function UserCard({ user, index }: { user: LeaderboardUser; index: number }) {
             />
           ) : (
             <div className={cn("h-full w-full flex items-center justify-center bg-gradient-to-br", gradient)}>
-              <span className="text-lg font-black text-foreground/40">{firstLetter}</span>
+              <span className="text-lg font-black text-foreground/80">{firstLetter}</span>
             </div>
           )}
           <span className={cn(
@@ -84,7 +84,7 @@ function UserCard({ user, index }: { user: LeaderboardUser; index: number }) {
         {user.name}
       </span>
 
-      <span className="text-[9px] font-bold text-muted-foreground/40 -mt-0.5">
+      <span className="text-[9px] font-bold text-muted-foreground -mt-0.5">
         {user.points.toLocaleString()} XP
       </span>
     </Link>
@@ -125,41 +125,36 @@ export const LeaderboardCarousel = memo(function LeaderboardCarousel() {
 
   if (loading) return <LeaderboardSkeleton />;
 
-  if (!users.length) {
-    return (
-      <div>
-      <div className="mb-5 pl-8">
-        <h2 className="text-[4px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">🏆 Top Learners</h2>
-        <p className="text-[4px] sm:text-[10px] font-medium text-muted-foreground/50 mt-0.5">See who's leading this week</p>
+  return (
+    <div>
+      {/* Section Header — Apple-style */}
+      <div className="flex justify-center mb-7">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10">
+          <Trophy className="h-3.5 w-3.5 text-primary" />
+          <span className="text-xs font-bold text-primary leading-none">Top Learners</span>
+        </div>
       </div>
+
+      {!users.length ? (
         <Button variant="outline" asChild className="w-full p-0 h-auto rounded-xl border-dashed bg-card/30 hover:bg-card/50">
           <Link href="/leaderboard" className="flex items-center justify-between p-5">
             <div className="flex items-center gap-3">
-              <Trophy className="h-7 w-7 text-muted-foreground/30" />
+              <Trophy className="h-7 w-7 text-muted-foreground/50" />
               <div>
                 <p className="text-sm font-bold text-foreground">No activity yet</p>
                 <p className="text-xs text-muted-foreground">Complete quizzes and tasks to earn XP and climb the ranks</p>
               </div>
             </div>
-            <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
+            <ArrowRight className="h-4 w-4 text-muted-foreground" />
           </Link>
         </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <div className="mb-5 pl-8">
-        <h2 className="text-[4px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">🏆 Top Learners</h2>
-        <p className="text-[4px] sm:text-[10px] font-medium text-muted-foreground/50 mt-0.5">See who's leading this week</p>
-      </div>
-
-      <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-2 pl-5">
-        {users.map((user, idx) => (
-          <UserCard key={user.id} user={user} index={idx} />
-        ))}
-      </div>
+      ) : (
+        <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-2 pl-5">
+          {users.map((user, idx) => (
+            <UserCard key={user.id} user={user} index={idx} />
+          ))}
+        </div>
+      )}
     </div>
   );
 });

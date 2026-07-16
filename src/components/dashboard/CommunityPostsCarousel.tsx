@@ -360,21 +360,21 @@ function PollBlock({ poll }: { poll: any }) {
                 style={{ width: voted ? `${Math.max(pct, 4)}%` : "100%" }}
               />
               <div className="relative flex items-center justify-between px-2.5 h-full">
-                <span className="text-[10px] font-semibold text-foreground/80 truncate">{opt.text}</span>
+                <span className="text-[10px] font-semibold text-foreground truncate">{opt.text}</span>
                 {voted && (
-                  <span className="text-[9px] font-black text-muted-foreground/70 ml-1 shrink-0">{pct}%</span>
+                  <span className="text-[9px] font-black text-muted-foreground ml-1 shrink-0">{pct}%</span>
                 )}
               </div>
             </button>
           );
         })}
         {poll.options?.length > 4 && (
-          <p className="text-[9px] text-muted-foreground/50 text-center pt-0.5">
+          <p className="text-[9px] text-muted-foreground text-center pt-0.5">
             +{poll.options.length - 4} more options
           </p>
         )}
       </div>
-      <p className="text-[9px] text-muted-foreground/40 mt-2 text-left">
+      <p className="text-[9px] text-muted-foreground mt-2 text-left">
         {total.toLocaleString()} votes
       </p>
     </div>
@@ -504,20 +504,20 @@ function PostCard({
           </div>
           <div className="min-w-0 flex-1">
             <span className="text-xs font-bold text-foreground truncate block">{post.author?.name || "Unknown"}</span>
-            <span className="text-[9px] text-muted-foreground/60">{timeAgo(post.createdAt)}</span>
+            <span className="text-[9px] text-muted-foreground">{timeAgo(post.createdAt)}</span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button onClick={handleLike} className="flex items-center gap-1 text-muted-foreground/60 hover:text-red-500 transition-colors">
+            <button onClick={handleLike} className="flex items-center gap-1 text-muted-foreground hover:text-red-500 transition-colors">
               <MeridianHeart filled={liked} className="h-3.5 w-3.5" />
               {likeCount > 0 && <span className="text-[10px] font-bold">{formatCount(likeCount)}</span>}
             </button>
-            <Link href="/social" className="flex items-center gap-1 text-muted-foreground/60 hover:text-indigo-500 transition-colors">
+            <Link href="/social" className="flex items-center gap-1 text-muted-foreground hover:text-indigo-500 transition-colors">
               <MeridianComment className="h-3.5 w-3.5" />
               {post._count?.comments ? <span className="text-[10px] font-bold">{formatCount(post._count.comments)}</span> : null}
             </Link>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground/70 leading-relaxed line-clamp-1 mt-2 flex-1">
+        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1 mt-2 flex-1">
           {preview || "No content"}
         </p>
         <Link href={`/social?post=${post.id}`} className="text-[9px] font-bold text-indigo-500 hover:text-indigo-400 transition-colors mt-auto">
@@ -532,7 +532,7 @@ function PostCard({
       <div
         ref={cardRef}
         dir="auto"
-        className="group sm:w-[340px] w-[260px] shrink-0 rounded-2xl border border-border/40 bg-card shadow-lg shadow-black/5 dark:shadow-black/20 hover:-translate-y-0.5 hover:shadow-xl hover:border-border/60 transition-all duration-200 flex flex-col p-5 gap-4 sm:h-[453px] sm:min-h-[453px] sm:max-h-[453px] h-[347px] min-h-[347px] max-h-[347px] overflow-hidden dark:bg-[#14141B]/70 dark:backdrop-blur-xl dark:border-white/[0.06]"
+        className="group sm:w-[340px] w-[300px] shrink-0 rounded-2xl border border-border/40 bg-card shadow-lg shadow-black/5 dark:shadow-black/20 hover:-translate-y-0.5 hover:shadow-xl hover:border-border/60 transition-all duration-200 flex flex-col p-5 gap-4 sm:h-[453px] sm:min-h-[453px] sm:max-h-[453px] h-[400px] min-h-[400px] max-h-[400px] overflow-hidden dark:bg-[#14141B]/70 dark:backdrop-blur-xl dark:border-white/[0.06]"
       >
         {/* ── Header: Author + Solved Badge + Category Badge ── */}
         <div className="relative shrink-0 flex items-start gap-3 z-10">
@@ -564,7 +564,7 @@ function PostCard({
                 {post.author?.name || "Unknown"}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
               {university && <span>{university}</span>}
               {(university || yearLabel) && <span> · </span>}
               <span>{timeAgo(post.createdAt)}</span>
@@ -600,11 +600,11 @@ function PostCard({
             {/* Preview - 2 lines, always */}
             {contentSrc && (
               isActive ? (
-                <p dir="auto" className="shrink-0 text-xs text-muted-foreground/50 leading-relaxed line-clamp-2">
+                <p dir="auto" className="shrink-0 text-xs text-muted-foreground leading-relaxed line-clamp-2">
                   {stripHandledUrls(post.content?.replace(/<[^>]*>/g, "") || "").slice(0, 200)}
                 </p>
               ) : (
-                <p dir="auto" className={cn("shrink-0 text-[12px] text-muted-foreground/60 leading-relaxed", clampForCategory(category))} style={{ fontFamily: "var(--font-nunito), var(--font-vazirmatn), sans-serif" }}>
+                <p dir="auto" className={cn("shrink-0 text-[12px] text-muted-foreground leading-relaxed", clampForCategory(category))} style={{ fontFamily: "var(--font-nunito), var(--font-vazirmatn), sans-serif" }}>
                   {stripHandledUrls(post.content?.replace(/<[^>]*>/g, "") || "").slice(0, 200) || "No content"}
                 </p>
               )
@@ -638,7 +638,7 @@ function PostCard({
                 </span>
               )}
               {mediaOverflow > 0 && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground/50">
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
                   +{mediaOverflow} more
                 </span>
               )}
@@ -649,7 +649,7 @@ function PostCard({
               <div className="shrink-0 flex flex-wrap gap-1.5">
                 {hashtags.slice(0, 6).map((tag, i) => (
                   <span key={i}
-                    className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary/70 hover:bg-primary/20 transition-colors">
+                    className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
                     #{tag}
                   </span>
                 ))}
@@ -704,7 +704,7 @@ function PostCard({
               onClick={handleLike}
               className={cn(
                 "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-90",
-                liked ? "text-red-500" : "text-muted-foreground/60 hover:text-red-500 hover:bg-red-500/8"
+                liked ? "text-red-500" : "text-muted-foreground hover:text-red-500 hover:bg-red-500/8"
               )}
             >
               <MeridianHeart filled={liked} className="h-4 w-4" />
@@ -714,7 +714,7 @@ function PostCard({
             {/* Comments */}
             <Link
               href="/social"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground/60 hover:text-indigo-500 hover:bg-indigo-500/8 transition-all"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-indigo-500 hover:bg-indigo-500/8 transition-all"
             >
               <MeridianComment className="h-4 w-4" />
               <span>{post._count?.comments ? formatCount(post._count.comments) : ""}</span>
@@ -725,7 +725,7 @@ function PostCard({
               onClick={handleBookmark}
               className={cn(
                 "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-90",
-                saved ? "text-primary" : "text-muted-foreground/60 hover:text-primary hover:bg-primary/8"
+                saved ? "text-primary" : "text-muted-foreground hover:text-primary hover:bg-primary/8"
               )}
             >
               <MeridianBookmark filled={saved} className="h-4 w-4" />
@@ -733,7 +733,7 @@ function PostCard({
             </button>
 
             {/* Share */}
-            <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground/60 hover:text-sky-500 hover:bg-sky-500/8 transition-all active:scale-90">
+            <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-sky-500 hover:bg-sky-500/8 transition-all active:scale-90">
               <MeridianShare className="h-4 w-4" />
             </button>
 
@@ -788,13 +788,13 @@ export function CommunityPostsCarousel({ variant, maxPosts }: { variant?: "defau
   if (loading) {
     return (
       <div className="section-entrance">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-5 pt-5">
           <Flame className="h-4 w-4 text-orange-500" />
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
             Community
           </span>
         </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 pl-5">
           <SkeletonCard compact={isCompact} />
           <SkeletonCard compact={isCompact} />
         </div>
@@ -812,7 +812,7 @@ export function CommunityPostsCarousel({ variant, maxPosts }: { variant?: "defau
       className="section-entrance"
     >
       {/* Community heading */}
-      <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-5 pt-5">
         <Flame className="h-4 w-4 text-orange-500" />
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
           Community
@@ -820,7 +820,7 @@ export function CommunityPostsCarousel({ variant, maxPosts }: { variant?: "defau
       </div>
 
       {/* Horizontal scroll of post cards */}
-      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 pl-5">
         {posts.slice(0, limit).map((post, idx) => (
           <PostCard
             key={post.id}

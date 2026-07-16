@@ -42,13 +42,13 @@ export function FocusPlanCard({ lastLecture, firstName }: FocusPlanCardProps) {
               <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] bg-primary/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                 <Sparkles className="h-3 w-3" /> Focus Plan
               </span>
-              <span className="text-[10px] font-bold text-muted-foreground/60">Estimated: 45 min</span>
+              <span className="text-[10px] font-bold text-muted-foreground">Estimated: 45 min</span>
             </div>
             
             <h2 className="sm:text-xl text-lg md:text-2xl font-black text-foreground tracking-tight leading-tight line-clamp-2">
               {lastLecture.lectureTitle}
             </h2>
-            <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest mt-1">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">
               {lastLecture.subjectName} &middot; {lastLecture.channelName || "MedOneX"}
             </p>
 
@@ -56,7 +56,7 @@ export function FocusPlanCard({ lastLecture, firstName }: FocusPlanCardProps) {
               <div className="h-1.5 sm:w-32 w-24 bg-muted/40 rounded-full overflow-hidden relative">
                 <div className="h-full bg-primary rounded-full w-[35%]" />
               </div>
-              <span className="text-[10px] font-black text-muted-foreground/50">35% completed</span>
+              <span className="text-[10px] font-black text-muted-foreground">35% completed</span>
             </div>
           </div>
 

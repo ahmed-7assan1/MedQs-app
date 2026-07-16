@@ -75,7 +75,7 @@ export function ProfileCoverSection({ data, hasAds }: { data: DashboardData; has
                   "flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-2.5 md:py-2 rounded-lg text-[10px] md:text-[11px] font-bold uppercase tracking-wider whitespace-nowrap transition-colors shrink-0",
                   active
                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                    : "text-foreground/80 hover:bg-foreground/10 hover:text-foreground"
+                    : "text-foreground hover:bg-foreground/10 hover:text-foreground"
                 )}
               >
                 <Icon className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" />

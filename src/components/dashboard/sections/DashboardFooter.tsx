@@ -48,7 +48,7 @@ export function DashboardFooter() {
             <div className="h-7 w-7 bg-foreground [mask-image:url(/medonex-logo.svg)] [mask-size:contain] [mask-repeat:no-repeat]" />
             <span className="text-sm font-bold">MedOneX</span>
           </div>
-          <p className="text-xs text-muted-foreground/50 mt-3 leading-relaxed max-w-xs">
+          <p className="text-xs text-muted-foreground mt-3 leading-relaxed max-w-xs">
             AI-powered medical education platform. Learn smarter, not harder.
           </p>
         </div>
@@ -56,7 +56,7 @@ export function DashboardFooter() {
         <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-8">
           {footerGroups.map((group) => (
             <div key={group.title}>
-              <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 mb-4">
+              <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground mb-4">
                 {group.title}
               </p>
               <ul className="space-y-2.5">
@@ -64,7 +64,7 @@ export function DashboardFooter() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-xs text-muted-foreground/60 hover:text-foreground transition-colors"
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -79,20 +79,20 @@ export function DashboardFooter() {
       <div className="h-px bg-border/10 my-8" />
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-[10px] text-muted-foreground/40">
+        <p className="text-[10px] text-muted-foreground">
           &copy; 2026 MedOneX. All rights reserved.
         </p>
         <div className="flex items-center gap-3">
           <Link
             href="/privacy"
-            className="text-[10px] text-muted-foreground/40 hover:text-foreground transition-colors"
+            className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
           >
             Privacy
           </Link>
-          <span className="text-muted-foreground/20">/</span>
+          <span className="text-muted-foreground/50">/</span>
           <Link
             href="/terms"
-            className="text-[10px] text-muted-foreground/40 hover:text-foreground transition-colors"
+            className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
           >
             Terms
           </Link>

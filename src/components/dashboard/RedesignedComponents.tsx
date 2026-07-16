@@ -91,7 +91,7 @@ export const StatCard = ({
       {typeof value === "number" ? <motion.span>{displayValue}</motion.span> : value}
       {label.includes("Mastery") || label.includes("Objective") ? "%" : ""}
      </p>
-     <p className="mt-0.5 text-[11px] md:text-xs font-bold text-foreground/60 uppercase tracking-widest">{label}</p>
+     <p className="mt-0.5 text-[11px] md:text-xs font-bold text-foreground uppercase tracking-widest">{label}</p>
      <p className="mt-0.5 text-[10px] md:text-[11px] font-medium text-muted-foreground">{subtitle}</p>
     </div>
 
@@ -112,7 +112,7 @@ export const StatCardMini = ({ label, value, iconName, color }: { label: string;
     <IconRenderer name={iconName} size={14} className="text-white" />
    </div>
    <div className="flex-1 min-w-0">
-    <p className="text-[11px] font-bold text-foreground/60 uppercase tracking-widest truncate">{label}</p>
+    <p className="text-[11px] font-bold text-foreground uppercase tracking-widest truncate">{label}</p>
     <p className="text-sm font-black text-foreground">{value}</p>
    </div>
   </div>
@@ -132,7 +132,7 @@ export const EmptyState = ({ label, iconName, href }: EmptyStateProps) => {
     <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-muted-foreground mb-4">
      <IconRenderer name={iconName} size={28} />
     </div>
-    <p className="text-sm font-bold text-foreground/60 mb-5">{label}</p>
+    <p className="text-sm font-bold text-foreground mb-5">{label}</p>
     <Button asChild variant="ghost" className="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-primary/10 text-primary hover:bg-primary hover:text-white">
      <Link href={href}>
       Start Learning
@@ -176,7 +176,7 @@ export const QuickLinkCompact = ({ label, iconName, color, href }: any) => {
    <div className={cn("p-1 rounded-lg", color)}>
     <IconRenderer name={iconName} size={12} className="text-white" />
    </div>
-   <span className="text-[10px] font-bold text-foreground/70 truncate">{label}</span>
+   <span className="text-[10px] font-bold text-foreground truncate">{label}</span>
   </Link>
  );
 };
@@ -199,7 +199,7 @@ export const AskDrQFeatured = () => {
       </div>
      </div>
 
-     <p className="text-xs font-medium text-foreground/60 leading-relaxed">
+     <p className="text-xs font-medium text-foreground leading-relaxed">
       Medical AI — clinical rationales, concept synthesis, instant answers.
      </p>
 

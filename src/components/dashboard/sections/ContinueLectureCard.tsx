@@ -21,9 +21,9 @@ export function ContinueLectureCard({ lecture }: { lecture: LastLectureInfo | nu
         <SidebarLabel icon={Play} label="Continue Lecture" />
         <Link
           href="/modules"
-          className="flex items-center gap-2 p-4 rounded-xl border border-border/30 bg-card/30 text-xs text-muted-foreground/50 hover:text-foreground transition-[color,opacity] duration-200"
+          className="flex items-center gap-2 p-4 rounded-xl border border-border/30 bg-card/30 text-xs text-muted-foreground hover:text-foreground transition-[color,opacity] duration-200"
         >
-          <BookOpen className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+          <BookOpen className="h-4 w-4 text-muted-foreground/50 shrink-0" />
           <span>No lecture in progress. Start studying!</span>
         </Link>
       </div>
@@ -66,7 +66,7 @@ export function ContinueLectureCard({ lecture }: { lecture: LastLectureInfo | nu
               </div>
             </>
           ) : (
-            <BookOpen className="h-8 w-8 text-muted-foreground/30" />
+            <BookOpen className="h-8 w-8 text-muted-foreground/50" />
           )}
         </div>
         
@@ -76,7 +76,7 @@ export function ContinueLectureCard({ lecture }: { lecture: LastLectureInfo | nu
             <h4 className="text-xs font-black text-foreground leading-snug line-clamp-2 mt-1.5">
               {lecture.lectureTitle}
             </h4>
-            <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wider mt-0.5">
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
               {lecture.subjectName}
             </p>
           </div>

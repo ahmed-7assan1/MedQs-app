@@ -46,7 +46,7 @@ function RecordCard({ record }: { record: import("@/lib/dashboard-fetch").Sugges
           <p className="text-xs font-bold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
             {record.title}
           </p>
-          <p className="text-[10px] text-muted-foreground/60 truncate">
+          <p className="text-[10px] text-muted-foreground truncate">
             {record.lectureTitle} &middot; {record.subjectName}
           </p>
           <div className="flex items-center gap-1.5 mt-auto pt-1">
@@ -55,7 +55,7 @@ function RecordCard({ record }: { record: import("@/lib/dashboard-fetch").Sugges
                 {record.artist.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <span className="text-[9px] font-medium text-muted-foreground/70 truncate">
+            <span className="text-[9px] font-medium text-muted-foreground truncate">
               {record.artist}
             </span>
           </div>

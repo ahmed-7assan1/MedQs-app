@@ -45,13 +45,13 @@ export function TodayQueue({ tasks }: TodayQueueProps) {
       <div className="flex items-center justify-between border-b border-border/20 pb-3">
         <div>
           <h3 className="text-sm font-black uppercase tracking-wider text-foreground">Today's Queue</h3>
-          <p className="text-[11px] font-bold text-muted-foreground/60 mt-0.5">
+          <p className="text-[11px] font-bold text-muted-foreground mt-0.5">
             Personalized task queue for today's learning goals
           </p>
         </div>
         <div className="text-right shrink-0">
           <span className="text-xs font-black text-foreground tabular-nums">
-            {completedCount} / {totalCount} <span className="text-[10px] font-medium text-muted-foreground/50">done</span>
+            {completedCount} / {totalCount} <span className="text-[10px] font-medium text-muted-foreground">done</span>
           </span>
           <div className="h-1.5 w-20 bg-muted/40 rounded-full overflow-hidden mt-1 relative">
             <div
@@ -66,7 +66,7 @@ export function TodayQueue({ tasks }: TodayQueueProps) {
       <div className="space-y-2.5">
         {tasks.length === 0 ? (
           <div className="text-center py-8 bg-card/20 rounded-xl border border-dashed border-border/40">
-            <CheckCircle2 className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+            <CheckCircle2 className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
             <p className="text-xs font-bold text-muted-foreground">All caught up! No tasks left for today.</p>
           </div>
         ) : (
@@ -94,7 +94,7 @@ export function TodayQueue({ tasks }: TodayQueueProps) {
                     </span>
                   </div>
                   {task.subtitle && (
-                    <span className="text-[10px] text-muted-foreground/60 mt-0.5 block truncate leading-none">
+                    <span className="text-[10px] text-muted-foreground mt-0.5 block truncate leading-none">
                       {task.subtitle}
                     </span>
                   )}
@@ -104,7 +104,7 @@ export function TodayQueue({ tasks }: TodayQueueProps) {
               {/* Estimate Duration & Action */}
               <div className="flex items-center gap-4 shrink-0">
                 {task.estimateMin && (
-                  <span className="hidden sm:flex items-center gap-1 text-[10px] font-bold text-muted-foreground/50">
+                  <span className="hidden sm:flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
                     <Clock className="h-3 w-3" /> {task.estimateMin}m
                   </span>
                 )}

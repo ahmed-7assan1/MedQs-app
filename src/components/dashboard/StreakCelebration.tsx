@@ -47,12 +47,12 @@ export const StreakCelebration = ({ currentStreak }: { currentStreak: number }) 
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-lg font-black text-foreground tabular-nums">{currentStreak} day{currentStreak !== 1 ? "s" : ""}</p>
-            <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-wider">{emoji.label}</p>
+            <p className="text-[10px] font-bold text-foreground/70 uppercase tracking-wider">{emoji.label}</p>
           </div>
         </div>
         {nextMilestone && (
           <div className="mt-3">
-            <div className="flex justify-between text-[9px] font-bold text-foreground/30 mb-1">
+            <div className="flex justify-between text-[9px] font-bold text-foreground/60 mb-1">
               <span>Next: {nextMilestone}d</span>
               <span>{Math.round(progress)}%</span>
             </div>

@@ -60,7 +60,7 @@ function PrimaryCard({ action, index }: { action: QuickAction; index: number }) 
                 <span className="block text-base font-black text-foreground group-hover:text-primary transition-colors duration-300">
                   {action.label}
                 </span>
-                <span className="text-[10px] text-muted-foreground/60 font-medium mt-0.5 block">{action.desc}</span>
+                <span className="text-[10px] text-muted-foreground font-medium mt-0.5 block">{action.desc}</span>
               </div>
             </div>
           </CardContent>

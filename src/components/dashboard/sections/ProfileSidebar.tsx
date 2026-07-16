@@ -96,7 +96,7 @@ export function ProfileSidebar({ data }: { data: DashboardData }) {
          <Icon className={cn("h-3.5 w-3.5", stat.color)} />
         </div>
         <p className="text-base font-black tabular-nums text-foreground">{stat.value}</p>
-        <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wider mt-0.5">{stat.label}</p>
+        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">{stat.label}</p>
         </CardContent>
        </Card>
       );
@@ -109,10 +109,10 @@ export function ProfileSidebar({ data }: { data: DashboardData }) {
      <div className="flex items-start gap-2">
       <Sparkles size={14} className="text-primary shrink-0 mt-0.5" />
       <div>
-       <p className="text-[10px] leading-relaxed text-foreground/60 italic">
+       <p className="text-[10px] leading-relaxed text-foreground italic">
         &ldquo;{quote.text}&rdquo;
        </p>
-       <p className="mt-1 text-[8px] font-bold text-foreground/30 tracking-wider">
+       <p className="mt-1 text-[8px] font-bold text-foreground/60 tracking-wider">
         &mdash; {quote.author}
        </p>
       </div>

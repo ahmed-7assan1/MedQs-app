@@ -87,12 +87,12 @@ export function ActiveRoomsSidebar() {
                     <span className={cn("h-2 w-2 rounded-full", cfg.dot, cfg.pulse && "animate-ping absolute inset-0 opacity-75")} />
                     <span className={cn("h-2 w-2 rounded-full relative", cfg.dot)} />
                   </div>
-                  <span className="text-xs font-bold text-foreground/80 truncate group-hover:text-primary transition-colors leading-none">
+                  <span className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors leading-none">
                     {s.room.name}
                   </span>
                 </div>
                 
-                <div className="flex items-center gap-1.5 shrink-0 text-[10px] font-bold text-muted-foreground/50">
+                <div className="flex items-center gap-1.5 shrink-0 text-[10px] font-bold text-muted-foreground">
                   <Users className="h-3 w-3" />
                   <span className="tabular-nums">{s._count.participants}</span>
                 </div>
@@ -102,7 +102,7 @@ export function ActiveRoomsSidebar() {
           
           <Link
             href="/community"
-            className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground/45 hover:text-primary transition-all pt-1 pl-1"
+            className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground hover:text-primary transition-all pt-1 pl-1"
           >
             Browse rooms <ArrowRight className="h-3 w-3" />
           </Link>
@@ -119,26 +119,26 @@ export function ActiveRoomsSidebar() {
                 {room.image ? (
                   <img src={room.image} alt={room.name} className="h-6 w-6 rounded-lg object-cover shrink-0" loading="lazy" />
                 ) : (
-                  <DoorOpen className="h-3.5 w-3.5 text-muted-foreground/30 shrink-0" />
+                  <DoorOpen className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
                 )}
-                <span className="text-xs font-bold text-foreground/80 truncate group-hover:text-primary transition-colors leading-none">
+                <span className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors leading-none">
                   {room.name}
                 </span>
               </div>
-              <ArrowRight className="h-3 w-3 text-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <ArrowRight className="h-3 w-3 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
           ))}
           
           <Link
             href="/community"
-            className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground/45 hover:text-primary transition-all pt-1 pl-1"
+            className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground hover:text-primary transition-all pt-1 pl-1"
           >
             Browse rooms <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
       ) : (
         <div className="p-4 rounded-xl border border-dashed border-border/40 bg-card/20 text-center">
-          <p className="text-[11px] font-bold text-muted-foreground/60">No active study sessions</p>
+          <p className="text-[11px] font-bold text-muted-foreground">No active study sessions</p>
         </div>
       )}
     </div>

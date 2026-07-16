@@ -46,7 +46,7 @@ export function CommunityStrip() {
       ) : posts.length === 0 ? (
         <Link
           href="/social"
-          className="flex items-center gap-2 p-4 rounded-xl border border-border/30 bg-card/30 text-xs text-muted-foreground/50 hover:text-foreground transition-all duration-200"
+          className="flex items-center gap-2 p-4 rounded-xl border border-border/30 bg-card/30 text-xs text-muted-foreground hover:text-foreground transition-all duration-200"
         >
           <MessageCircle className="h-4 w-4 text-muted-foreground/30 shrink-0" />
           <span>No posts yet. Start the conversation!</span>
@@ -72,15 +72,15 @@ export function CommunityStrip() {
                   
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-black text-foreground/80 truncate leading-none">
+                      <span className="text-[10px] font-black text-foreground truncate leading-none">
                         {authorName}
                       </span>
-                      <span className="text-[9px] font-medium text-muted-foreground/40 shrink-0">
+                      <span className="text-[9px] font-medium text-muted-foreground shrink-0">
                         {post.createdAt ? timeAgo(post.createdAt) : ""}
                       </span>
                     </div>
                     
-                    <p className="text-[10px] text-muted-foreground/60 leading-relaxed line-clamp-2 mt-1.5">
+                    <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2 mt-1.5">
                       {stripHtml((post.content || "").slice(0, 120))}
                     </p>
                   </div>
@@ -91,7 +91,7 @@ export function CommunityStrip() {
           
           <Link
             href="/social"
-            className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground/45 hover:text-primary transition-all pt-1 pl-1"
+            className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground hover:text-primary transition-all pt-1 pl-1"
           >
             View all posts <ArrowRight className="h-3 w-3" />
           </Link>

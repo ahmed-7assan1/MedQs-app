@@ -5,11 +5,6 @@ export interface ModuleProgressItem {
   imageUrl?: string | null;
 }
 
-export interface ActivityItem {
-  day: string;
-  count: number;
-}
-
 export interface DashboardAd {
   id: string;
   imageUrl: string;
@@ -46,7 +41,6 @@ export interface DashboardData {
   dailyTarget: number;
   totalQuestions: number;
   moduleProgress: ModuleProgressItem[];
-  activityArr: ActivityItem[];
   progressToNext: number;
   isProfileIncomplete: boolean;
   userImage?: string | null;

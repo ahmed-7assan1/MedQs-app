@@ -35,7 +35,7 @@ export function QuickAccessLinks() {
               className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-border/30 bg-card/45 backdrop-blur-sm hover:border-primary/20 hover:bg-card/65 transition-[transform,opacity,border-color,background-color] duration-200 group text-center"
             >
               <Icon className="h-4.5 w-4.5 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
-              <span className="text-[9px] font-black text-muted-foreground/60 group-hover:text-foreground mt-1.5 block truncate leading-none w-full">
+              <span className="text-[9px] font-black text-muted-foreground group-hover:text-foreground mt-1.5 block truncate leading-none w-full">
                 {link.label}
               </span>
             </Link>

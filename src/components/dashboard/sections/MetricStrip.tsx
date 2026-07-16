@@ -39,9 +39,9 @@ export function MetricStrip({
               <Flame className="h-4.5 w-4.5 text-orange-500 animate-pulse" />
             </div>
             <div className="min-w-0">
-              <span className="block text-xs font-bold text-muted-foreground/60 uppercase tracking-wider leading-none">Streak</span>
+              <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider leading-none">Streak</span>
               <span className="text-lg font-black text-foreground mt-0.5 block tabular-nums leading-none">
-                {currentStreak} <span className="text-[10px] font-bold text-muted-foreground/50 lowercase">days</span>
+                {currentStreak} <span className="text-[10px] font-bold text-muted-foreground lowercase">days</span>
               </span>
             </div>
           </div>
@@ -61,9 +61,9 @@ export function MetricStrip({
                   <Trophy className="h-4.5 w-4.5 text-amber-500" />
                 </div>
                 <div className="min-w-0">
-                  <span className="block text-xs font-bold text-muted-foreground/60 uppercase tracking-wider leading-none">{rankLabel}</span>
+                  <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider leading-none">{rankLabel}</span>
                   <span className="text-lg font-black text-foreground mt-0.5 block tabular-nums leading-none">
-                    {rankPoints.toLocaleString()} <span className="text-[10px] font-bold text-muted-foreground/50 uppercase">XP</span>
+                    {rankPoints.toLocaleString()} <span className="text-[10px] font-bold text-muted-foreground uppercase">XP</span>
                   </span>
                 </div>
               </div>
@@ -86,9 +86,9 @@ export function MetricStrip({
               <HelpCircle className="h-4.5 w-4.5 text-primary" />
             </div>
             <div className="min-w-0">
-              <span className="block text-xs font-bold text-muted-foreground/60 uppercase tracking-wider leading-none">Today</span>
+              <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider leading-none">Today</span>
               <span className="text-lg font-black text-foreground mt-0.5 block tabular-nums leading-none">
-                {todayItemCount} <span className="text-[10px] font-bold text-muted-foreground/50">/ {dailyTarget} Qs</span>
+                {todayItemCount} <span className="text-[10px] font-bold text-muted-foreground">/ {dailyTarget} Qs</span>
               </span>
             </div>
           </div>
@@ -106,9 +106,9 @@ export function MetricStrip({
               <CheckCircle2 className="h-4.5 w-4.5 text-sky-500" />
             </div>
             <div className="min-w-0">
-              <span className="block text-xs font-bold text-muted-foreground/60 uppercase tracking-wider leading-none">Accuracy</span>
+              <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider leading-none">Accuracy</span>
               <span className="text-lg font-black text-foreground mt-0.5 block tabular-nums leading-none">
-                {overallPct}% <span className="text-[10px] font-bold text-muted-foreground/50 uppercase">Correct</span>
+                {overallPct}% <span className="text-[10px] font-bold text-muted-foreground uppercase">Correct</span>
               </span>
             </div>
           </div>

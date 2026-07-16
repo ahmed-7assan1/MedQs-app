@@ -72,15 +72,15 @@ export function SearchableSidebar({ children }: { children: React.ReactNode }) {
       <div className="relative">
         {open ? (
           <>
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50 pointer-events-none" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
             <Input
               ref={inputRef}
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search lectures, modules..."
-              className="pl-8 pr-8 min-h-11 rounded-xl border-border/40 bg-card/60 text-xs placeholder:text-muted-foreground/40 focus-visible:ring-primary/30"
+              className="pl-8 pr-8 min-h-11 rounded-xl border-border/40 bg-card/60 text-xs placeholder:text-muted-foreground focus-visible:ring-primary/30"
             />
-            <button onClick={closeSearch} className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center h-9 w-9 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+            <button onClick={closeSearch} className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center h-9 w-9 text-muted-foreground hover:text-muted-foreground transition-colors">
               <X className="h-3.5 w-3.5" />
             </button>
             {searching && (
@@ -91,7 +91,7 @@ export function SearchableSidebar({ children }: { children: React.ReactNode }) {
           </>
         ) : (
           <div className="flex items-center gap-2">
-            <button onClick={openSearch} className="flex-1 flex items-center gap-2 min-h-11 px-2.5 rounded-xl border border-border/40 bg-card/60 text-xs text-muted-foreground/50 hover:text-muted-foreground/70 hover:bg-card/80 transition-all">
+            <button onClick={openSearch} className="flex-1 flex items-center gap-2 min-h-11 px-2.5 rounded-xl border border-border/40 bg-card/60 text-xs text-muted-foreground hover:text-muted-foreground/70 hover:bg-card/80 transition-all">
               <Search className="h-3.5 w-3.5 shrink-0" />
               <span>Search lectures...</span>
             </button>
@@ -127,13 +127,13 @@ export function SearchableSidebar({ children }: { children: React.ReactNode }) {
               );
             })
           ) : !searching && searchData ? (
-            <p className="text-xs text-muted-foreground/50 text-center py-8">No results found</p>
+            <p className="text-xs text-muted-foreground text-center py-8">No results found</p>
           ) : searching ? (
-            <p className="text-xs text-muted-foreground/50 text-center py-8">Searching...</p>
+            <p className="text-xs text-muted-foreground text-center py-8">Searching...</p>
           ) : null}
         </div>
       ) : open && searchQuery.length > 0 && searchQuery.length < 3 ? (
-        <p className="text-xs text-muted-foreground/50 text-center py-8">Type at least 3 characters</p>
+        <p className="text-xs text-muted-foreground text-center py-8">Type at least 3 characters</p>
       ) : (
         children
       )}

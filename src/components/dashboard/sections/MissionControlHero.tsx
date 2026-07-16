@@ -89,7 +89,7 @@ export const MissionControlHero = memo(function MissionControlHero({
                       />
                     ) : (
                       <div className={cn("h-full w-full flex items-center justify-center bg-gradient-to-br", FALLBACK_GRADIENTS[gradientIndex])}>
-                        <span className="text-lg font-black text-foreground/40">{firstLetter}</span>
+                        <span className="text-lg font-black text-foreground">{firstLetter}</span>
                       </div>
                     )}
                   </div>
@@ -103,7 +103,7 @@ export const MissionControlHero = memo(function MissionControlHero({
                       className="h-full rounded-full bg-primary"
                     />
                   </div>
-                  <span className="text-[8px] font-bold text-muted-foreground/40 tabular-nums text-center block mt-0.5">
+                  <span className="text-[8px] font-bold text-muted-foreground tabular-nums text-center block mt-0.5">
                     {data.progressToNext}%
                   </span>
                 </div>
@@ -188,7 +188,7 @@ export const MissionControlHero = memo(function MissionControlHero({
                   >
                     <Icon className={cn("sm:h-3 sm:w-3 h-3.5 w-3.5", metric.color)} />
                     <span className="sm:text-xs text-sm font-black text-foreground tabular-nums leading-none">{metric.value}</span>
-                    <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-wider leading-none hidden md:inline">{metric.label}</span>
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none hidden md:inline">{metric.label}</span>
                     {i < metrics.length - 1 && (
                       <span className="hidden md:block ml-2 h-3 w-px bg-border/40" />
                     )}

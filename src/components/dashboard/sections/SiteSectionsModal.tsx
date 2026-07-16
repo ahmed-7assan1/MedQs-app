@@ -107,7 +107,7 @@ function SiteSectionsModal({ open, onOpenChange }: { open: boolean; onOpenChange
               <div key={cat.label}>
                 <div className="flex items-center gap-1.5 mb-2.5">
                   <CatIcon className={cn("h-3.5 w-3.5", cat.color)} />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">{cat.label}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{cat.label}</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {cat.sections.map((section) => {
@@ -150,7 +150,7 @@ export function SiteSectionsTrigger({ className }: { className?: string }) {
       <button
         onClick={() => setOpen(true)}
         className={cn(
-          "flex items-center justify-center h-11 w-11 rounded-xl border border-border/40 bg-card/60 text-muted-foreground/50 hover:text-muted-foreground/70 hover:bg-card/80 hover:border-border/60 transition-all shrink-0",
+          "flex items-center justify-center h-11 w-11 rounded-xl border border-border/40 bg-card/60 text-muted-foreground hover:text-muted-foreground hover:bg-card/80 hover:border-border/60 transition-all shrink-0",
           className
         )}
       >

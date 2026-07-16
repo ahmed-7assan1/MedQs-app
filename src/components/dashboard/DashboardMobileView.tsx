@@ -7,20 +7,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap, Play,
   Trophy, Sparkles, Flame,
-  Bell, Moon, Sun, BookOpen, TrendingUp, Target,
-  AlertCircle, BrainCircuit, ArrowRight, ChevronRight,
+  Bell, Moon, Sun, TrendingUp, Target,
+  AlertCircle, BrainCircuit, ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useThemeStore, useNotificationStore } from "@/lib/store";
 import { NotificationsSheet } from "@/components/layout/NotificationsSheet";
-import { TodayQueue } from "@/components/dashboard/sections/TodayQueue";
 import { QuickActionsStrip } from "@/components/dashboard/sections/QuickActionsStrip";
-import { LearningHeatmap } from "@/components/dashboard/sections/LearningHeatmap";
 import { CommunityPostsCarousel } from "@/components/dashboard/CommunityPostsCarousel";
+import { CarouselErrorBoundary } from "@/components/dashboard/CarouselErrorBoundary";
 import { LeaderboardCarousel } from "@/components/dashboard/sections/LeaderboardCarousel";
 import { generateRecommendations } from "@/components/dashboard/sections/AIRecommendations";
 import type { Recommendation } from "@/components/dashboard/sections/AIRecommendations";
-import { deriveTodayTasks } from "@/types/dashboard";
 import type { DashboardData, LastLectureInfo } from "@/types/dashboard";
 
 const STREAK_MILESTONES = [3, 7, 14, 30, 60, 90, 120];
@@ -79,7 +77,7 @@ function ProgressRing({
         </div>
       </div>
       <span className="text-xs font-black text-foreground tabular-nums leading-none">{value}</span>
-      <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-wider leading-none">{sublabel}</span>
+      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider leading-none">{sublabel}</span>
     </div>
   );
 }
@@ -155,7 +153,7 @@ function FeaturedCard({
                   <h3 className="text-sm font-black text-foreground leading-tight line-clamp-1">
                     {rec.title}
                   </h3>
-                  <p className="text-xs text-muted-foreground/70 mt-1 leading-relaxed line-clamp-1">
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-1">
                     {rec.desc}
                   </p>
                 </div>
@@ -200,7 +198,7 @@ function CompactFocusCard({ lastLecture, firstName }: { lastLecture: LastLecture
           <p className="text-sm font-bold text-foreground leading-tight">
             Welcome, Dr. {firstName}
           </p>
-          <p className="text-[10px] font-bold text-muted-foreground/60 mt-0.5">
+          <p className="text-[10px] font-bold text-muted-foreground mt-0.5">
             Start your first lecture
           </p>
           <Link
@@ -223,7 +221,7 @@ function CompactFocusCard({ lastLecture, firstName }: { lastLecture: LastLecture
         <p className="text-sm font-bold text-foreground leading-tight line-clamp-1">
           {lastLecture.lectureTitle}
         </p>
-        <p className="text-[10px] font-bold text-muted-foreground/60 leading-tight line-clamp-1 mt-0.5">
+        <p className="text-[10px] font-bold text-muted-foreground leading-tight line-clamp-1 mt-0.5">
           {lastLecture.subjectName} &middot; {lastLecture.channelName || "MedOneX"}
         </p>
         <Link
@@ -264,7 +262,6 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
   }, [notifOpen]);
 
   const recommendations = useMemo(() => generateRecommendations(data), [data]);
-  const todayTasks = useMemo(() => deriveTodayTasks(data), [data]);
 
   const handleFeaturedSwipe = useCallback((dir: "left" | "right") => {
     setFeaturedIndex((prev) => {
@@ -284,7 +281,6 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
     }
   }, [handleFeaturedSwipe]);
 
-  const moduleProgress = data.moduleProgress || [];
   const avatarLetter = data.firstName.charAt(0).toUpperCase();
 
   return (
@@ -294,9 +290,9 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
           ════════════════════════════════════════ */}
       <div className="home-header fixed top-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm py-1">
         <div className="flex-1 min-w-0">
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 leading-none">MEDONEX</span>
+          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground leading-none">MEDONEX</span>
           <p className="text-sm mt-0.5 leading-tight">
-            <span className="font-medium text-foreground/80">Hello</span>
+            <span className="font-medium text-foreground">Hello</span>
             <span className="font-black text-foreground"> {data.firstName} 👋</span>
           </p>
         </div>
@@ -338,7 +334,7 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
               />
             ) : (
               <div className="w-[36px] h-[36px] min-w-[36px] min-h-[36px] rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-border/20">
-                <span className="text-xs font-black text-foreground/50">{avatarLetter}</span>
+                <span className="text-xs font-black text-foreground">{avatarLetter}</span>
               </div>
             )}
           </button>
@@ -402,57 +398,12 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
       </div>
 
       {/* ════════════════════════════════════════
-          MODULES — Horizontal peek cards
-          ════════════════════════════════════════ */}
-      {moduleProgress.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center justify-between px-5 mb-4">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">Modules</span>
-            <Link href="/modules" className="text-[9px] font-bold text-primary hover:text-primary/80 transition-colors">
-              See all <ChevronRight className="h-2.5 w-2.5 inline" />
-            </Link>
-          </div>
-          <div className="flex gap-3 overflow-x-auto home-no-scrollbar px-5 pr-6">
-            {moduleProgress.slice(0, 6).map((mod) => (
-              <Link
-                key={mod.id}
-                href={`/modules/${mod.id}`}
-                className="home-module-card shrink-0"
-              >
-                <div className="h-[80px] w-full rounded-t-[20px] overflow-hidden bg-gradient-to-br from-primary/15 via-primary/5 to-transparent">
-                  {mod.imageUrl ? (
-                    <img src={mod.imageUrl} alt={mod.name} className="w-full h-full object-cover" loading="lazy" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <BookOpen className="h-7 w-7 text-muted-foreground/25" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-3">
-                  <p className="text-[11px] font-bold text-foreground truncate leading-tight">{mod.name}</p>
-                  <div className="h-1 bg-muted/40 rounded-full mt-2 overflow-hidden">
-                    <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${mod.pct}%` }} />
-                  </div>
-                  <p className="text-[8px] font-bold text-muted-foreground/50 mt-1 tabular-nums">{mod.pct}%</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ════════════════════════════════════════
-          TODAY'S QUEUE
-          ════════════════════════════════════════ */}
-      <div className="px-5 mb-8">
-        <TodayQueue tasks={todayTasks} />
-      </div>
-
-      {/* ════════════════════════════════════════
           COMMUNITY — Compact horizontal cards
           ════════════════════════════════════════ */}
       <div className="mb-8">
-        <CommunityPostsCarousel variant="compact" maxPosts={5} />
+        <CarouselErrorBoundary title="Community">
+          <CommunityPostsCarousel />
+        </CarouselErrorBoundary>
       </div>
 
       {/* ════════════════════════════════════════
@@ -460,13 +411,6 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
           ════════════════════════════════════════ */}
       <div className="px-5 mb-8">
         <QuickActionsStrip />
-      </div>
-
-      {/* ════════════════════════════════════════
-          WEEKLY ACTIVITY
-          ════════════════════════════════════════ */}
-      <div className="px-5 mb-8">
-        <LearningHeatmap data={data} />
       </div>
 
       {/* ════════════════════════════════════════

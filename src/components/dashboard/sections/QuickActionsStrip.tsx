@@ -86,7 +86,7 @@ export function QuickActionsStrip() {
                     <span className="block text-xs font-black text-foreground group-hover:text-primary transition-colors leading-none truncate">
                       {action.label}
                     </span>
-                    <span className="text-[9px] text-muted-foreground/50 mt-1 block leading-none truncate">
+                    <span className="text-[9px] text-muted-foreground mt-1 block leading-none truncate">
                       {action.desc}
                     </span>
                   </div>

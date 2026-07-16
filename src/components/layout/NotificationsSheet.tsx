@@ -37,7 +37,7 @@ const CHANNEL_STYLE: Record<string, ChannelStyle> = {
   OTHER: {
     icon: Info,
     label: "Other",
-    accent: "text-muted-foreground/40",
+    accent: "text-muted-foreground",
     bg: "bg-muted/20",
     lightBg: "bg-transparent",
     border: "border-l-muted-foreground/20",
@@ -82,7 +82,7 @@ export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: 
                 <SheetTitle className="text-sm font-bold text-foreground leading-tight">
                   Notifications
                 </SheetTitle>
-                <p className="text-[10px] font-medium text-muted-foreground/50 mt-0.5">
+                <p className="text-[10px] font-medium text-muted-foreground mt-0.5">
                   Stay updated with your activity
                 </p>
               </div>
@@ -96,7 +96,7 @@ export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: 
           {unread > 0 && (
             <button
               onClick={markAllRead}
-              className="mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 hover:text-primary transition-colors self-start"
+              className="mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors self-start"
             >
               <CheckCheck className="h-3 w-3" />
               Mark all as read
@@ -111,8 +111,8 @@ export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: 
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/20 mb-4">
                 <Inbox className="h-7 w-7 opacity-30" />
               </div>
-              <p className="text-sm font-semibold text-foreground/60">All caught up</p>
-              <p className="text-xs mt-1 text-muted-foreground/40 text-center leading-relaxed">
+              <p className="text-sm font-semibold text-foreground">All caught up</p>
+              <p className="text-xs mt-1 text-muted-foreground text-center leading-relaxed">
                 No notifications yet. Engage with the community to see updates here.
               </p>
             </div>
@@ -128,7 +128,7 @@ export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: 
                     <div className={cn("flex h-5 w-5 items-center justify-center rounded-lg", style.bg)}>
                       <Icon className={cn("h-3 w-3", style.accent)} />
                     </div>
-                    <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground/40">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                       {style.label}
                     </span>
                     {channelUnread > 0 && (
@@ -171,7 +171,7 @@ export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: 
                           {n.body && (
                             <p className={cn(
                               "mt-0.5 text-[11px] leading-relaxed line-clamp-2",
-                              !n.read ? "text-muted-foreground/80" : "text-muted-foreground/50"
+                              !n.read ? "text-muted-foreground/80" : "text-muted-foreground"
                             )}>
                               {n.body}
                             </p>

@@ -303,11 +303,11 @@
 .dark {
   --shadow-clr: rgba(0, 0, 0, 0.5);
   --background: 0 0% 4%;               /* #0B0B0B near-black */
-  --foreground: 250 33% 95%;        /* #F0EFF8 headings */
+  --foreground: 250 33% 80%;        /* #F0EFF8 headings */
   --card: 240 20% 16%;              /* surfaces — lighter than bg for contrast */
-  --card-foreground: 250 33% 95%;
+  --card-foreground: 250 33% 80%;
   --popover: 240 16% 12%;
-  --popover-foreground: 250 33% 95%;
+  --popover-foreground: 250 33% 80%;
   --primary: 180 70% 30%;           /* #1A8A8A deep medical teal */
   --primary-foreground: 0 0% 100%;
   --secondary: 0 0% 100% / 0.03;
@@ -315,7 +315,7 @@
   --muted: 240 19% 16%;             /* #222232 surface-raised */
   --muted-foreground: 246 14% 42%;  /* #5E5C7A */
   --accent: 0 0% 100% / 0.04;       /* subtle overlay for hover */
-  --accent-foreground: 250 33% 95%;
+  --accent-foreground: 250 33% 80%;
   --destructive: 0 100% 74%;        /* #FF7B7B */
   --destructive-foreground: 0 0% 100%;
   --border: 240 20% 22%;            /* #2C2C42 */
@@ -330,7 +330,7 @@
 
   --surface-bg: 240 8% 15%;          /* matches --background */
   --surface-card: 240 20% 16%;      /* matches --card */
-  --surface-text: 250 33% 95%;      /* matches --foreground */
+  --surface-text: 250 33% 80%;      /* matches --foreground */
   --surface-text-muted: 246 14% 42%;/* matches --muted-foreground */
   --surface-border: 240 20% 22%;    /* matches --border */
   --surface-white-10: rgba(255,255,255,0.08);
