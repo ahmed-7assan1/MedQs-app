@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Bookmark } from "lucide-react";
+import { useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";
+import { toggleSave, isSaved } from "@/lib/local-saved-store";
 import type { ModuleWithStats } from "./ModulesGrid";
 
 export interface ModuleStyle {
@@ -20,6 +23,11 @@ function getAbbreviation(name: string): string {
   return abbreviation || name.slice(0, 3).toUpperCase();
 }
 
+function subscribe(cb: () => void) {
+  window.addEventListener("storage", cb);
+  return () => window.removeEventListener("storage", cb);
+}
+
 interface ModuleCardProps {
   module: ModuleWithStats;
   moduleStyle: ModuleStyle;
@@ -28,6 +36,21 @@ interface ModuleCardProps {
 }
 
 export default function ModuleCard({ module, moduleStyle, index, isGuest }: ModuleCardProps) {
+  const saved = useSyncExternalStore(subscribe, () => isSaved("MODULE", module.id), () => false);
+
+  const handleBookmark = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleSave({
+      type: "MODULE",
+      id: module.id,
+      title: module.name,
+      subtitle: `${module.lecturesCount} lectures · ${module.questionsCount} questions`,
+      lecturesCount: module.lecturesCount,
+    });
+    window.dispatchEvent(new Event("storage"));
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -51,6 +74,17 @@ export default function ModuleCard({ module, moduleStyle, index, isGuest }: Modu
               }}
             />
           )}
+          {/* Bookmark button */}
+          <button
+            onClick={handleBookmark}
+            className={cn(
+              "absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-lg ring-1 backdrop-blur-sm transition hover:bg-muted/50",
+              saved ? "bg-primary/10 ring-primary/30 text-primary" : "bg-card/60 ring-border/40 text-muted-foreground"
+            )}
+          >
+            <Bookmark className={cn("h-3.5 w-3.5", saved && "fill-current")} />
+          </button>
+
           <div className="relative">
             <div className={cn("text-xl font-bold", moduleStyle.progressText)}>
               {getAbbreviation(module.name)}

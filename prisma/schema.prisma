@@ -595,6 +595,7 @@ model User {
   quizAttempts             QuizAttempt[]
   savedPosts               SavedPost[]
   savedQuestions           SavedQuestion[]
+  savedItems               UserSavedItem[]
   sessions                 Session[]
   studyAssistantProfile    StudyAssistantProfile?
   ownedStudyRoom           StudyRoom?                @relation("RoomOwner")
@@ -2836,4 +2837,17 @@ model AdminAIKeys {
   featureOverrides        Json?
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
+}
+
+model UserSavedItem {
+  id        String   @id @default(uuid())
+  userId    String
+  itemType  String
+  itemId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemType, itemId])
+  @@index([userId])
 }

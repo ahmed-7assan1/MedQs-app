@@ -13,6 +13,7 @@ import FeaturedModuleCard from "@/components/modules/FeaturedModuleCard";
 import RecentModuleCard from "@/components/modules/RecentModuleCard";
 import { Prisma } from "@prisma/client";
 import type { Metadata } from "next";
+import ModulesContent from "@/components/modules/ModulesContent";
 
 export const revalidate = 60;
 
@@ -190,33 +191,22 @@ export default async function ModulesPage() {
     : [];
 
   // ── Split into groups ────────────────────────────────────────────────────
-  const inProgressRaw = allModules.filter((m) => m.semesterId === semesterId);
-  const completedRaw = allModules.filter(
-    (m) => m.semester.academicYear.yearNumber < userSemesterYearNum
-  );
+  const currentSemModules = allModules.filter((m) => m.semesterId === semesterId);
+  const semesterModuleStats = currentSemModules.map((m) => mapModule(m, correctByModule));
+  const inProgressStats = semesterModuleStats.filter((m) => m.percentage < 100);
+  const completedStats = semesterModuleStats.filter((m) => m.percentage >= 80);
 
-  const inProgressStats = inProgressRaw.map((m) => mapModule(m, correctByModule));
-  const completedStats = completedRaw.map((m) => mapModule(m, correctByModule));
-
-  // ── Group all modules by semester for the "All Modules" section ───────────
-  // ── Group all modules by semester ────────────────────────────────────────
+  // ── Group current semester modules for "All Modules" ─────────────────────
   const semesterGroups: { semesterId: string; name: string; yearNumber: number; modules: ModuleWithStats[] }[] = [];
-  const seenSemesters = new Set<string>();
-
-  for (const m of allModules) {
-    if (!seenSemesters.has(m.semesterId)) {
-      seenSemesters.add(m.semesterId);
-      const sem = m.semester;
-      const groupMods = allModules.filter((x) => x.semesterId === m.semesterId);
-      semesterGroups.push({
-        semesterId: sem.id,
-        name: sem.name,
-        yearNumber: sem.academicYear.yearNumber,
-        modules: groupMods.map((x) => mapModule(x, correctByModule)),
-      });
-    }
+  if (semesterId && currentSemModules.length > 0) {
+    const sem = currentSemModules[0].semester;
+    semesterGroups.push({
+      semesterId,
+      name: sem.name,
+      yearNumber: sem.academicYear.yearNumber,
+      modules: semesterModuleStats,
+    });
   }
-  semesterGroups.sort((a, b) => a.yearNumber - b.yearNumber);
 
   // ── Stats for current semester ───────────────────────────────────────────
   const totalModules = inProgressStats.length;
@@ -276,6 +266,7 @@ export default async function ModulesPage() {
     <div className="min-h-screen bg-background text-foreground">
       <TopBar userName={user?.name} userImage={user?.image} />
       <PageContainer>
+        <ModulesContent>
 
         {/* ── HERO + STATS (current semester only) ── */}
         <section className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
@@ -366,6 +357,7 @@ export default async function ModulesPage() {
             />
           </>
         ) : null}
+        </ModulesContent>
       </PageContainer>
     </div>
   );

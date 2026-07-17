@@ -1,6 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Play, Bookmark } from "lucide-react";
-import { GradientLogo } from "@/components/branding/GradientLogo";
+import { setView } from "@/lib/view-store";
 
 interface HeroSectionProps {
   lastActivityHref?: string | null;
@@ -33,15 +35,20 @@ export default function HeroSection({
               Continue Last Lecture
             </span>
           )}
-          <button className="grid h-10 w-10 place-items-center rounded-xl bg-card ring-1 ring-border/60 transition hover:bg-accent">
+          <button onClick={() => setView("saved")} className="grid h-10 w-10 place-items-center rounded-xl bg-card ring-1 ring-border/60 transition hover:bg-accent">
             <Bookmark className="h-4 w-4" />
           </button>
         </div>
       </div>
 
       {/* Platform logo */}
-      <div className="pointer-events-none absolute right-6 top-1/2 hidden -translate-y-1/2 select-none md:flex items-center justify-center h-[130px] w-[130px]">
-        <GradientLogo className="h-[110px] w-[110px]" toColor="hsl(var(--primary))" />
+      <div className="pointer-events-none absolute right-12 top-1/2 hidden -translate-y-1/2 select-none md:flex items-center justify-center h-[180px] w-[180px]">
+        <img
+          src="/book.png"
+          alt="Medical Library"
+          className="relative h-full w-full object-contain"
+          style={{ transform: "perspective(800px) rotateX(-6deg)" }}
+        />
       </div>
     </div>
   );

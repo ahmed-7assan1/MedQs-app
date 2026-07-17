@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { Bookmark } from "lucide-react";
+import { useSyncExternalStore } from "react";
+import { cn } from "@/lib/utils";
+import { toggleSave, isSaved, getSaved } from "@/lib/local-saved-store";
 import type { ModuleWithStats } from "./ModulesGrid";
 
 const SMALL_GRADIENTS = [
@@ -26,6 +31,11 @@ function getAbbreviation(name: string): string {
   return abbreviation || name.slice(0, 3).toUpperCase();
 }
 
+function subscribe(cb: () => void) {
+  window.addEventListener("storage", cb);
+  return () => window.removeEventListener("storage", cb);
+}
+
 interface RecentModuleCardProps {
   module: ModuleWithStats;
   index?: number;
@@ -34,6 +44,21 @@ interface RecentModuleCardProps {
 export default function RecentModuleCard({ module, index = 0 }: RecentModuleCardProps) {
   const gradient = SMALL_GRADIENTS[index % SMALL_GRADIENTS.length];
   const barColor = BAR_COLORS[index % BAR_COLORS.length];
+  const saved = useSyncExternalStore(subscribe, () => isSaved("MODULE", module.id), () => false);
+
+  const handleBookmark = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleSave({
+      type: "MODULE",
+      id: module.id,
+      title: module.name,
+      subtitle: `${module.lecturesCount} lectures · ${module.questionsCount} questions`,
+      lecturesCount: module.lecturesCount,
+    });
+    // Dispatch storage event so other tabs/components re-sync
+    window.dispatchEvent(new Event("storage"));
+  };
 
   return (
     <Link href={`/modules/${module.id}`} className="block group">
@@ -49,8 +74,14 @@ export default function RecentModuleCard({ module, index = 0 }: RecentModuleCard
             className="pointer-events-none absolute -right-4 top-1/2 h-[115%] w-auto -translate-y-1/2 object-contain opacity-60 mix-blend-screen select-none"
           />
         )}
-        <button className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full bg-white/10 backdrop-blur ring-1 ring-white/20 transition hover:bg-white/20">
-          <Bookmark className="h-3.5 w-3.5" />
+        <button
+          onClick={handleBookmark}
+          className={cn(
+            "absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full backdrop-blur ring-1 transition hover:bg-white/20",
+            saved ? "bg-white/20 ring-white/40" : "bg-white/10 ring-white/20"
+          )}
+        >
+          <Bookmark className={cn("h-3.5 w-3.5", saved ? "fill-white text-white" : "text-white/70")} />
         </button>
         <div className="relative z-10">
           <div className="text-2xl font-bold">{getAbbreviation(module.name)}</div>

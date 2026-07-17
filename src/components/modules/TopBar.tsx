@@ -9,6 +9,7 @@ import {
   LogOut, User, CheckCheck, Clock,
 } from "lucide-react";
 import { useSidebar } from "@/contexts/SidebarContext";
+import { setView } from "@/lib/view-store";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
@@ -333,7 +334,10 @@ export default function TopBar({ userName, userImage }: TopBarProps) {
             )}
           </AnimatePresence>
         </div>
-        <button className="relative grid h-9 w-9 place-items-center rounded-full bg-card text-foreground shadow-[var(--shadow-card)] ring-1 ring-border/60 transition hover:bg-accent">
+        <button
+          onClick={() => setView("saved")}
+          className="relative grid h-9 w-9 place-items-center rounded-full bg-card text-foreground shadow-[var(--shadow-card)] ring-1 ring-border/60 transition hover:bg-accent"
+        >
           <Bookmark className="h-4 w-4" />
         </button>
 
