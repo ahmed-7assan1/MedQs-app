@@ -130,7 +130,7 @@ export default function TopBar({ userName, userImage }: TopBarProps) {
           : isCollapsed
             ? "left-0 right-0 lg:left-16 lg:right-0"
             : "left-0 right-0 lg:left-60 lg:right-0",
-        scrolled && "shadow-sm border-b border-border/50"
+        scrolled && "shadow-sm"
       )}
     >
       <div className={cn(
