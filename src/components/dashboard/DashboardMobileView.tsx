@@ -293,6 +293,15 @@ export function DashboardMobileView({ data }: { data: DashboardData }) {
 
   return (
     <div className="md:hidden pb-24 scroll-smooth">
+      {/* Gradient backdrop — fixed at top, behind header */}
+      <div
+        className="fixed top-0 left-0 right-0 pointer-events-none z-[5]"
+        style={{
+          height: "calc(7rem + env(safe-area-inset-top, 0px))",
+          background: "linear-gradient(to bottom, hsl(var(--background)), transparent)",
+        }}
+      />
+
       {/* ════════════════════════════════════════
           HEADER — Compact top bar
           ════════════════════════════════════════ */}

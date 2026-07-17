@@ -1,5 +1,5 @@
-import { PremiumLoading } from "@/components/ui/PremiumLoading";
+import { ModuleDetailSkeleton } from "@/components/modules/ModuleDetailSkeleton";
 
 export default function Loading() {
-  return <PremiumLoading />;
+  return <ModuleDetailSkeleton />;
 }

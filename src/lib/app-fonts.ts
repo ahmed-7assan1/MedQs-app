@@ -1,4 +1,4 @@
-import { Cairo, Nunito, Syne, Vazirmatn } from "next/font/google";
+import { Cairo, Nunito, Syne, Vazirmatn, Plus_Jakarta_Sans, Inter, IBM_Plex_Mono } from "next/font/google";
 
 /**
  * UI pair: **Nunito** (English / UI) + **Cairo** (Arabic).
@@ -32,4 +32,25 @@ export const fontSyne = Syne({
   display: "swap",
 });
 
-export const appFontVariableClassName = `${fontEnglish.variable} ${fontArabic.variable} ${fontVazirmatn.variable} ${fontSyne.variable}`.trim();
+export const fontPlusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+});
+
+export const fontInter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+export const fontIbmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-ibm-plex-mono",
+  display: "swap",
+});
+
+export const appFontVariableClassName = `${fontEnglish.variable} ${fontArabic.variable} ${fontVazirmatn.variable} ${fontSyne.variable} ${fontPlusJakarta.variable} ${fontInter.variable} ${fontIbmPlexMono.variable}`.trim();

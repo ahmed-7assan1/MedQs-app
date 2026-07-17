@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-function Skeleton({ className }: { className?: string }) {
+export function Skeleton({ className }: { className?: string }) {
   return (
     <div className={cn("skeleton-box rounded-lg", className)} />
   );

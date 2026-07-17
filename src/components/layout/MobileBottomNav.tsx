@@ -196,7 +196,7 @@ export function MobileBottomNav() {
   {/* Gradient backdrop — fixed at bottom, behind nav */}
   <div
     className={cn(
-      "fixed bottom-0 left-0 right-0 pointer-events-none z-40 transition-opacity duration-300",
+      "fixed bottom-0 left-0 right-0 pointer-events-none z-40 md:hidden transition-opacity duration-300",
       (visible || isComposerOpen) ? "opacity-100" : "opacity-0"
     )}
     style={{

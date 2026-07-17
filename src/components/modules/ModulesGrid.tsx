@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Brain, Heart, Dna, FlaskConical,
   Layers, Atom, BookOpen,
   ChevronRight, Library, Pencil, X, Check, Sparkles,
 } from "lucide-react";
+import ModuleCard from "./ModuleCard";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "@/contexts/SidebarContext";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "@/lib/api-error-client";
 import ColorPicker from "@/components/ui/ColorPicker";
@@ -49,13 +50,13 @@ const iconMap: Record<string, any> = { Brain, Heart, Dna, FlaskConical, Layers, 
 const iconThemeMap: Record<string, {
   theme: string; icon: any; bar: string; header: string; progressText: string; iconBg: string;
 }> = {
-  Brain:        { theme: "border-violet-500/20 hover:border-violet-400/40", icon: Brain, bar: "bg-gradient-to-r from-violet-400 to-purple-400 shadow-[0_0_6px_rgba(139,92,246,0.4)]", header: "bg-gradient-to-r from-violet-800/90 to-purple-800/90", progressText: "text-violet-400", iconBg: "bg-white/20" },
-  Heart:        { theme: "border-rose-500/20 hover:border-rose-400/40", icon: Heart, bar: "bg-gradient-to-r from-rose-400 to-pink-400 shadow-[0_0_6px_rgba(244,63,94,0.4)]", header: "bg-gradient-to-r from-rose-800/90 to-pink-800/90", progressText: "text-rose-400", iconBg: "bg-white/20" },
-  Dna:          { theme: "border-blue-500/20 hover:border-blue-400/40", icon: Dna, bar: "bg-gradient-to-r from-blue-400 to-cyan-400 shadow-[0_0_6px_rgba(59,130,246,0.4)]", header: "bg-gradient-to-r from-blue-800/90 to-cyan-800/90", progressText: "text-blue-400", iconBg: "bg-white/20" },
-  FlaskConical: { theme: "border-amber-500/20 hover:border-amber-400/40", icon: FlaskConical, bar: "bg-gradient-to-r from-amber-400 to-orange-400 shadow-[0_0_6px_rgba(245,158,11,0.4)]", header: "bg-gradient-to-r from-amber-800/90 to-orange-800/90", progressText: "text-amber-400", iconBg: "bg-white/20" },
-  Layers:       { theme: "border-emerald-500/20 hover:border-emerald-400/40", icon: Layers, bar: "bg-gradient-to-r from-emerald-400 to-green-400 shadow-[0_0_6px_rgba(16,185,129,0.4)]", header: "bg-gradient-to-r from-emerald-800/90 to-green-800/90", progressText: "text-emerald-400", iconBg: "bg-white/20" },
-  Atom:         { theme: "border-primary/20 hover:border-primary/40", icon: Atom, bar: "bg-gradient-to-r from-primary to-indigo-400 shadow-[0_0_6px_rgba(79,70,229,0.4)]", header: "bg-gradient-to-r from-[#1e1b4b]/95 to-indigo-800/90", progressText: "text-primary-400", iconBg: "bg-white/20" },
-  BookOpen:     { theme: "border-sky-500/20 hover:border-sky-400/40", icon: BookOpen, bar: "bg-gradient-to-r from-sky-400 to-blue-400 shadow-[0_0_6px_rgba(14,165,233,0.4)]", header: "bg-gradient-to-r from-sky-800/90 to-blue-800/90", progressText: "text-sky-400", iconBg: "bg-white/20" },
+  Brain:        { theme: "border-violet-500/20 hover:border-violet-400/40", icon: Brain, bar: "bg-gradient-to-r from-violet-400 to-purple-400 shadow-[0_0_6px_rgba(139,92,246,0.4)]", header: "bg-gradient-to-r from-violet-800/90 to-purple-800/90", progressText: "dark:text-violet-400 text-violet-600", iconBg: "bg-white/20" },
+  Heart:        { theme: "border-rose-500/20 hover:border-rose-400/40", icon: Heart, bar: "bg-gradient-to-r from-rose-400 to-pink-400 shadow-[0_0_6px_rgba(244,63,94,0.4)]", header: "bg-gradient-to-r from-rose-800/90 to-pink-800/90", progressText: "dark:text-rose-400 text-rose-600", iconBg: "bg-white/20" },
+  Dna:          { theme: "border-blue-500/20 hover:border-blue-400/40", icon: Dna, bar: "bg-gradient-to-r from-blue-400 to-cyan-400 shadow-[0_0_6px_rgba(59,130,246,0.4)]", header: "bg-gradient-to-r from-blue-800/90 to-cyan-800/90", progressText: "dark:text-blue-400 text-blue-600", iconBg: "bg-white/20" },
+  FlaskConical: { theme: "border-amber-500/20 hover:border-amber-400/40", icon: FlaskConical, bar: "bg-gradient-to-r from-amber-400 to-orange-400 shadow-[0_0_6px_rgba(245,158,11,0.4)]", header: "bg-gradient-to-r from-amber-800/90 to-orange-800/90", progressText: "dark:text-amber-400 text-amber-600", iconBg: "bg-white/20" },
+  Layers:       { theme: "border-emerald-500/20 hover:border-emerald-400/40", icon: Layers, bar: "bg-gradient-to-r from-emerald-400 to-green-400 shadow-[0_0_6px_rgba(16,185,129,0.4)]", header: "bg-gradient-to-r from-emerald-800/90 to-green-800/90", progressText: "dark:text-emerald-400 text-emerald-600", iconBg: "bg-white/20" },
+  Atom:         { theme: "border-primary/20 hover:border-primary/40", icon: Atom, bar: "bg-gradient-to-r from-primary to-indigo-400 shadow-[0_0_6px_rgba(79,70,229,0.4)]", header: "bg-gradient-to-r from-[#1e1b4b]/95 to-indigo-800/90", progressText: "dark:text-primary-400 text-primary-600", iconBg: "bg-white/20" },
+  BookOpen:     { theme: "border-sky-500/20 hover:border-sky-400/40", icon: BookOpen, bar: "bg-gradient-to-r from-sky-400 to-blue-400 shadow-[0_0_6px_rgba(14,165,233,0.4)]", header: "bg-gradient-to-r from-sky-800/90 to-blue-800/90", progressText: "dark:text-sky-400 text-sky-600", iconBg: "bg-white/20" },
 };
 
 interface CustomModuleStyle {
@@ -125,6 +126,7 @@ function getModuleStyle(icon: string | null, name: string) {
 }
 
 export default function ModulesGrid({ modules, isGuest, isAdmin }: ModulesGridProps) {
+  const { isOpen } = useSidebar();
   const [visibleCount, setVisibleCount] = useState(9);
   const [localModules, setLocalModules] = useState(modules);
   const [editTarget, setEditTarget] = useState<ModuleWithStats | null>(null);
@@ -240,92 +242,20 @@ export default function ModulesGrid({ modules, isGuest, isAdmin }: ModulesGridPr
         <div className="space-y-6 md:space-y-0">
           <motion.div 
             layout
-            className="grid gap-3 md:gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            className={cn("grid gap-3 md:gap-6 sm:grid-cols-2", isOpen ? "lg:grid-cols-3" : "lg:grid-cols-4")}
           >
             <AnimatePresence mode="popLayout">
               {visibleModules.map((mod, index) => {
                 const modStyle = getModuleStyle(mod.icon, mod.name);
-                const CardIcon = modStyle.icon;
 
                 return (
-                  <motion.div
-                    key={mod.id}
-                    layout
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.4) }}
-                    className="group relative"
-                  >
-                    <Link
-                      href={isGuest ? "/login" : `/modules/${mod.id}`}
-                      aria-label={`Open module: ${mod.name}`}
-                    >
-                      <div className={cn(
-                        "relative flex flex-col border rounded-2xl md:rounded-[28px] overflow-hidden transition-all duration-300 cursor-pointer shadow-lg hover:-translate-y-1 active:scale-[0.97] hover:shadow-xl",
-                        (modStyle as any).cardBg ? "" : "bg-card/40",
-                        modStyle.theme,
-                      )} style={(modStyle as any).cardBg ? { backgroundColor: (modStyle as any).cardBg } : undefined}>
-                        {/* Themed Gradient Header or Image */}
-                        {mod.imageUrl ? (
-                          <div className="relative h-28 md:h-32 overflow-hidden">
-                            <img src={mod.imageUrl} alt={mod.name} className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                            <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
-                              <h3 className="text-sm md:text-[17px] font-black text-white truncate">{mod.name}</h3>
-                              <ChevronRight className="h-4 w-4 text-white/50 shrink-0 ml-2" />
-                            </div>
-                          </div>
-                        ) : (
-                        <div className={cn(
-                          "px-4 md:px-5 py-3 md:py-4 flex items-center justify-between",
-                          !(modStyle as any).isCustom && modStyle.header
-                        )} style={(modStyle as any).isCustom ? {
-                          backgroundColor: (modStyle as any).headerBg,
-                          backgroundImage: (modStyle as any).headerGradient,
-                        } : undefined}>
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className={cn(
-                              "h-8 w-8 md:h-9 md:w-9 rounded-xl flex items-center justify-center shrink-0 backdrop-blur-sm",
-                              modStyle.iconBg
-                            )}>
-                              <CardIcon className="h-[18px] w-[18px] md:h-5 md:w-5 text-white" />
-                            </div>
-                            <h3 className="text-sm md:text-[17px] font-black text-white truncate">
-                              {mod.name}
-                            </h3>
-                          </div>
-                          <ChevronRight className="h-4 w-4 text-white/50 shrink-0 ml-2" />
-                        </div>
-                        )}
-
-                        {/* Card Body */}
-                        <div className="px-4 md:px-5 py-2.5 md:py-4 space-y-2 md:space-y-2.5">
-                          {/* Stats Row */}
-                          <div className="flex items-center gap-1.5 text-[10px] md:text-[11px] font-bold text-muted-foreground/60 uppercase tracking-wider">
-                            <span>{mod.subjectsCount} Sub</span>
-                            <span className="text-border/40">•</span>
-                            <span>{mod.lecturesCount} Lec</span>
-                            <span className="text-border/40">•</span>
-                            <span>{mod.questionsCount} Qs</span>
-                          </div>
-
-                          {/* Progress Row */}
-                          <div className="space-y-1">
-                            <div className="flex justify-between items-center text-[9px] md:text-[10px] font-black uppercase tracking-wider">
-                              <span className="text-muted-foreground/40">Mastery</span>
-                              <span className={cn("font-black", modStyle.progressText)}>{mod.percentage}%</span>
-                            </div>
-                            <div className="h-1.5 w-full bg-muted/20 rounded-full overflow-hidden">
-                              <div 
-                                className={cn("h-full rounded-full transition-all duration-1000", modStyle.bar)} 
-                                style={{ width: `${mod.percentage}%` }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
+                  <div key={mod.id} className="group relative">
+                    <ModuleCard
+                      module={mod}
+                      moduleStyle={{ progressText: modStyle.progressText, bar: modStyle.bar }}
+                      index={index}
+                      isGuest={isGuest}
+                    />
 
                     {/* Admin Edit Button */}
                     {isAdmin && (
@@ -337,7 +267,7 @@ export default function ModulesGrid({ modules, isGuest, isAdmin }: ModulesGridPr
                         <Pencil className="h-4 w-4 text-white" />
                       </button>
                     )}
-                  </motion.div>
+                  </div>
                 );
               })}
             </AnimatePresence>

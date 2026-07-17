@@ -20,12 +20,14 @@ const config: Config = {
   		},
   		fontFamily: {
   			sans: [
+  				'var(--font-inter)',
   				'var(--font-nunito)',
   				'var(--font-cairo)',
   				'system-ui',
   				'sans-serif'
   			],
   			display: [
+  				'var(--font-plus-jakarta)',
   				'var(--font-nunito)',
   				'var(--font-cairo)',
   				'system-ui',
@@ -38,6 +40,7 @@ const config: Config = {
   				'sans-serif'
   			],
   			mono: [
+  				'var(--font-ibm-plex-mono)',
   				'var(--font-mono)',
   				'monospace'
   			],

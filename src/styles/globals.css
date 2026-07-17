@@ -190,14 +190,17 @@
 /* Fonts are injected via next/font in layout; avoid runtime @import external fonts. */
 
 :root {
-  --font-ui: var(--font-nunito), var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
+  --font-ui: var(--font-inter), var(--font-nunito), var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-ui);
-  --font-english: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+  --font-english: var(--font-inter), var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
   --font-arabic: var(--font-cairo), var(--font-nunito), ui-sans-serif, sans-serif;
-  --font-display: var(--font-nunito), var(--font-cairo), ui-sans-serif, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-display: var(--font-plus-jakarta), var(--font-nunito), var(--font-cairo), ui-sans-serif, sans-serif;
+  --font-body: var(--font-inter), var(--font-nunito), var(--font-cairo), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   --shadow-clr: rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+  --shadow-elevated: 0 10px 40px hsl(var(--primary) / 0.25);
   --z-navbar: 300;
 
   --background: 240 16% 93%;        /* page bg — slightly grayer so cards pop */
@@ -295,13 +298,15 @@
 }
 
 .font-arabic {
-  --font-ui: var(--font-cairo), var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+  --font-ui: var(--font-cairo), var(--font-inter), var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-ui);
-  --font-display: var(--font-cairo), var(--font-nunito), ui-sans-serif, sans-serif;
+  --font-display: var(--font-cairo), var(--font-plus-jakarta), var(--font-nunito), ui-sans-serif, sans-serif;
 }
 
 .dark {
   --shadow-clr: rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.2), 0 8px 24px rgb(0 0 0 / 0.4);
+  --shadow-elevated: 0 10px 40px rgb(0 0 0 / 0.5);
   --background: 0 0% 4%;               /* #0B0B0B near-black */
   --foreground: 250 33% 80%;        /* #F0EFF8 headings */
   --card: 240 20% 16%;              /* surfaces — lighter than bg for contrast */

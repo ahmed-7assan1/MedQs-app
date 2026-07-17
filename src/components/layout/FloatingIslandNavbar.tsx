@@ -132,6 +132,9 @@ export function FloatingIslandNavbar({
 
  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
+ // Hidden on modules pages — ModulesSidebar handles it
+ if (pathname?.startsWith("/modules")) return null;
+
  const avatarBlock = (size: "sm" | "md" = "md") => {
   const dim = size === "sm" ? "h-8 w-8" : "h-10 w-10";
   return (
