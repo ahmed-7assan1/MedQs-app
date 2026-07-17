@@ -59,14 +59,14 @@ export default function ModulesSidebar({ userName, userImage, userId }: ModulesS
   return (
     <aside
       className={cn(
-        "fixed left-2 top-2 z-max hidden flex-col rounded-2xl shadow-lg transition-all duration-500 ease-in-out lg:flex h-[calc(100vh-16px)] bg-card dark:bg-[#0a0b10] overflow-x-hidden",
-        isOpen ? "translate-x-0" : "-translate-x-full",
+        "fixed left-2 top-2 z-max hidden flex-col rounded-2xl transition-all duration-500 ease-in-out lg:flex h-[calc(100vh-16px)] bg-background/70 backdrop-blur-xl overflow-x-hidden",
+        isOpen ? "translate-x-0" : "-translate-x-[calc(100%+0.5rem)]",
         isCollapsed ? "w-16" : "w-60"
       )}
     >
       {/* ── Brand ── */}
       <div className={cn(
-        "flex shrink-0 items-center border-b border-border/60 h-14",
+        "flex shrink-0 items-center border-b border-border/10 h-14",
         isCollapsed ? "justify-center px-0" : "justify-between px-4"
       )}>
         <Link href="/dashboard-app" className="flex items-center gap-2.5">
@@ -94,11 +94,11 @@ export default function ModulesSidebar({ userName, userImage, userId }: ModulesS
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center rounded-xl text-sm font-medium transition-all",
-                  isCollapsed ? "justify-center py-2.5" : "gap-3 px-3 py-2.5",
+                  "flex items-center rounded-full text-sm font-medium transition-all",
+                  isCollapsed ? "justify-center py-2" : "gap-3 px-3 py-2",
                   active
-                    ? "bg-gradient-to-r from-primary/10 to-transparent text-primary ring-1 ring-primary/20"
-                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    ? "bg-card text-primary ring-1 ring-primary/30 shadow-sm"
+                    : "text-muted-foreground hover:bg-card/80 hover:text-foreground"
                 )}
                 title={isCollapsed ? item.label : undefined}
               >
@@ -112,13 +112,13 @@ export default function ModulesSidebar({ userName, userImage, userId }: ModulesS
       </nav>
 
       {/* ── Bottom bar ── */}
-      <div className="flex flex-col border-t border-border/60 px-3 py-2 gap-1 shrink-0">
+      <div className="flex flex-col border-t border-border/10 px-3 py-2 gap-1 shrink-0">
         <button
           onClick={toggleTheme}
           className={cn(
-            "flex items-center gap-3 rounded-xl text-sm font-medium transition-all",
-            isCollapsed ? "justify-center h-9 w-9" : "px-3 py-2.5",
-            "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            "flex items-center gap-3 rounded-full text-sm font-medium transition-all",
+            isCollapsed ? "justify-center h-9 w-9" : "px-3 py-2",
+            "text-muted-foreground hover:bg-card/80 hover:text-foreground"
           )}
           title={theme === "dark" ? "Light mode" : "Dark mode"}
         >
@@ -130,9 +130,9 @@ export default function ModulesSidebar({ userName, userImage, userId }: ModulesS
           <Link
             href="/settings"
             className={cn(
-              "flex items-center gap-3 rounded-xl text-sm font-medium transition-all",
-              isCollapsed ? "justify-center h-9 w-9" : "px-3 py-2.5",
-              "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              "flex items-center gap-3 rounded-full text-sm font-medium transition-all",
+              isCollapsed ? "justify-center h-9 w-9" : "px-3 py-2",
+              "text-muted-foreground hover:bg-card/80 hover:text-foreground"
             )}
           >
             <Settings className="h-4 w-4 shrink-0" />
