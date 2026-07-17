@@ -4,21 +4,14 @@ import Link from "next/link";
 import { Bookmark } from "lucide-react";
 import { useSyncExternalStore, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { toggleSave, isSaved, getSaved } from "@/lib/local-saved-store";
+import { toggleSave, isSaved } from "@/lib/local-saved-store";
 import type { ModuleWithStats } from "./ModulesGrid";
 
-const SMALL_GRADIENTS = [
-  "linear-gradient(135deg, hsl(190 60% 30%), hsl(220 40% 18%))",
-  "linear-gradient(135deg, hsl(40 60% 30%), hsl(30 40% 18%))",
-  "linear-gradient(135deg, hsl(240 60% 30%), hsl(260 40% 18%))",
-  "linear-gradient(135deg, hsl(160 60% 30%), hsl(140 40% 18%))",
-];
-
-const BAR_COLORS = [
-  "oklch(0.7 0.17 155)",
-  "oklch(0.75 0.17 65)",
-  "oklch(0.65 0.18 240)",
-  "oklch(0.7 0.15 100)",
+const CARD_ACCENTS = [
+  { ring: "hover:ring-sky-500/30", dot: "bg-sky-500", text: "text-sky-500", bar: "bg-gradient-to-r from-sky-500 to-cyan-400" },
+  { ring: "hover:ring-amber-500/30", dot: "bg-amber-500", text: "text-amber-500", bar: "bg-gradient-to-r from-amber-500 to-orange-400" },
+  { ring: "hover:ring-emerald-500/30", dot: "bg-emerald-500", text: "text-emerald-500", bar: "bg-gradient-to-r from-emerald-500 to-teal-400" },
+  { ring: "hover:ring-violet-500/30", dot: "bg-violet-500", text: "text-violet-500", bar: "bg-gradient-to-r from-violet-500 to-purple-400" },
 ];
 
 function getAbbreviation(name: string): string {
@@ -42,8 +35,7 @@ interface RecentModuleCardProps {
 }
 
 export default function RecentModuleCard({ module, index = 0 }: RecentModuleCardProps) {
-  const gradient = SMALL_GRADIENTS[index % SMALL_GRADIENTS.length];
-  const barColor = BAR_COLORS[index % BAR_COLORS.length];
+  const accent = CARD_ACCENTS[index % CARD_ACCENTS.length];
   const getSnapshot = useCallback(() => isSaved("MODULE", module.id), [module.id]);
   const saved = useSyncExternalStore(subscribe, getSnapshot, () => false);
 
@@ -57,49 +49,62 @@ export default function RecentModuleCard({ module, index = 0 }: RecentModuleCard
       subtitle: `${module.lecturesCount} lectures · ${module.questionsCount} questions`,
       lecturesCount: module.lecturesCount,
     });
-    // Dispatch storage event so other tabs/components re-sync
     window.dispatchEvent(new Event("storage"));
   };
 
   return (
     <Link href={`/modules/${module.id}`} className="block group">
       <div
-        className="relative overflow-hidden rounded-3xl p-5 text-white transition hover:shadow-xl hover:-translate-y-0.5"
-        style={{ background: gradient, minHeight: 200 }}
+        className={cn(
+          "relative overflow-hidden rounded-2xl p-4 transition-all duration-300",
+          "bg-card/70 backdrop-blur-xl ring-1 ring-border/60 shadow-[var(--shadow-card)]",
+          accent.ring,
+          "hover:shadow-lg hover:-translate-y-0.5"
+        )}
       >
         {module.imageUrl && (
           <img
             src={module.imageUrl}
             alt=""
             loading="lazy"
-            className="pointer-events-none absolute -right-4 top-1/2 h-[115%] w-auto -translate-y-1/2 object-contain opacity-60 mix-blend-screen select-none"
+            className="pointer-events-none absolute -right-4 top-1/2 h-[115%] w-auto -translate-y-1/2 object-contain opacity-[0.06] select-none"
           />
         )}
+
         <button
           onClick={handleBookmark}
           className={cn(
-            "absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full backdrop-blur ring-1 transition hover:bg-white/20",
-            saved ? "bg-white/20 ring-white/40" : "bg-white/10 ring-white/20"
+            "absolute right-2.5 top-2.5 grid h-6 w-6 place-items-center rounded-full backdrop-blur ring-1 transition hover:bg-muted/60",
+            saved ? "bg-primary/10 ring-primary/30" : "bg-card ring-border/40"
           )}
         >
-          <Bookmark className={cn("h-3.5 w-3.5", saved ? "fill-white text-white" : "text-white/70")} />
+          <Bookmark className={cn("h-3 w-3", saved ? "fill-primary text-primary" : "text-muted-foreground")} />
         </button>
+
         <div className="relative z-10">
-          <div className="text-2xl font-bold">{getAbbreviation(module.name)}</div>
-          <div className="mt-0.5 text-xs text-white/80">{module.name}</div>
-          <div className="mt-8 flex items-center gap-3 text-[11px] text-white/70">
+          <div className={cn("mb-2 h-1.5 w-1.5 rounded-full", accent.dot)} />
+
+          <div className={cn("text-xl font-bold", accent.text)}>
+            {getAbbreviation(module.name)}
+          </div>
+          <div className="mt-0.5 text-xs font-medium text-muted-foreground line-clamp-1">
+            {module.name}
+          </div>
+
+          <div className="mt-5 flex items-center gap-2.5 text-[11px] font-medium text-muted-foreground">
             <span>{module.lecturesCount} Lectures</span>
-            <span className="h-1 w-1 rounded-full bg-white/30" />
+            <span className="h-1 w-1 rounded-full bg-border" />
             <span>{module.questionsCount} Questions</span>
           </div>
-          <div className="mt-2 flex items-center gap-3">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/15">
+
+          <div className="mt-3 flex items-center gap-2">
+            <div className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full transition-all duration-1000"
-                style={{ width: `${module.percentage}%`, background: barColor }}
+                className={cn("h-full rounded-full transition-all duration-1000", accent.bar)}
+                style={{ width: `${module.percentage}%` }}
               />
             </div>
-            <span className="text-[11px] font-semibold">{module.percentage}%</span>
+            <span className={cn("text-[10px] font-bold", accent.text)}>{module.percentage}%</span>
           </div>
         </div>
       </div>
