@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Bookmark } from "lucide-react";
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { toggleSave, isSaved, getSaved } from "@/lib/local-saved-store";
 import type { ModuleWithStats } from "./ModulesGrid";
@@ -44,7 +44,8 @@ interface RecentModuleCardProps {
 export default function RecentModuleCard({ module, index = 0 }: RecentModuleCardProps) {
   const gradient = SMALL_GRADIENTS[index % SMALL_GRADIENTS.length];
   const barColor = BAR_COLORS[index % BAR_COLORS.length];
-  const saved = useSyncExternalStore(subscribe, () => isSaved("MODULE", module.id), () => false);
+  const getSnapshot = useCallback(() => isSaved("MODULE", module.id), [module.id]);
+  const saved = useSyncExternalStore(subscribe, getSnapshot, () => false);
 
   const handleBookmark = (e: React.MouseEvent) => {
     e.preventDefault();

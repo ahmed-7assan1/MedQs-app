@@ -1,0 +1,6 @@
+# Grok
+
+> A fast, minimal AI chat assistant. Ask anything, get answers.
+
+## Pages
+- [Home](/): Start a new chat with Grok.

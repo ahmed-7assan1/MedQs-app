@@ -10,14 +10,25 @@ interface SavedItem {
 
 const STORAGE_KEY = "medonex_saved";
 
+let _cacheRaw: string | null = null;
+let _cached: SavedItem[] = [];
+
 function read(): SavedItem[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (raw === _cacheRaw) return _cached;
+    _cacheRaw = raw;
+    _cached = raw ? JSON.parse(raw) : [];
+    return _cached;
   } catch {
     return [];
   }
+}
+
+function invalidateCache() {
+  _cacheRaw = null;
+  _cached = [];
 }
 
 function write(items: SavedItem[]) {
@@ -38,20 +49,21 @@ export function isSaved(type: ItemType, id: string): boolean {
 }
 
 export function toggleSave(item: SavedItem): boolean {
+  invalidateCache();
   const items = read();
   const idx = items.findIndex((i) => i.type === item.type && i.id === item.id);
   if (idx >= 0) {
     items.splice(idx, 1);
     write(items);
-    return false; // removed
+    return false;
   } else {
     items.unshift(item);
     write(items);
-    return true; // added
+    return true;
   }
 }
 
 export function removeSave(type: ItemType, id: string) {
-  const items = read().filter((i) => !(i.type === type && i.id === id));
-  write(items);
+  invalidateCache();
+  write(read().filter((i) => !(i.type === type && i.id === id)));
 }

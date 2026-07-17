@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BookOpen, Bookmark, Library, Trash2, ArrowLeft, FolderOpen, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -38,7 +38,8 @@ function subscribe(cb: () => void) {
 }
 
 export default function SavedView({ onBack }: SavedViewProps) {
-  const items = useSyncExternalStore(subscribe, () => getSaved() as SavedItem[], () => []);
+  const getSnapshot = useCallback(() => getSaved() as SavedItem[], []);
+  const items = useSyncExternalStore(subscribe, getSnapshot, () => []);
   const [activeType, setActiveType] = useState<string | null>(null);
 
   const types = ["MODULE", "SUBJECT", "LECTURE"] as const;
@@ -58,6 +59,7 @@ export default function SavedView({ onBack }: SavedViewProps) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
+      className="pt-6"
     >
       {/* ── Header ── */}
       <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-background px-8 py-8 shadow-[var(--shadow-card)] ring-1 ring-border/60">

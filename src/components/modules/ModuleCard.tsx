@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Bookmark } from "lucide-react";
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { toggleSave, isSaved } from "@/lib/local-saved-store";
 import type { ModuleWithStats } from "./ModulesGrid";
@@ -36,7 +36,8 @@ interface ModuleCardProps {
 }
 
 export default function ModuleCard({ module, moduleStyle, index, isGuest }: ModuleCardProps) {
-  const saved = useSyncExternalStore(subscribe, () => isSaved("MODULE", module.id), () => false);
+  const getSnapshot = useCallback(() => isSaved("MODULE", module.id), [module.id]);
+  const saved = useSyncExternalStore(subscribe, getSnapshot, () => false);
 
   const handleBookmark = (e: React.MouseEvent) => {
     e.preventDefault();

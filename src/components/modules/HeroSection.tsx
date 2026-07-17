@@ -24,13 +24,13 @@ export default function HeroSection({
           {lastActivityHref ? (
             <Link
               href={lastActivityHref}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-elevated)] transition hover:opacity-90 active:scale-[0.97]"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#2563EB] px-6 py-3 text-sm font-semibold text-white shadow-[var(--shadow-elevated)] transition hover:opacity-90 active:scale-[0.97]"
             >
-              <Play className="h-4 w-4 fill-current" />
+              <Play className="h-4 w-4 fill-white" />
               Continue Last Lecture
             </Link>
           ) : (
-            <span className="inline-flex items-center gap-2 rounded-xl bg-primary/10 px-6 py-3 text-sm font-semibold text-primary/60">
+            <span className="inline-flex items-center gap-2 rounded-xl bg-[#2563EB]/10 px-6 py-3 text-sm font-semibold text-[#2563EB]/60">
               <Play className="h-4 w-4 fill-current" />
               Continue Last Lecture
             </span>
