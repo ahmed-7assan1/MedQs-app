@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LectureClient } from "@/components/content/LectureClient";
+import { addDownload } from "@/lib/local-downloads-store";
+import TopBar from "@/components/modules/TopBar";
 import ReactMarkdown from "react-markdown";
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
@@ -60,6 +62,14 @@ function FileCard({ file }: { file: { id: string; name: string; url: string; mim
       a.download = downloadName;
       document.body.appendChild(a);
       a.click();
+      addDownload({
+        id: file.id,
+        title: file.name,
+        fileName: downloadName,
+        fileUrl: file.url,
+        mimeType: file.mimeType,
+        fileSize: blob.size,
+      });
       setTimeout(() => {
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
@@ -205,8 +215,8 @@ function RecordCard({ record }: { record: { id: string; title: string; url: stri
 }
 
 export function LectureExperienceClient({
-  lecture, moduleId, isAdmin = false, userId,
-}: { lecture: any; moduleId: string; isAdmin?: boolean; userId?: string }) {
+  lecture, moduleId, isAdmin = false, userId, userName, userImage,
+}: { lecture: any; moduleId: string; isAdmin?: boolean; userId?: string; userName?: string | null; userImage?: string | null }) {
   const [active, setActive] = useState<TabId>("overview");
   const sidebar = useLectureSidebar();
   const { sidebarOpen, setSelectedText } = sidebar;
@@ -270,11 +280,11 @@ export function LectureExperienceClient({
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      {/* ── Main content wrapper (shrinks on desktop when sidebar is open) ── */}
+      <TopBar userName={userName} userImage={userImage} />
       <div className="transition-all duration-300" style={sidebarOpen ? { marginRight: sidebar.sidebarWidth } : undefined}>
 
       {/* ── Mobile back navigation & title row ── */}
-      <div className="md:hidden px-4 pb-2 pt-2 space-y-3 shrink-0">
+      <div className="md:hidden px-4 pb-2 pt-14 space-y-3 shrink-0">
         <Link
           href={`/modules/${moduleId}`}
           className="inline-flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
@@ -319,14 +329,8 @@ export function LectureExperienceClient({
       </div>
 
       {/* ══════════════ HERO (Desktop Only) ══════════════ */}
-      <div className="relative overflow-hidden pt-14 hidden md:block">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-24 left-1/4 h-96 w-96 rounded-full bg-primary/10 blur-[100px]" />
-          <div className="absolute -top-12 right-0 h-64 w-64 rounded-full bg-violet-500/8 blur-[80px]" />
-          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-        </div>
-
-        <div className="relative mx-auto max-w-7xl px-4 pb-6 md:px-8">
+      <div className="hidden md:block">
+        <div className="relative mx-auto max-w-7xl px-4 pb-6 md:px-8 pt-6">
           {/* Breadcrumb */}
           <Link
             href={`/modules/${moduleId}`}
@@ -445,7 +449,7 @@ export function LectureExperienceClient({
       </div>
 
       {/* ══════════════ TAB BAR ══════════════ */}
-      <div className="sticky top-16 md:top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
+      <div className="sticky top-[52px] z-50 border-b border-border bg-background/90 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="flex gap-1 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => {

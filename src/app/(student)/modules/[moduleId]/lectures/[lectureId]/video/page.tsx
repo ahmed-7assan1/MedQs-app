@@ -7,6 +7,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Video, ChevronRight, Clock, Box, GraduationCap } from "lucide-react";
 import { LectureVideoStudio } from "@/components/content/LectureVideoStudio";
+import TopBar from "@/components/modules/TopBar";
 
 export const dynamic = "force-dynamic";
 
@@ -64,8 +65,9 @@ export default async function LectureVideoPage({
   const likedSet = new Set(likedRows.map((r) => r.videoId));
 
   return (
-    <div className="min-h-screen bg-[#07080f] animate-in fade-in duration-500 overflow-x-hidden pt-16">
-      <div className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 py-8 lg:py-12">
+    <div className="min-h-screen bg-[#07080f] animate-in fade-in duration-500 overflow-x-hidden">
+      <TopBar userName={session?.user?.name} userImage={session?.user?.image} />
+      <div className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 py-8 lg:py-12 pt-[72px]">
         {videos.length > 0 ? (
           <LectureVideoStudio
             lectureId={lecture.id}

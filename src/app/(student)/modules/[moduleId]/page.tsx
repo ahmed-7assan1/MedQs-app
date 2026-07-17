@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SubjectInlineManager } from "@/components/admin-inline/SubjectInlineManager";
+import TopBar from "@/components/modules/TopBar";
+import PageContainer from "@/components/modules/PageContainer";
 
 export const revalidate = 60;
 
@@ -126,71 +128,49 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
   const totalLectures = mod.subjects.flatMap(s => s.lectures).length;
 
   return (
-    <div className="min-h-screen bg-background pb-32 pt-0">
-      {/* ── Immersive Hero Section ── */}
-      <div className="relative hidden md:flex h-[400px] w-full overflow-hidden items-center">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/15 via-transparent to-background z-10" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-        
-        <div className="container mx-auto px-6 relative z-20 max-md:pt-2 md:pt-20">
-          <div className="flex flex-col md:flex-row items-center md:items-center gap-8">
-             {/* Large Module Icon */}
-             <div className="h-32 w-32 rounded-[32px] bg-gradient-to-br from-primary to-primary/40 p-[2px] shadow-2xl rotate-3">
-                <div className="h-full w-full rounded-[30px] bg-card flex items-center justify-center">
-                   <Brain className="h-14 w-14 text-primary" />
-                </div>
-             </div>
-
-             <div className="flex-1 text-left space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-black uppercase tracking-widest text-primary">
-                    Academic Module
-                  </span>
-                </div>
-                
-                <h1 className="text-7xl font-black tracking-tighter text-foreground leading-none">
-                  {mod.name}.
-                </h1>
-
-                {/* Quick Stats Row (Mobile Optimized) */}
-                <div className="flex items-center gap-6 pt-2">
-                   <div>
-                      <p className="text-xl font-black text-foreground">{totalLectures}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Lectures</p>
-                   </div>
-                   <div className="h-6 w-px bg-border" />
-                   <div>
-                      <p className="text-xl font-black text-foreground">{totalQ}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Questions</p>
-                   </div>
-                   <div className="h-6 w-px bg-border" />
-                   <div>
-                      <p className={cn("text-xl font-black", modPct >= 70 ? "text-emerald-500" : modPct > 0 ? "text-amber-500" : "text-muted-foreground")}>{modPct}%</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Mastery</p>
-                   </div>
-                </div>
-             </div>
+    <div className="min-h-screen bg-background">
+      <TopBar userName={session?.user?.name} userImage={session?.user?.image} />
+      <PageContainer>
+        {/* ── Compact Module Header ── */}
+        <div className="relative overflow-hidden rounded-3xl p-6 mt-6 bg-gradient-to-br from-background via-card/50 to-background shadow-[var(--shadow-card)] ring-1 ring-border/60">
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary to-primary/40 p-[2px] shrink-0">
+              <div className="h-full w-full rounded-[13px] bg-background flex items-center justify-center">
+                <Brain className="h-7 w-7 text-primary" />
+              </div>
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-[9px] font-black uppercase tracking-widest text-primary">Academic Module</span>
+              <h1 className="text-2xl font-black text-foreground tracking-tight truncate">{mod.name}.</h1>
+              <div className="sm:hidden flex items-center gap-2 mt-1">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{totalLectures} Lectures</span>
+                <span className="h-1 w-1 rounded-full bg-border" />
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{totalQ} Qs</span>
+                <span className="h-1 w-1 rounded-full bg-border" />
+                <span className={cn("text-[10px] font-bold uppercase tracking-wider", modPct >= 70 ? "text-emerald-500" : modPct > 0 ? "text-amber-500" : "text-muted-foreground")}>{modPct}%</span>
+              </div>
+            </div>
+            <div className="hidden sm:flex items-center gap-5">
+              <div className="text-right">
+                <p className="text-lg font-black text-foreground">{totalLectures}</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Lectures</p>
+              </div>
+              <div className="h-8 w-px bg-border/50" />
+              <div className="text-right">
+                <p className="text-lg font-black text-foreground">{totalQ}</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Questions</p>
+              </div>
+              <div className="h-8 w-px bg-border/50" />
+              <div className="text-right">
+                <p className={cn("text-lg font-black", modPct >= 70 ? "text-emerald-500" : modPct > 0 ? "text-amber-500" : "text-muted-foreground")}>{modPct}%</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Mastery</p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Mobile Title Row */}
-      <div className="md:hidden px-6 pb-2 pt-2 flex items-center gap-4">
-         <div className="h-14 w-14 rounded-[18px] bg-gradient-to-br from-primary to-primary/40 p-[1.5px] shrink-0">
-            <div className="h-full w-full rounded-[16.5px] bg-[#07080f] flex items-center justify-center">
-               <Brain className="h-7 w-7 text-primary" />
-            </div>
-         </div>
-         <div className="space-y-0.5 min-w-0">
-            <span className="text-[9px] font-black uppercase tracking-widest text-primary">Academic Module</span>
-             <h1 className="text-[20px] font-black text-foreground truncate leading-tight tracking-tight">{mod.name}</h1>
-             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{totalLectures} Lectures • {totalQ} Qs</p>
-         </div>
-      </div>
-
-      <div className="container mx-auto px-6 -mt-8 relative z-30">
         {isAdmin && (
-          <div className="mb-12">
+          <div className="mt-8">
             <SubjectInlineManager
               moduleId={mod.id}
               initialSubjects={mod.subjects.map((s) => ({ id: s.id, name: s.name, icon: s.icon }))}
@@ -199,7 +179,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
         )}
 
         {/* ── Subjects Grid ── */}
-        <div className="space-y-8">
+        <div className="mt-8 space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="h-8 w-1.5 rounded-full bg-primary" />
@@ -299,9 +279,9 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
           </div>
         </div>
 
-        {/* ── Immersive Past Papers Section ── */}
+        {/* ── Past Papers Section ── */}
         {mod.pastPapers.length > 0 && (
-          <div className="mt-24 space-y-8">
+          <div className="mt-16 space-y-6">
             <div className="flex items-center gap-3">
               <div className="h-8 w-1.5 rounded-full bg-violet-500" />
               <div>
@@ -349,7 +329,7 @@ export default async function ModuleDetailPage({ params }: { params: { moduleId:
             </div>
           </div>
         )}
-      </div>
+      </PageContainer>
     </div>
   );
 }

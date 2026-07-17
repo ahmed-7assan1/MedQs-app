@@ -4,6 +4,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { LectureInlineManager } from "@/components/admin-inline/LectureInlineManager";
+import TopBar from "@/components/modules/TopBar";
+import PageContainer from "@/components/modules/PageContainer";
 import { 
   Video, FileQuestion, Layers, FileText, ChevronRight, 
   ArrowLeft, Clock, PlayCircle, BookOpen, GraduationCap,
@@ -88,75 +90,66 @@ export default async function SubjectLecturesPage({
   const IconComp = accent.icon;
 
   return (
-    <div className="min-h-screen bg-background pb-32 pt-0">
-      {/* ── Immersive Subject Hero ── */}
-      <div className="relative hidden md:flex h-[380px] w-full overflow-hidden items-center">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#07080f] z-10" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-        
-        <div className="container mx-auto px-6 relative z-20 max-md:pt-2 md:pt-20">
-          <div className="flex flex-col gap-4">
-            {/* Breadcrumbs */}
-            <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 overflow-x-auto whitespace-nowrap no-scrollbar pb-1">
-              <Link href="/modules" className="hover:text-foreground">Hub</Link>
-              <ChevronRight className="h-2 w-2" />
-              <Link href={`/modules/${params.moduleId}`} className="hover:text-foreground">
-                {subject.module?.name}
-              </Link>
-              <ChevronRight className="h-2 w-2" />
-              <span className="text-primary">{subject.name}</span>
-            </nav>
-
-            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
-              <div className="flex items-center gap-4">
-                <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center shadow-xl", accent.bgColor)}>
-                  <IconComp className={cn("h-8 w-8", accent.iconColor)} />
-                </div>
-                <div>
-                   <h1 className="text-6xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">
-                     {subject.name}.
-                   </h1>
-                   <p className="text-sm font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest mt-1">
-                     {subject.lectures.length} Lectures
-                   </p>
-                </div>
+    <div className="min-h-screen bg-background">
+      <TopBar userName={session?.user?.name} userImage={session?.user?.image} />
+      <PageContainer>
+        {/* ── Compact Subject Header ── */}
+        <div className="relative overflow-hidden rounded-3xl p-6 mt-6 bg-gradient-to-br from-background via-card/50 to-background shadow-[var(--shadow-card)] ring-1 ring-border/60">
+          {/* Breadcrumbs */}
+          <nav className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.15em] text-muted-foreground/70 overflow-x-auto whitespace-nowrap no-scrollbar mb-4">
+            <Link href="/modules" className="hover:text-foreground">Hub</Link>
+            <ChevronRight className="h-1.5 w-1.5 text-muted-foreground/30" />
+            <Link href={`/modules/${params.moduleId}`} className="hover:text-foreground truncate max-w-[80px]">
+              {subject.module?.name}
+            </Link>
+            <ChevronRight className="h-1.5 w-1.5 text-muted-foreground/30" />
+            <span className="text-primary truncate max-w-[120px]">{subject.name}</span>
+          </nav>
+          
+          <div className="flex items-center gap-4">
+            <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center shrink-0 shadow-md", accent.bgColor)}>
+              <IconComp className={cn("h-7 w-7", accent.iconColor)} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-[9px] font-black uppercase tracking-widest text-primary">Discipline</span>
+              <h1 className="text-2xl font-black text-foreground tracking-tight truncate">{subject.name}.</h1>
+              <div className="sm:hidden flex items-center gap-2 mt-1">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{subject.lectures.length} Lectures</span>
+                <span className="h-1 w-1 rounded-full bg-border" />
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{theoreticalLectures.length} Theory</span>
+                {practicalLectures.length > 0 && (
+                  <>
+                    <span className="h-1 w-1 rounded-full bg-border" />
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{practicalLectures.length} Practical</span>
+                  </>
+                )}
               </div>
+            </div>
+            <div className="hidden sm:flex items-center gap-5">
+              <div className="text-right">
+                <p className="text-lg font-black text-foreground">{subject.lectures.length}</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Lectures</p>
+              </div>
+              <div className="h-8 w-px bg-border/50" />
+              <div className="text-right">
+                <p className="text-lg font-black text-foreground">{theoreticalLectures.length}</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Theory</p>
+              </div>
+              {practicalLectures.length > 0 && (
+                <>
+                  <div className="h-8 w-px bg-border/50" />
+                  <div className="text-right">
+                    <p className="text-lg font-black text-foreground">{practicalLectures.length}</p>
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Practical</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Mobile Title Row */}
-      <div className="md:hidden px-6 pb-2 pt-2 space-y-3">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.15em] text-muted-foreground/70 overflow-x-auto whitespace-nowrap no-scrollbar">
-          <Link href="/modules" className="hover:text-foreground">Hub</Link>
-          <ChevronRight className="h-1.5 w-1.5 text-muted-foreground/30" />
-          <Link href={`/modules/${params.moduleId}`} className="hover:text-foreground truncate max-w-[80px]">
-            {subject.module?.name}
-          </Link>
-          <ChevronRight className="h-1.5 w-1.5 text-muted-foreground/30" />
-          <span className="text-primary truncate max-w-[120px]">{subject.name}</span>
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0 shadow-md", accent.bgColor)}>
-            <IconComp className={cn("h-5.5 w-5.5", accent.iconColor)} />
-          </div>
-          <div>
-             <h1 className="text-[20px] font-black text-foreground leading-none tracking-tight">
-               {subject.name}.
-             </h1>
-             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-1">
-               {subject.lectures.length} Lectures
-             </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-6 -mt-8 relative z-30">
         {isAdmin && (
-          <div className="mb-12">
+          <div className="mt-8">
             <LectureInlineManager
               subjectId={subject.id}
               initialLectures={subject.lectures.map((l: any) => ({ id: l.id, title: l.title, videoUrl: l.videoUrl }))}
@@ -166,7 +159,7 @@ export default async function SubjectLecturesPage({
 
         {/* ── Lectures Grid ── */}
         {/* ── Tabs & Filter ── */}
-        <div className="mb-8">
+        <div className="mt-8 mb-6">
            <div className="flex items-center gap-2 p-1.5 bg-card/60 border border-border/30 rounded-2xl w-fit">
               <Link 
                 href={`?tab=lectures`}
@@ -191,21 +184,21 @@ export default async function SubjectLecturesPage({
            </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={cn("h-8 w-1.5 rounded-full", activeTab === "practical" ? "bg-indigo-500" : "bg-primary")} />
               <div>
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                <h2 className="text-2xl font-black text-foreground tracking-tight">
                   {activeTab === "practical" ? "Clinical Sessions" : "Lecture Series"}
                 </h2>
-                <p className="text-xs font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest">
+                <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
                   {activeTab === "practical" ? "Procedure & Skill Training" : "Step-by-step Learning"}
                 </p>
               </div>
             </div>
             
-            <button className="flex items-center gap-2 px-4 py-2 bg-slate-200/50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5 text-[10px] font-bold text-slate-500 dark:text-white/40 hover:text-primary transition-all uppercase tracking-widest">
+            <button className="flex items-center gap-2 px-4 py-2 bg-card/60 rounded-xl border border-border/30 text-[10px] font-bold text-muted-foreground/70 hover:text-primary transition-all uppercase tracking-widest">
                <Clock className="h-4 w-4 text-primary" /> {currentLectures.length} Items
             </button>
           </div>
@@ -220,17 +213,17 @@ export default async function SubjectLecturesPage({
                   <div className="flex-1 flex gap-3 md:gap-4.5">
                     <div className={cn(
                       "h-9 w-9 md:h-11 md:w-11 shrink-0 rounded-lg md:rounded-xl flex items-center justify-center transition-all",
-                      activeTab === "practical" ? "bg-indigo-500/10 text-indigo-500" : "bg-black/5 dark:bg-white/5 text-slate-400 dark:text-white/40 group-hover:text-primary"
+                      activeTab === "practical" ? "bg-indigo-500/10 text-indigo-500" : "bg-muted text-muted-foreground group-hover:text-primary"
                     )}>
                       {activeTab === "practical" ? <Microscope className="h-4.5 w-4.5 md:h-5.5 md:w-5.5" /> : <PlayCircle className="h-4.5 w-4.5 md:h-5.5 md:w-5.5" />}
                     </div>
                     
                     <div className="min-w-0 flex-1 space-y-0.5">
-                      <h3 className="text-[13px] md:text-[15px] font-black dark:text-white text-slate-900 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                      <h3 className="text-[13px] md:text-[15px] font-black text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
                         {lecture.title}
                       </h3>
                       <div className="flex items-center gap-2.5">
-                         <p className="text-[8px] md:text-[9px] font-bold dark:text-white/20 text-slate-400 uppercase tracking-widest">
+                         <p className="text-[8px] md:text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest">
                            {activeTab === "practical" ? "Skill" : "Step"} {idx + 1}
                          </p>
                          <div className="flex items-center gap-1.5">
@@ -255,7 +248,7 @@ export default async function SubjectLecturesPage({
             </div>
           )}
         </div>
-      </div>
+      </PageContainer>
     </div>
   );
 }

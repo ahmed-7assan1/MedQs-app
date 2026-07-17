@@ -52,7 +52,7 @@ export default async function LectureHubPage({
         </div>
       ) : null}
 
-      <LectureExperienceClient lecture={lectureClient as any} moduleId={params.moduleId} isAdmin={isAdmin} userId={session.user.id} />
+      <LectureExperienceClient lecture={lectureClient as any} moduleId={params.moduleId} isAdmin={isAdmin} userId={session.user.id} userName={session.user.name} userImage={session.user.image} />
     </div>
   );
 }

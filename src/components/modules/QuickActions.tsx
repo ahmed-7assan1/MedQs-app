@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   Play,
   Bookmark,
@@ -18,14 +19,20 @@ const actions = [
 ];
 
 export default function QuickActions() {
+  const router = useRouter();
   return (
     <section className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
       {actions.map((a) => {
         const Icon = a.icon;
+        const handleClick = a.title === "Downloads"
+          ? () => router.push("/modules/downloads")
+          : a.bookmarks
+            ? () => setView("saved")
+            : undefined;
         return (
           <button
             key={a.title}
-            onClick={a.bookmarks ? () => setView("saved") : undefined}
+            onClick={handleClick}
             className="flex items-center gap-3 rounded-2xl bg-card p-4 text-left shadow-[var(--shadow-card)] ring-1 ring-border/60 transition hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98]"
           >
             <div className={`grid h-11 w-11 place-items-center rounded-full shrink-0 ${a.color}`}>

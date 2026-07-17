@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FileText, Download, FileImage, FileCode, Loader2 } from "lucide-react";
 import { downloadFileInline } from "@/lib/download-helper";
+import { addDownload } from "@/lib/local-downloads-store";
 
 interface LectureFile {
   id: string;
@@ -49,6 +50,14 @@ function FileItem({ file }: { file: LectureFile }) {
       a.download = downloadName;
       document.body.appendChild(a);
       a.click();
+      addDownload({
+        id: file.id,
+        title: file.name,
+        fileName: downloadName,
+        fileUrl: file.url,
+        mimeType: file.mimeType,
+        fileSize: blob.size,
+      });
       setTimeout(() => {
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);

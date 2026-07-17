@@ -6,6 +6,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Headphones, Clock, GraduationCap } from "lucide-react";
 import { LectureRecordStudio } from "@/components/content/LectureRecordStudio";
+import TopBar from "@/components/modules/TopBar";
+import PageContainer from "@/components/modules/PageContainer";
 
 export const dynamic = "force-dynamic";
 
@@ -34,8 +36,11 @@ export default async function LectureRecordPage({
   const records = lecture.records && lecture.records.length > 0 ? lecture.records : [];
 
   return (
-    <div className="mx-auto max-w-[1248px] px-4 md:px-6 py-6 animate-in fade-in duration-500 overflow-x-hidden">
-      {/* 1. BREADCRUMBS */}
+    <div className="min-h-screen bg-background">
+      <TopBar userName={session?.user?.name} userImage={session?.user?.image} />
+      <PageContainer>
+        <div className="pt-6">
+          {/* 1. BREADCRUMBS */}
       <nav className="mb-6 flex flex-wrap items-center gap-2 text-[13px] font-normal text-muted-foreground/60">
         <Link href="/modules" className="hover:text-primary transition-colors">Modules</Link>
         <span className="text-[11px] opacity-30 select-none">›</span>
@@ -105,6 +110,8 @@ export default async function LectureRecordPage({
           </div>
         </div>
       )}
+        </div>
+      </PageContainer>
     </div>
   );
 }
