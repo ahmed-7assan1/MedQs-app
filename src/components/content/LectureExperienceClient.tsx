@@ -15,6 +15,7 @@ import TopBar from "@/components/modules/TopBar";
 import ReactMarkdown from "react-markdown";
 import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
 import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
+import { OverviewStory } from "@/components/content/OverviewStory";
 import { useLectureCache } from "@/hooks/useLectureCache";
 import { useLectureSidebar } from "@/contexts/LectureSidebarContext";
 import dynamic from "next/dynamic";
@@ -219,7 +220,7 @@ export function LectureExperienceClient({
 }: { lecture: any; moduleId: string; isAdmin?: boolean; userId?: string; userName?: string | null; userImage?: string | null }) {
   const [active, setActive] = useState<TabId>("overview");
   const sidebar = useLectureSidebar();
-  const { sidebarOpen, setSelectedText } = sidebar;
+  const { sidebarOpen, setSelectedText, closeSidebar, setActiveSection } = sidebar;
 
   const { lecture: cachedLecture } = useLectureCache(lecture.id);
 
@@ -244,15 +245,14 @@ export function LectureExperienceClient({
   }, [setSelectedText]);
 
   useEffect(() => {
-    sidebar.openSidebar(lecture.id, lecture.title, cachedLecture?.content);
     return () => {
-      sidebar.closeSidebar();
+      closeSidebar();
     };
-  }, [lecture.id]);
+  }, [lecture.id, closeSidebar]);
 
   useEffect(() => {
-    sidebar.setActiveSection(active);
-  }, [active, sidebar]);
+    setActiveSection(active);
+  }, [active, setActiveSection]);
 
   const recordCount   = lecture?.records?.length || 0;
   const fileCount     = lecture?.files?.length || 0;
@@ -486,11 +486,29 @@ export function LectureExperienceClient({
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-8">
         <div className="animate-in fade-in slide-in-from-bottom-1 duration-150">
 
-          {/* Overview */}
+          {/* Overview - Lecture Story */}
           {active === "overview" && (
-            <div className="space-y-6">
-              {Array.isArray(extras?.overviewCards) && extras.overviewCards.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mx-auto max-w-3xl space-y-6">
+              {/* Header */}
+              <div className="flex items-center gap-3 mb-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/10">
+                  <Sparkles className="h-6 w-6 text-violet-500" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-foreground">Lecture Story</h2>
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    A brief introduction to today&apos;s topic
+                  </p>
+                </div>
+              </div>
+
+              {/* Story content */}
+              {extras?.overviewStory ? (
+                <div className="rounded-2xl border border-border bg-card/30 p-6 md:p-8">
+                  <OverviewStory content={extras.overviewStory} />
+                </div>
+              ) : Array.isArray(extras?.overviewCards) && extras.overviewCards.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2">
                   {extras.overviewCards.map((card: any, i: number) => (
                     <div key={i} className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
                       <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-primary/5 blur-2xl" />
@@ -503,7 +521,7 @@ export function LectureExperienceClient({
                   ))}
                 </div>
               ) : (
-                <EmptyState icon={Layers} title="No Overview Yet" desc="Overview cards will appear here once the lecture is analyzed." color="violet" />
+                <EmptyState icon={Sparkles} title="No Overview Yet" desc="The lecture story will appear here once it's generated." color="violet" />
               )}
             </div>
           )}

@@ -597,7 +597,7 @@ export function MedOneXChat({
   const personaList = Object.keys(DRQ_PERSONAS).slice(0, 5) as DrQPersonaId[];
 
   return (
-    <div className={cn("flex flex-col flex-1 w-full overflow-hidden transition-colors duration-200 ease-out", isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
+    <div className={cn("flex flex-col flex-1 w-full overflow-hidden transition-colors duration-200 ease-out", embedded ? "bg-background" : isDark ? "bg-[#050505]" : "bg-[#FCFCFC]")}>
       <style>{`
         :root { color-scheme: ${isDark ? "dark" : "light"}; }
       `}</style>
@@ -760,10 +760,10 @@ export function MedOneXChat({
       )}
 
       {embedded ? (
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#050505] shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background/70 backdrop-blur-xl shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <Sparkle size={18} weight="fill" className="text-primary shrink-0" />
-            <span className="text-sm font-bold truncate text-white">MedOneX Expert</span>
+            <span className="text-sm font-bold truncate text-foreground">MedOneX Expert</span>
             {lectureId && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary truncate max-w-[120px] border border-primary/20">
                 {lectureTitle || "Lecture"}
@@ -772,7 +772,7 @@ export function MedOneXChat({
           </div>
           <div className="flex items-center gap-1">
             {onClose && (
-              <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+              <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors">
                 <X size={16} weight="bold" />
               </button>
             )}
@@ -1170,7 +1170,7 @@ export function MedOneXChat({
       >
 
       {/* ─── Messages Area ─── */}
-      <main className={cn("flex flex-col flex-1 min-h-0 relative transition-colors duration-200 ease-out", isDark ? "bg-[#050505]" : "bg-white")}
+      <main className={cn("flex flex-col flex-1 min-h-0 relative transition-colors duration-200 ease-out", embedded ? "bg-background" : isDark ? "bg-[#050505]" : "bg-white")}
         style={{
           ...(settings.bgImage ? {
             backgroundImage: `url(${settings.bgImage})`,
@@ -1384,7 +1384,7 @@ export function MedOneXChat({
 
       {embedded ? (
         /* ── Embedded capsule input (matches mobile style) ── */
-        <div className="flex-shrink-0 border-t border-white/10 bg-[#050505]">
+        <div className="flex-shrink-0 border-t border-border bg-background">
           {selectedText && (
             <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 border-b border-primary/10">
               <span className="text-[10px] font-medium text-primary truncate max-w-[250px]">
@@ -1402,7 +1402,7 @@ export function MedOneXChat({
               onClick={() => { if (!inputFocused) inputRef.current?.focus(); }}
               className={cn(
                 "flex flex-col rounded-[20px] ring-1 transition-all duration-200 ease-out cursor-text overflow-hidden",
-                isDark ? "ring-white/10 bg-[#141414]/90 backdrop-blur-xl text-white" : "ring-gray-200/80 bg-white text-[#050505]"
+                isDark ? "ring-white/10 bg-[#141414]/90 backdrop-blur-xl text-white" : "ring-gray-200/80 bg-card text-foreground"
               )}
             >
               <div className="grid transition-all duration-200 ease-out" style={{ gridTemplateRows: inputFocused ? '1fr' : '0fr' }}>
@@ -1443,7 +1443,7 @@ export function MedOneXChat({
                     placeholder={isRecording ? (voicePersona?.lang === "ar" ? "تسجيل..." : "Recording...") : "Ask about this lecture..."}
                     className={cn(
                       "w-full bg-transparent border-none outline-none resize-none px-3 pt-3 pb-1 text-sm leading-relaxed no-scrollbar",
-                      isDark ? "text-white placeholder-gray-400" : "text-[#050505] placeholder-gray-400"
+                      isDark ? "text-white placeholder-gray-400" : "text-foreground placeholder-muted-foreground"
                     )}
                   />
                 </div>

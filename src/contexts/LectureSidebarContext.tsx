@@ -1,9 +1,11 @@
 "use client";
 import { createContext, useContext, useState, useCallback, useRef, useEffect, ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
+import { cn } from "@/lib/utils";
 
 const MedOneXChat = dynamic(() => import("@/components/ai/MedOneXChat").then(m => m.MedOneXChat), {
-  loading: () => <div className="h-full w-full animate-pulse bg-white/5" />,
+  loading: () => <div className="h-full w-full animate-pulse bg-muted/20" />,
   ssr: false,
 });
 
@@ -91,6 +93,11 @@ export function LectureSidebarProvider({ children }: { children: ReactNode }) {
     };
   }, [sidebarOpen]);
 
+  const pathname = usePathname();
+  useEffect(() => {
+    closeSidebar();
+  }, [pathname, closeSidebar]);
+
   return (
     <LectureSidebarContext.Provider
       value={{
@@ -112,11 +119,17 @@ export function LectureSidebarProvider({ children }: { children: ReactNode }) {
 
       {sidebarOpen && (
         <div
-          className="fixed right-0 inset-y-0 z-50 flex flex-col overflow-hidden shadow-2xl border-l border-white/10 bg-[#09090b] select-none"
+          className={cn(
+            "fixed right-0 inset-y-0 z-50 flex flex-col overflow-hidden shadow-2xl border-l border-border bg-background/80 backdrop-blur-xl select-none",
+            "transition-all duration-500 ease-in-out"
+          )}
           style={{ width: sidebarWidth }}
         >
           <div
-            className="absolute left-0 inset-y-0 w-1.5 cursor-ew-resize z-10 hover:bg-white/20 active:bg-white/30 transition-colors"
+            className={cn(
+              "absolute left-0 inset-y-0 w-1.5 cursor-ew-resize z-10 transition-colors duration-200",
+              "hover:bg-muted/50 active:bg-muted/70"
+            )}
             onMouseDown={handleMouseDown}
             onTouchStart={handleMouseDown}
           />

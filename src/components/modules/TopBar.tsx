@@ -16,9 +16,12 @@ import { createClient } from "@/lib/supabase/client";
 interface TopBarProps {
   userName?: string | null;
   userImage?: string | null;
+  className?: string;
+  isCompact?: boolean;
+  transparentUntilScroll?: boolean;
 }
 
-export default function TopBar({ userName, userImage }: TopBarProps) {
+export default function TopBar({ userName, userImage, className, isCompact, transparentUntilScroll }: TopBarProps) {
   const initials = userName
     ? userName.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
     : "A";
@@ -124,17 +127,24 @@ export default function TopBar({ userName, userImage }: TopBarProps) {
   return (
     <header
       className={cn(
-        "fixed top-0 z-40 bg-background/70 backdrop-blur-xl transition-all duration-500 ease-in-out",
+        "fixed top-0 z-40 transition-all duration-500 ease-in-out",
+        transparentUntilScroll
+          ? scrolled
+            ? "bg-background/70 backdrop-blur-xl shadow-sm"
+            : "bg-transparent"
+          : "bg-background/70 backdrop-blur-xl",
         !isOpen
           ? "left-0 right-0"
           : isCollapsed
             ? "left-0 right-0 lg:left-16 lg:right-0"
             : "left-0 right-0 lg:left-60 lg:right-0",
-        scrolled && "shadow-sm"
+        !transparentUntilScroll && scrolled && "shadow-sm",
+        className
       )}
     >
       <div className={cn(
-        "mx-auto flex items-center gap-4 px-6 py-4 transition-all duration-500 ease-in-out",
+        "mx-auto flex items-center gap-4 px-6 transition-all duration-500 ease-in-out",
+        isCompact ? "py-2.5 h-14" : "py-4",
         isOpen && !isCollapsed
           ? "max-w-[1240px]"
           : isOpen && isCollapsed
