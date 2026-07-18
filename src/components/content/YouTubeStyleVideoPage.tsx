@@ -228,9 +228,9 @@ export function YouTubeStyleVideoPage({
   /* ── No videos fallback ── */
   if (!videos.length) {
     return (
-      <div className="min-h-screen bg-[#0f0f0f] flex flex-col items-center justify-center gap-4">
+      <div className="yt-root min-h-screen bg-[var(--yt-bg)] flex flex-col items-center justify-center gap-4">
         <Video className="h-16 w-16 text-white/10" />
-        <p className="text-sm text-[#aaaaaa]">No videos for this lecture.</p>
+        <p className="text-sm text-[var(--yt-muted)]">No videos for this lecture.</p>
         {hubUrl && (
           <Link href={hubUrl} className="text-sm text-[#3ea6ff] hover:underline">
             ← Back to lecture
@@ -241,7 +241,7 @@ export function YouTubeStyleVideoPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] font-sans text-[#f1f1f1] animate-in fade-in duration-500">
+    <div className="yt-root min-h-screen bg-[var(--yt-bg)] font-sans text-[var(--yt-fg)] animate-in fade-in duration-500">
       {/* ── TOP BAR ── */}
       <TopBar userName={userName} userImage={userImage} isCompact={true} transparentUntilScroll={true} />
 
@@ -257,7 +257,7 @@ export function YouTubeStyleVideoPage({
           {hubUrl && (
             <Link
               href={hubUrl}
-              className="mb-3 inline-flex items-center gap-1.5 text-xs text-[#aaaaaa] hover:text-white transition-colors lg:hidden"
+              className="mb-3 inline-flex items-center gap-1.5 text-xs text-[var(--yt-muted)] hover:text-[var(--yt-hover-fg)] transition-colors lg:hidden"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
               Back to lecture
@@ -285,10 +285,10 @@ export function YouTubeStyleVideoPage({
 
           {/* ── TITLE + AI BADGE ── */}
           <div className="mt-3">
-            <h1 className="text-xl font-semibold leading-snug text-[#f1f1f1]">
+            <h1 className="text-xl font-semibold leading-snug text-[var(--yt-fg)]">
               {active?.title || lectureTitle}
             </h1>
-            <div className="mt-1 inline-flex items-center gap-1 text-xs text-[#aaaaaa]">
+            <div className="mt-1 inline-flex items-center gap-1 text-xs text-[var(--yt-muted)]">
               <Sparkles className="h-3 w-3" />
               <span>MedOneX Original Content</span>
             </div>
@@ -314,15 +314,15 @@ export function YouTubeStyleVideoPage({
 
               {/* Name + subs */}
               <div className="leading-tight">
-                <div className="flex items-center gap-1 text-sm font-medium text-[#f1f1f1]">
+                <div className="flex items-center gap-1 text-sm font-medium text-[var(--yt-fg)]">
                   {loadingMeta ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-[#aaaaaa]" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--yt-muted)]" />
                   ) : (
                     channelMeta?.name || "MedOneX Expert"
                   )}
-                  <CheckCircle2 className="h-3.5 w-3.5 text-[#aaaaaa]" />
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[var(--yt-muted)]" />
                 </div>
-                <div className="text-xs text-[#aaaaaa]">
+                <div className="text-xs text-[var(--yt-muted)]">
                   {channelMeta?.subscriberCount
                     ? `${Number(channelMeta.subscriberCount).toLocaleString()} subscribers`
                     : "Verified Instructor"}
@@ -335,15 +335,15 @@ export function YouTubeStyleVideoPage({
                 className={cn(
                   "ml-2 rounded-full px-4 py-2 text-sm font-medium transition-all active:scale-95",
                   isFollowing
-                    ? "bg-[#272727] text-[#f1f1f1] hover:bg-[#3f3f3f]"
-                    : "bg-[#f1f1f1] text-[#0f0f0f] hover:bg-white/90"
+                    ? "bg-[var(--yt-surface)] text-[var(--yt-fg)] hover:bg-[var(--yt-surface-hover)]"
+                    : "bg-[var(--yt-inverse-bg)] text-[var(--yt-inverse-fg)] hover:opacity-90"
                 )}
               >
                 {isFollowing ? "Subscribed" : "Subscribe"}
               </button>
 
               {isFollowing && (
-                <button className="flex items-center gap-2 rounded-full bg-[#272727] px-3 py-2 text-sm hover:bg-[#3f3f3f]">
+                <button className="flex items-center gap-2 rounded-full bg-[var(--yt-surface)] px-3 py-2 text-sm hover:bg-[var(--yt-surface-hover)]">
                   <Bell className="h-4 w-4" />
                 </button>
               )}
@@ -352,11 +352,11 @@ export function YouTubeStyleVideoPage({
             {/* Action buttons */}
             <div className="flex flex-wrap items-center gap-2">
               {/* Like / Dislike pill */}
-              <div className="flex items-center rounded-full bg-[#272727]">
+              <div className="flex items-center rounded-full bg-[var(--yt-surface)]">
                 <button
                   onClick={toggleLike}
                   className={cn(
-                    "flex items-center gap-2 rounded-l-full px-4 py-2 text-sm transition-colors hover:bg-[#3f3f3f]",
+                    "flex items-center gap-2 rounded-l-full px-4 py-2 text-sm transition-colors hover:bg-[var(--yt-surface-hover)]",
                     active?.likedByMe && "text-indigo-400"
                   )}
                 >
@@ -370,9 +370,9 @@ export function YouTubeStyleVideoPage({
                     {channelMeta?.likeCount || active?.likesCount || 0}
                   </span>
                 </button>
-                <span className="h-6 w-px bg-white/15" />
+                <span className="h-6 w-px bg-[var(--yt-border)]" />
                 <button
-                  className="rounded-r-full px-3 py-2 hover:bg-[#3f3f3f] transition-colors"
+                  className="rounded-r-full px-3 py-2 hover:bg-[var(--yt-surface-hover)] transition-colors"
                   aria-label="Dislike"
                 >
                   <ThumbsDown className="h-4 w-4" />
@@ -382,7 +382,7 @@ export function YouTubeStyleVideoPage({
               {/* Share */}
               <button
                 onClick={shareVideo}
-                className="flex items-center gap-2 rounded-full bg-[#272727] px-4 py-2 text-sm hover:bg-[#3f3f3f] transition-colors"
+                className="flex items-center gap-2 rounded-full bg-[var(--yt-surface)] px-4 py-2 text-sm hover:bg-[var(--yt-surface-hover)] transition-colors"
               >
                 <Share2 className="h-4 w-4" />
                 <span>Share</span>
@@ -392,7 +392,7 @@ export function YouTubeStyleVideoPage({
               <button
                 onClick={() => void generateSummary()}
                 disabled={isSummarizing}
-                className="flex items-center gap-2 rounded-full bg-[#272727] px-4 py-2 text-sm hover:bg-[#3f3f3f] transition-colors disabled:opacity-60"
+                className="flex items-center gap-2 rounded-full bg-[var(--yt-surface)] px-4 py-2 text-sm hover:bg-[var(--yt-surface-hover)] transition-colors disabled:opacity-60"
               >
                 {isSummarizing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -403,14 +403,14 @@ export function YouTubeStyleVideoPage({
               </button>
 
               {/* Download */}
-              <button className="flex items-center gap-2 rounded-full bg-[#272727] px-4 py-2 text-sm hover:bg-[#3f3f3f] transition-colors">
+              <button className="flex items-center gap-2 rounded-full bg-[var(--yt-surface)] px-4 py-2 text-sm hover:bg-[var(--yt-surface-hover)] transition-colors">
                 <Download className="h-4 w-4" />
                 <span>Download</span>
               </button>
 
               {/* More */}
               <button
-                className="rounded-full bg-[#272727] p-2 hover:bg-[#3f3f3f] transition-colors"
+                className="rounded-full bg-[var(--yt-surface)] p-2 hover:bg-[var(--yt-surface-hover)] transition-colors"
                 aria-label="More options"
               >
                 <MoreHorizontal className="h-4 w-4" />
@@ -421,13 +421,13 @@ export function YouTubeStyleVideoPage({
           {/* ── DESCRIPTION BOX ── */}
           <div
             className={cn(
-              "mt-4 rounded-xl bg-[#272727] p-3 text-sm cursor-pointer hover:bg-[#3f3f3f] transition-colors",
-              descExpanded && "cursor-auto hover:bg-[#272727]"
+              "mt-4 rounded-xl bg-[var(--yt-surface)] p-3 text-sm cursor-pointer hover:bg-[var(--yt-surface-hover)] transition-colors",
+              descExpanded && "cursor-auto hover:bg-[var(--yt-surface)]"
             )}
             onClick={() => !descExpanded && setDescExpanded(true)}
           >
-            <div className="flex items-center gap-2 text-xs text-[#aaaaaa]">
-              <span className="font-medium text-[#f1f1f1]">
+            <div className="flex items-center gap-2 text-xs text-[var(--yt-muted)]">
+              <span className="font-medium text-[var(--yt-fg)]">
                 {channelMeta?.viewCount
                   ? `${Number(channelMeta.viewCount).toLocaleString()} views`
                   : `${active?.likesCount || 0} likes`}
@@ -438,7 +438,7 @@ export function YouTubeStyleVideoPage({
             </div>
             <p
               className={cn(
-                "mt-2 leading-relaxed text-[#f1f1f1]",
+                "mt-2 leading-relaxed text-[var(--yt-fg)]",
                 !descExpanded && "line-clamp-2"
               )}
             >
@@ -451,7 +451,7 @@ export function YouTubeStyleVideoPage({
                 e.stopPropagation();
                 setDescExpanded((v) => !v);
               }}
-              className="mt-2 text-xs font-medium text-[#f1f1f1] hover:text-white"
+              className="mt-2 text-xs font-medium text-[var(--yt-fg)] hover:text-[var(--yt-hover-fg)]"
             >
               {descExpanded ? "Show less" : "...more"}
             </button>
@@ -474,7 +474,7 @@ export function YouTubeStyleVideoPage({
                   </h3>
                   <button
                     onClick={() => setAiSummary(null)}
-                    className="text-[#aaaaaa] hover:text-white transition-colors"
+                    className="text-[var(--yt-muted)] hover:text-[var(--yt-hover-fg)] transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -489,10 +489,10 @@ export function YouTubeStyleVideoPage({
           {/* ── COMMENTS SECTION ── */}
           <div className="mt-6">
             <div className="mb-4 flex items-center gap-6">
-              <h2 className="text-lg font-semibold text-[#f1f1f1]">
+              <h2 className="text-lg font-semibold text-[var(--yt-fg)]">
                 {active?.commentsCount || 0} Comments
               </h2>
-              <button className="text-sm text-[#aaaaaa] hover:text-white transition-colors">
+              <button className="text-sm text-[var(--yt-muted)] hover:text-[var(--yt-hover-fg)] transition-colors">
                 Sort by
               </button>
             </div>
@@ -507,7 +507,7 @@ export function YouTubeStyleVideoPage({
                 <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-pink-500 to-orange-500" />
               )}
               <input
-                className="w-full border-b border-white/15 bg-transparent pb-2 text-sm text-[#f1f1f1] outline-none placeholder:text-[#aaaaaa] focus:border-white/60 transition-colors"
+                className="w-full border-b border-[var(--yt-border)] bg-transparent pb-2 text-sm text-[var(--yt-fg)] outline-none placeholder:text-[var(--yt-muted)] focus:border-[var(--yt-hover-border)] transition-colors"
                 placeholder="Add a comment..."
               />
             </div>
@@ -528,8 +528,8 @@ export function YouTubeStyleVideoPage({
                 className={cn(
                   "shrink-0 rounded-lg px-3 py-1.5 text-sm transition-colors",
                   activeChip === chip
-                    ? "bg-[#f1f1f1] text-[#0f0f0f] font-medium"
-                    : "bg-[#272727] text-[#f1f1f1] hover:bg-[#3f3f3f]"
+                    ? "bg-[var(--yt-inverse-bg)] text-[var(--yt-inverse-fg)] font-medium"
+                    : "bg-[var(--yt-surface)] text-[var(--yt-fg)] hover:bg-[var(--yt-surface-hover)]"
                 )}
               >
                 {chip}
@@ -539,11 +539,11 @@ export function YouTubeStyleVideoPage({
 
           {/* ── SIDEBAR HEADER ── */}
           <div className="mb-2 flex items-center justify-between px-1">
-            <div className="flex items-center gap-2 text-xs text-[#aaaaaa]">
+            <div className="flex items-center gap-2 text-xs text-[var(--yt-muted)]">
               <BookOpen className="h-3.5 w-3.5" />
               <span>{lectureTitle}</span>
             </div>
-            <span className="text-[10px] font-semibold text-[#aaaaaa] uppercase tracking-wider">
+            <span className="text-[10px] font-semibold text-[var(--yt-muted)] uppercase tracking-wider">
               {filteredVideos.length} videos
             </span>
           </div>
@@ -564,12 +564,12 @@ export function YouTubeStyleVideoPage({
                     className={cn(
                       "flex w-full gap-2 rounded-xl p-1.5 text-left transition-colors",
                       isActive
-                        ? "bg-[#272727]"
-                        : "hover:bg-[#181818]"
+                        ? "bg-[var(--yt-surface)]"
+                        : "hover:bg-[var(--yt-surface-soft)]"
                     )}
                   >
                     {/* Thumbnail */}
-                    <div className="relative aspect-video w-[168px] shrink-0 overflow-hidden rounded-lg bg-[#272727]">
+                    <div className="relative aspect-video w-[168px] shrink-0 overflow-hidden rounded-lg bg-[var(--yt-surface)]">
                       {thumbUrl ? (
                         <img
                           src={thumbUrl}
@@ -578,7 +578,7 @@ export function YouTubeStyleVideoPage({
                         />
                       ) : (
                         <div className="h-full w-full flex items-center justify-center">
-                          <Video className="h-6 w-6 text-[#aaaaaa]" />
+                          <Video className="h-6 w-6 text-[var(--yt-muted)]" />
                         </div>
                       )}
 
@@ -600,25 +600,25 @@ export function YouTubeStyleVideoPage({
                       <h3
                         className={cn(
                           "line-clamp-2 text-sm font-medium leading-snug",
-                          isActive ? "text-[#f1f1f1]" : "text-[#f1f1f1]"
+                          isActive ? "text-[var(--yt-fg)]" : "text-[var(--yt-fg)]"
                         )}
                       >
                         {v.title}
                       </h3>
-                      <div className="mt-1 flex items-center gap-1 text-xs text-[#aaaaaa]">
+                      <div className="mt-1 flex items-center gap-1 text-xs text-[var(--yt-muted)]">
                         <span className="truncate">MedOneX Studio</span>
                         {v.likedByMe && (
                           <Heart className="h-3 w-3 shrink-0 fill-red-500 text-red-500" />
                         )}
                       </div>
-                      <div className="text-xs text-[#aaaaaa]">
+                      <div className="text-xs text-[var(--yt-muted)]">
                         {v.likesCount > 0 && `${v.likesCount} likes`}
                       </div>
                     </div>
 
                     {/* More button */}
                     <button
-                      className="h-6 w-6 shrink-0 rounded-full text-[#aaaaaa] hover:bg-[#3f3f3f] hover:text-white transition-colors self-start mt-1"
+                      className="h-6 w-6 shrink-0 rounded-full text-[var(--yt-muted)] hover:bg-[var(--yt-surface-hover)] hover:text-[var(--yt-hover-fg)] transition-colors self-start mt-1"
                       aria-label="More"
                       onClick={(e) => e.stopPropagation()}
                     >
@@ -635,7 +635,7 @@ export function YouTubeStyleVideoPage({
             <div className="mt-6">
               <Link
                 href={hubUrl}
-                className="flex items-center gap-2 rounded-xl bg-[#272727] px-4 py-3 text-sm font-medium text-[#f1f1f1] hover:bg-[#3f3f3f] transition-colors group"
+                className="flex items-center gap-2 rounded-xl bg-[var(--yt-surface)] px-4 py-3 text-sm font-medium text-[var(--yt-fg)] hover:bg-[var(--yt-surface-hover)] transition-colors group"
               >
                 <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
                 Return to Lecture Sections
@@ -650,7 +650,7 @@ export function YouTubeStyleVideoPage({
         <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
           <Link
             href={hubUrl}
-            className="flex items-center gap-2 rounded-full bg-[#0f0f0f]/90 backdrop-blur-xl border border-white/15 shadow-xl px-6 py-2.5 text-xs font-bold text-[#f1f1f1] whitespace-nowrap active:scale-95 transition-all hover:bg-[#272727]"
+            className="flex items-center gap-2 rounded-full bg-[var(--yt-bg)]/90 backdrop-blur-xl border-[var(--yt-border)] shadow-xl px-6 py-2.5 text-xs font-bold text-[var(--yt-fg)] whitespace-nowrap active:scale-95 transition-all hover:bg-[var(--yt-surface)]"
           >
             <ChevronLeft className="h-4 w-4" />
             Lecture Sections

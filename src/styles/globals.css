@@ -2622,3 +2622,32 @@ select,
   background-size: 200% 100%;
   animation: home-shimmer 1.5s ease-in-out infinite;
 }
+
+/* ── YouTube-Style Video Page Theme (light/dark) ── */
+.yt-root {
+  --yt-bg: #0f0f0f;
+  --yt-fg: #f1f1f1;
+  --yt-muted: #aaaaaa;
+  --yt-surface: #272727;
+  --yt-surface-hover: #3f3f3f;
+  --yt-surface-soft: #181818;
+  --yt-border: rgba(255, 255, 255, 0.15);
+  --yt-inverse-bg: #f1f1f1;
+  --yt-inverse-fg: #0f0f0f;
+  --yt-hover-fg: #ffffff;
+  --yt-hover-border: rgba(255, 255, 255, 0.6);
+}
+
+html:not(.dark) .yt-root {
+  --yt-bg: #fafafa;
+  --yt-fg: #0f0f0f;
+  --yt-muted: #606060;
+  --yt-surface: #e9e9e9;
+  --yt-surface-hover: #d9d9d9;
+  --yt-surface-soft: #efefef;
+  --yt-border: rgba(0, 0, 0, 0.12);
+  --yt-inverse-bg: #0f0f0f;
+  --yt-inverse-fg: #f1f1f1;
+  --yt-hover-fg: #0f0f0f;
+  --yt-hover-border: rgba(0, 0, 0, 0.6);
+}
