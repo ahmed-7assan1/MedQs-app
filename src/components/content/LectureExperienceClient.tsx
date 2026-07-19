@@ -268,131 +268,61 @@ export function LectureExperienceClient({
   const extras = lecture.extras || {};
 
   return (
+    <>
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <TopBar userName={userName} userImage={userImage} isCompact />
-      <div className="transition-all duration-300" style={sidebarOpen ? { marginRight: sidebar.sidebarWidth } : undefined}>
 
-      {/* ── Mobile back navigation & title row ── */}
-      <div className="md:hidden px-4 pb-2 pt-14 space-y-3 shrink-0">
-        <Link
-          href={`/modules/${moduleId}`}
-          className="inline-flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Back to Module
-        </Link>
-
-        <div className="space-y-1.5">
+      {/* ══════════════ TAB BAR ══════════════ */}
+      <div className="sticky top-[56px] z-50 border-b border-border bg-background/90 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[8.5px] font-black uppercase tracking-[0.15em] text-primary ring-1 ring-primary/20">
-              {lecture.type === "PRACTICAL" ? <Microscope className="h-2.5 w-2.5" /> : <BookOpen className="h-2.5 w-2.5" />}
-              {lecture.type === "PRACTICAL" ? "Practical" : (lecture?.subject?.name || "Lecture")}
-            </span>
-            {lecture?.order != null && (
-              <span className="text-[8.5px] font-bold text-muted-foreground uppercase tracking-widest">
-                #{lecture.order}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <h1 className="text-[22px] font-black leading-tight tracking-tight text-foreground capitalize">
-              {lecture.title}
-            </h1>
-            <button
-              type="button"
-              onClick={() => {
-                if (sidebarOpen) { sidebar.closeSidebar(); }
-                else { sidebar.openSidebar(lecture.id, lecture.title, cachedLecture?.content); }
-              }}
-              className={cn(
-                "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all",
-                sidebarOpen
-                  ? "bg-white/10 text-white shadow-sm"
-                  : "bg-primary text-primary-foreground shadow-sm hover:scale-105"
-              )}
-              aria-label={sidebarOpen ? "Close AI chat" : "Open AI chat"}
-            >
-              {sidebarOpen ? <X className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ══════════════ HERO (Desktop Only) ══════════════ */}
-      <div className="hidden md:block">
-        <div className="relative mx-auto max-w-7xl px-4 pb-6 md:px-8 pt-6">
-          {/* Breadcrumb */}
-          <Link
-            href={`/modules/${moduleId}`}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5 text-[11px] font-bold text-muted-foreground backdrop-blur-sm transition-all hover:border-primary/30 hover:text-primary hover:bg-primary/5"
-          >
-            <ArrowLeft className="h-3 w-3" /> Back to Module
-          </Link>
-
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            {/* Left — Title */}
-            <div className="flex-1 space-y-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary ring-1 ring-primary/20">
-                  {lecture.type === "PRACTICAL" ? <Microscope className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
-                  {lecture.type === "PRACTICAL" ? "Practical Session" : (lecture?.subject?.name || "Academic Lecture")}
-                </span>
-                {lecture?.order != null && (
-                  <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    Lecture #{lecture.order}
-                  </span>
-                )}
-              </div>
-
-              <h1 className="font-display text-4xl font-black leading-tight tracking-tight text-foreground md:text-5xl capitalize">
-                {lecture.title}
-              </h1>
-
-              {/* Stats */}
-              <div className="flex flex-wrap items-center gap-3 pt-1">
-                <StatPill icon={Brain}     label="Flashcards" value={flashcardCount} color="text-amber-500" />
-                <StatPill icon={CheckCircle2} label="Quiz"    value={questionCount}  color="text-emerald-500" />
-                <StatPill icon={FolderArchive} label="Files"   value={fileCount}      color="text-orange-500" />
-                <StatPill icon={Mic2}      label="Recordings" value={recordCount}    color="text-pink-500" />
-                <StatPill icon={FileText}  label="Notes"      value={hasNotes ? "Yes" : "—"} color="text-rose-400" />
-              </div>
+            <div className="flex flex-1 gap-1 overflow-x-auto scrollbar-hide">
+              {tabs.map((tab) => {
+                const meta    = TAB_META[tab.id] || TAB_META.overview;
+                const active_ = active === tab.id;
+                const Icon    = meta.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActive(tab.id)}
+                    className={cn(
+                      "relative flex flex-1 md:flex-none shrink-0 items-center justify-center gap-2 px-2 md:px-4 py-4 md:py-3 text-[11px] font-bold uppercase tracking-widest transition-all",
+                      active_ ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                    )}
+                    title={tab.label}
+                  >
+                    <Icon className={cn(
+                      "transition-colors",
+                      active_ ? meta.color : "text-muted-foreground/60",
+                      "h-6 w-6 md:h-3.5 md:w-3.5"
+                    )} />
+                    <span className="hidden md:inline">{tab.label}</span>
+                    {active_ && (
+                      <span className={cn("absolute bottom-0 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-0 h-[3px] md:h-[2px] w-8 md:w-full rounded-t-full", meta.color, "bg-current")} />
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Right — Quick actions (icons only) */}
-            <div className="flex flex-row gap-2 shrink-0">
-              <Link
-                href={`${base}/video`}
-                className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-500/10 border border-border/30 hover:border-sky-500/30 hover:bg-sky-500/20 transition-all"
-                title="Watch Lecture"
-              >
-                <PlayCircle className="h-5 w-5 text-sky-500" />
-              </Link>
-
-              {recordCount > 0 && (
-                <button
-                  onClick={() => setActive("recordings")}
-                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-500/10 border border-border/30 hover:border-pink-500/30 hover:bg-pink-500/20 transition-all"
-                  title="Recordings"
-                >
-                  <Mic2 className="h-5 w-5 text-pink-500" />
-                </button>
-              )}
-
+            {/* AI toggle - always visible */}
+            <div className="shrink-0">
               <button
                 onClick={() => {
                   if (sidebarOpen) { sidebar.closeSidebar(); }
                   else { sidebar.openSidebar(lecture.id, lecture.title, cachedLecture?.content); }
                 }}
                 className={cn(
-                  "flex h-12 w-12 items-center justify-center rounded-xl border border-border/30 transition-all",
+                  "flex h-9 w-9 md:h-8 md:w-8 items-center justify-center rounded-xl md:rounded-lg transition-all",
                   sidebarOpen
-                    ? "bg-primary/20 border-primary/30"
-                    : "bg-primary/10 hover:bg-primary/20 hover:border-primary/30"
+                    ? "bg-primary/20 text-primary"
+                    : "bg-primary/10 text-primary hover:bg-primary/20"
                 )}
                 title={sidebarOpen ? "Close AI" : "Lecture AI"}
               >
                 {sidebarOpen
-                  ? <X className="h-5 w-5 text-primary" />
-                  : <Sparkles className="h-5 w-5 text-primary" />
+                  ? <X className="h-4 w-4 md:h-3.5 md:w-3.5" />
+                  : <Sparkles className="h-4 w-4 md:h-3.5 md:w-3.5" />
                 }
               </button>
             </div>
@@ -400,81 +330,132 @@ export function LectureExperienceClient({
         </div>
       </div>
 
-      {/* ══════════════ TAB BAR ══════════════ */}
-      <div className="sticky top-[56px] z-50 border-b border-border bg-background/90 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <div className="flex gap-1 overflow-x-auto scrollbar-hide">
-            {tabs.map((tab) => {
-              const meta    = TAB_META[tab.id] || TAB_META.overview;
-              const active_ = active === tab.id;
-              const Icon    = meta.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActive(tab.id)}
-                  className={cn(
-                    "relative flex flex-1 md:flex-none shrink-0 items-center justify-center gap-2 px-2 md:px-4 py-4 md:py-3 text-[11px] font-bold uppercase tracking-widest transition-all",
-                    active_ ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                  )}
-                  title={tab.label}
-                >
-                  <Icon className={cn(
-                    "transition-colors", 
-                    active_ ? meta.color : "text-muted-foreground/60",
-                    "h-6 w-6 md:h-3.5 md:w-3.5"
-                  )} />
-                  <span className="hidden md:inline">{tab.label}</span>
-                  {active_ && (
-                    <span className={cn("absolute bottom-0 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-0 h-[3px] md:h-[2px] w-8 md:w-full rounded-t-full", meta.color, "bg-current")} />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
       {/* ══════════════ CONTENT ══════════════ */}
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-8">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-8" style={sidebarOpen ? { marginRight: sidebar.sidebarWidth } : undefined}>
         <div className="animate-in fade-in slide-in-from-bottom-1 duration-150">
 
-          {/* Overview - Lecture Story */}
+          {/* Overview */}
           {active === "overview" && (
-            <div className="mx-auto max-w-3xl space-y-6">
-              {/* Header */}
-              <div className="flex items-center gap-3 mb-8">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/10">
-                  <Sparkles className="h-6 w-6 text-violet-500" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-black text-foreground">Lecture Story</h2>
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                    A brief introduction to today&apos;s topic
-                  </p>
+            <div className="space-y-8">
+
+              {/* ── Mobile: back + badge + title ── */}
+              <div className="md:hidden space-y-3">
+                <Link
+                  href={`/modules/${moduleId}`}
+                  className="inline-flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" /> Back to Module
+                </Link>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[8.5px] font-black uppercase tracking-[0.15em] text-primary ring-1 ring-primary/20">
+                      {lecture.type === "PRACTICAL" ? <Microscope className="h-2.5 w-2.5" /> : <BookOpen className="h-2.5 w-2.5" />}
+                      {lecture.type === "PRACTICAL" ? "Practical" : (lecture?.subject?.name || "Lecture")}
+                    </span>
+                    {lecture?.order != null && (
+                      <span className="text-[8.5px] font-bold text-muted-foreground uppercase tracking-widest">
+                        #{lecture.order}
+                      </span>
+                    )}
+                  </div>
+                  <h1 className="text-[22px] font-black leading-tight tracking-tight text-foreground capitalize">
+                    {lecture.title}
+                  </h1>
                 </div>
               </div>
 
-              {/* Story content */}
-              {extras?.overviewStory ? (
-                <div className="rounded-2xl border border-border bg-card/30 p-6 md:p-8">
-                  <OverviewStory content={extras.overviewStory} />
-                </div>
-              ) : Array.isArray(extras?.overviewCards) && extras.overviewCards.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {extras.overviewCards.map((card: any, i: number) => (
-                    <div key={i} className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
-                      <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-primary/5 blur-2xl" />
-                      <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                        <Star className="h-4 w-4 text-primary" />
-                      </div>
-                      <h5 className="mb-2 font-display text-sm font-bold text-card-foreground">{card?.title}</h5>
-                      <p className="text-sm leading-relaxed text-muted-foreground">{card?.body}</p>
+              {/* ── Desktop: hero ── */}
+              <div className="hidden md:block space-y-6">
+                <Link
+                  href={`/modules/${moduleId}`}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5 text-[11px] font-bold text-muted-foreground backdrop-blur-sm transition-all hover:border-primary/30 hover:text-primary hover:bg-primary/5"
+                >
+                  <ArrowLeft className="h-3 w-3" /> Back to Module
+                </Link>
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex-1 space-y-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary ring-1 ring-primary/20">
+                        {lecture.type === "PRACTICAL" ? <Microscope className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
+                        {lecture.type === "PRACTICAL" ? "Practical Session" : (lecture?.subject?.name || "Academic Lecture")}
+                      </span>
+                      {lecture?.order != null && (
+                        <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                          Lecture #{lecture.order}
+                        </span>
+                      )}
                     </div>
-                  ))}
+                    <h1 className="font-display text-4xl font-black leading-tight tracking-tight text-foreground md:text-5xl capitalize">
+                      {lecture.title}
+                    </h1>
+                    <div className="flex flex-wrap items-center gap-3 pt-1">
+                      <StatPill icon={Brain}     label="Flashcards" value={flashcardCount} color="text-amber-500" />
+                      <StatPill icon={CheckCircle2} label="Quiz"    value={questionCount}  color="text-emerald-500" />
+                      <StatPill icon={FolderArchive} label="Files"   value={fileCount}      color="text-orange-500" />
+                      <StatPill icon={Mic2}      label="Recordings" value={recordCount}    color="text-pink-500" />
+                      <StatPill icon={FileText}  label="Notes"      value={hasNotes ? "Yes" : "—"} color="text-rose-400" />
+                    </div>
+                  </div>
+
+                  {/* Quick actions */}
+                  <div className="flex flex-row gap-2 shrink-0">
+                    <Link
+                      href={`${base}/video`}
+                      className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-500/10 border border-border/30 hover:border-sky-500/30 hover:bg-sky-500/20 transition-all"
+                      title="Watch Lecture"
+                    >
+                      <PlayCircle className="h-5 w-5 text-sky-500" />
+                    </Link>
+                    {recordCount > 0 && (
+                      <button
+                        onClick={() => setActive("recordings")}
+                        className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-500/10 border border-border/30 hover:border-pink-500/30 hover:bg-pink-500/20 transition-all"
+                        title="Recordings"
+                      >
+                        <Mic2 className="h-5 w-5 text-pink-500" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <EmptyState icon={Sparkles} title="No Overview Yet" desc="The lecture story will appear here once it's generated." color="violet" />
-              )}
+              </div>
+
+              <hr className="border-border/50" />
+
+              {/* Lecture Story */}
+              <div className="mx-auto max-w-3xl space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/10">
+                    <Sparkles className="h-6 w-6 text-violet-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black text-foreground">Lecture Story</h2>
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                      A brief introduction to today&apos;s topic
+                    </p>
+                  </div>
+                </div>
+
+                {extras?.overviewStory ? (
+                  <div className="rounded-2xl border border-border bg-card/30 p-6 md:p-8">
+                    <OverviewStory content={extras.overviewStory} />
+                  </div>
+                ) : Array.isArray(extras?.overviewCards) && extras.overviewCards.length > 0 ? (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {extras.overviewCards.map((card: any, i: number) => (
+                      <div key={i} className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
+                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-primary/5 blur-2xl" />
+                        <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                          <Star className="h-4 w-4 text-primary" />
+                        </div>
+                        <h5 className="mb-2 font-display text-sm font-bold text-card-foreground">{card?.title}</h5>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{card?.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState icon={Sparkles} title="No Overview Yet" desc="The lecture story will appear here once it's generated." color="violet" />
+                )}
+              </div>
             </div>
           )}
 
@@ -622,7 +603,7 @@ export function LectureExperienceClient({
         onClick={sidebar.closeSidebar}
       />
     )}
-    </div>
+    </>
   );
 }
 
