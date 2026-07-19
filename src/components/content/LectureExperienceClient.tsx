@@ -3,33 +3,23 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  FileText, Layers, HelpCircle, Video, Sparkles, PlayCircle, X,
-  ArrowLeft, CheckCircle2, BookOpen, Brain, Zap, Star,
-  AlignLeft, ChevronRight, Music2, Mic2, Radio, ExternalLink,
-  Youtube, Play, Download, FileImage, FolderArchive, Microscope, ShieldCheck, ListChecks, Loader2,
+  FileText, Layers, HelpCircle, Sparkles, PlayCircle, X,
+  ArrowLeft, CheckCircle2, BookOpen, Brain, Star,
+  AlignLeft, Music2, Mic2, Radio, ExternalLink,
+  Youtube, Play, Download, FileImage, FolderArchive, Microscope, ShieldCheck, ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LectureClient } from "@/components/content/LectureClient";
 import { addDownload } from "@/lib/local-downloads-store";
 import TopBar from "@/components/modules/TopBar";
-import ReactMarkdown from "react-markdown";
-import { markdownComponentsWithImages } from "@/components/ui/MarkdownBody";
-import { enhancePlainImageUrls } from "@/lib/markdown-helpers";
+import { LectureNotesAnnotator } from "@/components/content/LectureNotesAnnotator";
 import { OverviewStory } from "@/components/content/OverviewStory";
 import { useLectureCache } from "@/hooks/useLectureCache";
 import { useLectureSidebar } from "@/contexts/LectureSidebarContext";
-import dynamic from "next/dynamic";
-
-const PremiumVideoPlayer = dynamic(() => import("@/components/content/PremiumVideoPlayer").then(m => m.PremiumVideoPlayer), {
-  loading: () => <div className="aspect-video w-full animate-pulse bg-white/5 rounded-3xl" />,
-  ssr: false
-});
-
-type TabId = "overview" | "video" | "materials" | "recordings" | "flashcards" | "questions" | "notes" | "drq" | "checklist";
+type TabId = "overview" | "materials" | "recordings" | "flashcards" | "questions" | "notes" | "drq" | "checklist";
 
 const TAB_META: Record<string, { icon: any; color: string }> = {
   overview:   { icon: Layers,       color: "text-violet-500"  },
-  video:      { icon: PlayCircle,   color: "text-sky-500"     },
   materials:  { icon: FolderArchive,color: "text-orange-500"  },
   recordings: { icon: Mic2,         color: "text-pink-500"    },
   flashcards: { icon: Brain,        color: "text-amber-500"   },
@@ -262,7 +252,6 @@ export function LectureExperienceClient({
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "overview",   label: "Overview"   },
-    { id: "video",      label: "Video"      },
     { id: "materials",  label: `Materials${fileCount > 0 ? ` (${fileCount})` : ""}` },
     { id: "recordings", label: `Recordings${recordCount > 0 ? ` (${recordCount})` : ""}` },
     { id: "flashcards", label: "Flashcards" },
@@ -280,7 +269,7 @@ export function LectureExperienceClient({
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <TopBar userName={userName} userImage={userImage} />
+      <TopBar userName={userName} userImage={userImage} isCompact />
       <div className="transition-all duration-300" style={sidebarOpen ? { marginRight: sidebar.sidebarWidth } : undefined}>
 
       {/* ── Mobile back navigation & title row ── */}
@@ -368,51 +357,23 @@ export function LectureExperienceClient({
               </div>
             </div>
 
-            {/* Right — Quick actions */}
-            <div className="flex flex-col gap-3 lg:w-72 shrink-0">
+            {/* Right — Quick actions (icons only) */}
+            <div className="flex flex-row gap-2 shrink-0">
               <Link
                 href={`${base}/video`}
-                className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-500/30 hover:shadow-sky-500/10"
+                className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-500/10 border border-border/30 hover:border-sky-500/30 hover:bg-sky-500/20 transition-all"
+                title="Watch Lecture"
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-500/10">
-                  <PlayCircle className="h-5 w-5 text-sky-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground">Watch Lecture</p>
-                  <p className="text-[11px] text-muted-foreground">Open Video Player</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-sky-500 transition-colors" />
+                <PlayCircle className="h-5 w-5 text-sky-500" />
               </Link>
 
               {recordCount > 0 && (
                 <button
                   onClick={() => setActive("recordings")}
-                  className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-pink-500/30 hover:shadow-pink-500/10"
+                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-500/10 border border-border/30 hover:border-pink-500/30 hover:bg-pink-500/20 transition-all"
+                  title="Recordings"
                 >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-pink-500/10">
-                    <Mic2 className="h-5 w-5 text-pink-500" />
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-sm font-bold text-foreground">Recordings</p>
-                    <p className="text-[11px] text-muted-foreground">{recordCount} audio/video records</p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-pink-500 transition-colors" />
-                </button>
-              )}
-
-              {questionCount > 0 && (
-                <button
-                  onClick={() => setActive("questions")}
-                  className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-emerald-500/30 hover:shadow-emerald-500/10"
-                >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-                    <Zap className="h-5 w-5 text-emerald-500" />
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-sm font-bold text-foreground">Quick Quiz</p>
-                    <p className="text-[11px] text-muted-foreground">{questionCount} MCQ questions</p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-emerald-500 transition-colors" />
+                  <Mic2 className="h-5 w-5 text-pink-500" />
                 </button>
               )}
 
@@ -422,26 +383,17 @@ export function LectureExperienceClient({
                   else { sidebar.openSidebar(lecture.id, lecture.title, cachedLecture?.content); }
                 }}
                 className={cn(
-                  "group flex items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5",
+                  "flex h-12 w-12 items-center justify-center rounded-xl border border-border/30 transition-all",
                   sidebarOpen
-                    ? "border-primary/30 bg-primary/5 shadow-primary/10"
-                    : "border-border hover:border-primary/30 hover:shadow-primary/10"
+                    ? "bg-primary/20 border-primary/30"
+                    : "bg-primary/10 hover:bg-primary/20 hover:border-primary/30"
                 )}
+                title={sidebarOpen ? "Close AI" : "Lecture AI"}
               >
-                <div className={cn(
-                  "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors",
-                  sidebarOpen ? "bg-primary/20" : "bg-primary/10"
-                )}>
-                  {sidebarOpen
-                    ? <X className="h-5 w-5 text-primary" />
-                    : <Sparkles className="h-5 w-5 text-primary" />
-                  }
-                </div>
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-bold text-foreground">{sidebarOpen ? "Close AI" : "Lecture AI"}</p>
-                  <p className="text-[11px] text-muted-foreground">{sidebarOpen ? "Tap to close sidebar" : "Ask about this lecture"}</p>
-                </div>
-                {!sidebarOpen && <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors" />}
+                {sidebarOpen
+                  ? <X className="h-5 w-5 text-primary" />
+                  : <Sparkles className="h-5 w-5 text-primary" />
+                }
               </button>
             </div>
           </div>
@@ -449,7 +401,7 @@ export function LectureExperienceClient({
       </div>
 
       {/* ══════════════ TAB BAR ══════════════ */}
-      <div className="sticky top-[52px] z-50 border-b border-border bg-background/90 backdrop-blur-xl">
+      <div className="sticky top-[56px] z-50 border-b border-border bg-background/90 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="flex gap-1 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => {
@@ -523,34 +475,6 @@ export function LectureExperienceClient({
               ) : (
                 <EmptyState icon={Sparkles} title="No Overview Yet" desc="The lecture story will appear here once it's generated." color="violet" />
               )}
-            </div>
-          )}
-
-          {/* Video */}
-          {active === "video" && (
-            <div className="space-y-6">
-               <PremiumVideoPlayer 
-                 primaryUrl={lecture.videoUrl} 
-                 extraVideos={lecture.videos} 
-                 title={lecture.title}
-               />
-               
-               <div className="flex flex-wrap items-center gap-4 p-6 rounded-3xl bg-card/40 border border-border/30">
-                  <div className="flex items-center gap-2">
-                     <div className="h-8 w-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
-                        <PlayCircle className="h-4 w-4 text-sky-500" />
-                     </div>
-                     <span className="text-xs font-bold text-muted-foreground">Source Tracking Active</span>
-                  </div>
-                  {lecture.videos.length > 0 && (
-                     <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                           <Layers className="h-4 w-4 text-indigo-500" />
-                        </div>
-                        <span className="text-xs font-bold text-muted-foreground">{lecture.videos.length} Alternative Streams</span>
-                     </div>
-                  )}
-               </div>
             </div>
           )}
 
@@ -676,29 +600,14 @@ export function LectureExperienceClient({
             </div>
           )}
 
-          {/* Notes */}
+          {/* Notes with Annotations */}
           {active === "notes" && (
-            <div className="rounded-3xl border border-border bg-card shadow-xl overflow-hidden">
-              {hasNotes ? (
-                <div className="p-8 md:p-12">
-                  <div className="mb-8 flex items-center gap-3 pb-6 border-b border-border">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-400/10">
-                      <AlignLeft className="h-5 w-5 text-rose-400" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Study Notes</p>
-                      <h2 className="text-lg font-black text-foreground">{lecture.title}</h2>
-                    </div>
-                  </div>
-                  <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight prose-p:leading-relaxed prose-p:text-muted-foreground">
-                    <ReactMarkdown components={markdownComponentsWithImages}>
-                      {enhancePlainImageUrls(lecture.notesMarkdown)}
-                    </ReactMarkdown>
-                  </div>
-                </div>
-              ) : (
-                <EmptyState icon={FileText} title="Notes Not Generated" desc="Study notes haven't been added to this lecture yet." color="rose" />
-              )}
+            <div>
+              <LectureNotesAnnotator
+                markdown={lecture.notesMarkdown}
+                lectureId={lecture.id}
+                isAdmin={isAdmin}
+              />
             </div>
           )}
 
