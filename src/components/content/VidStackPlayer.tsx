@@ -46,16 +46,42 @@ function NativeYouTubePlayer({ videoId, title, playing, startTime }: {
   const autoplay = playing ? 1 : 0;
   const start = startTime ? Math.floor(startTime) : 0;
   const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=${autoplay}&rel=0&modestbranding=1&enablejsapi=1${start ? `&start=${start}` : ""}`;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!containerRef.current) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      containerRef.current.requestFullscreen();
+    }
+  }, []);
 
   return (
-    <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden">
+    <div ref={containerRef} className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden group">
       <iframe
         src={embedUrl}
         title={title || "YouTube video player"}
         className="w-full h-full border-0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
       />
+      {/* Blocks YouTube logo + share + end cards (bottom 64px, desktop only) */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 hidden h-16 lg:block" />
+      {/* Custom fullscreen — keeps overlay active when expanded */}
+      <button
+        onClick={toggleFullscreen}
+        className="absolute bottom-[85px] right-[29px] z-20 hidden lg:flex items-center justify-center w-9 h-9 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all"
+        aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+      >
+        {isFullscreen ? <Shrink size={14} /> : <Expand size={14} />}
+      </button>
     </div>
   );
 }
