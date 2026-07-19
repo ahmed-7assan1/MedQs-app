@@ -80,6 +80,10 @@ export function LectureNotesAnnotator({
   const drawing = useRef(false);
   const last = useRef({ x: 0, y: 0 });
   const prevModeRef = useRef<Mode>("view");
+  const zoomContainerRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ dist: number; zoom: number } | null>(null);
+  const currentZoomRef = useRef(1);
+  const zoomDisplayRef = useRef<HTMLSpanElement>(null);
 
   const hasContent = !!markdown?.trim();
 
@@ -270,6 +274,69 @@ export function LectureNotesAnnotator({
   const updateStickyNote = useCallback((id: string, content: string) => {
     setStickyNotes(prev => prev.map(n => n.id === id ? { ...n, content } : n));
   }, []);
+
+  // ── Zoom: ref-based DOM update (no React re-render during gesture) ──
+  const applyZoom = useCallback((z: number) => {
+    z = Math.min(3, Math.max(0.5, z));
+    currentZoomRef.current = z;
+    if (pageRef.current) {
+      pageRef.current.style.zoom = String(z);
+    }
+    if (zoomDisplayRef.current) {
+      zoomDisplayRef.current.textContent = `${Math.round(z * 100)}%`;
+    }
+  }, []);
+
+  // Sync zoomLevel state changes to DOM (for button clicks)
+  useEffect(() => {
+    applyZoom(zoomLevel);
+  }, [zoomLevel, applyZoom]);
+
+  // ── Pinch-to-zoom (touch) ──
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      touchStartRef.current = { dist: Math.hypot(dx, dy), zoom: currentZoomRef.current };
+    }
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && touchStartRef.current) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const ratio = dist / touchStartRef.current.dist;
+      const newZoom = Math.min(3, Math.max(0.5, touchStartRef.current.zoom * ratio));
+      applyZoom(newZoom);
+    }
+  }, [applyZoom]);
+
+  const onTouchEnd = useCallback(() => {
+    touchStartRef.current = null;
+    setZoomLevel(currentZoomRef.current);
+  }, []);
+
+  // ── Ctrl+Scroll zoom (desktop) ──
+  useEffect(() => {
+    const el = zoomContainerRef.current;
+    if (!el) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const newZoom = Math.min(3, Math.max(0.5, currentZoomRef.current - e.deltaY * 0.002));
+        applyZoom(newZoom);
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => setZoomLevel(currentZoomRef.current), 80);
+      }
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      if (timer) clearTimeout(timer);
+    };
+  }, [applyZoom]);
 
   // ── Apply highlight via TipTap ──
   const applyHighlight = useCallback((color?: string) => {
@@ -524,23 +591,28 @@ export function LectureNotesAnnotator({
             {/* Zoom controls */}
             <button
               onClick={() => {
-                const idx = ZOOM_LEVELS.indexOf(zoomLevel);
-                if (idx > 0) setZoomLevel(ZOOM_LEVELS[idx - 1]);
+                const z = currentZoomRef.current;
+                const prev = [...ZOOM_LEVELS].reverse().find(v => v < z - 0.01);
+                if (prev) setZoomLevel(prev);
               }}
-              disabled={zoomLevel === ZOOM_LEVELS[0]}
+              disabled={currentZoomRef.current <= ZOOM_LEVELS[0] + 0.01}
               className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all disabled:opacity-30"
             >
               <ZoomOut className="h-3.5 w-3.5" />
             </button>
-            <span className="text-[11px] font-bold tabular-nums text-muted-foreground min-w-[2.5rem] text-center select-none">
+            <span
+              ref={zoomDisplayRef}
+              className="text-[11px] font-bold tabular-nums text-muted-foreground min-w-[2.5rem] text-center select-none"
+            >
               {Math.round(zoomLevel * 100)}%
             </span>
             <button
               onClick={() => {
-                const idx = ZOOM_LEVELS.indexOf(zoomLevel);
-                if (idx < ZOOM_LEVELS.length - 1) setZoomLevel(ZOOM_LEVELS[idx + 1]);
+                const z = currentZoomRef.current;
+                const next = ZOOM_LEVELS.find(v => v > z + 0.01);
+                if (next) setZoomLevel(next);
               }}
-              disabled={zoomLevel === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]}
+              disabled={currentZoomRef.current >= ZOOM_LEVELS[ZOOM_LEVELS.length - 1] - 0.01}
               className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all disabled:opacity-30"
             >
               <ZoomIn className="h-3.5 w-3.5" />
@@ -582,16 +654,23 @@ export function LectureNotesAnnotator({
       </div>
 
       {/* ── White Page ── */}
-      <div className="w-full overflow-x-auto">
+      <div
+        ref={zoomContainerRef}
+        className="w-full overflow-x-auto px-4 md:px-8"
+        style={{ touchAction: "pan-x pan-y" }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <div
           ref={pageRef}
           onClick={onPageClick}
           className={cn(
-            "notes-white-page mx-auto max-w-4xl relative overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/5 transition-all",
+            "notes-white-page relative overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/5 transition-shadow",
             mode === "note" && "cursor-cell",
             mode === "pen" && "cursor-crosshair",
           )}
-          style={{ minHeight: "600px", zoom: zoomLevel }}
+          style={{ minHeight: "600px" }}
         >
           {/* TipTap content */}
           {editor && (
