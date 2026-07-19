@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Loader2, Sparkles, Copy, Check, ArrowLeft } from "lucide-react";
 import { FlashcardDeck } from "@/components/content/FlashcardDeck";
 import { MedqsCard } from "@/components/ui/MedqsCard";
+import { useAIKey } from "@/hooks/useAIKey";
 import toast from "react-hot-toast";
 
 type Card = { front: string; back: string };
@@ -15,19 +16,92 @@ export function FlashcardFromTextClient({ signedIn }: { signedIn: boolean }) {
   const [loading, setLoading] = useState(false);
   const [cards, setCards] = useState<Card[] | null>(null);
   const [copied, setCopied] = useState<"tsv" | "md" | null>(null);
+  const { getKey } = useAIKey();
 
   async function generate() {
     if (!signedIn) {
       toast.error("Sign in to generate flashcards");
       return;
     }
+    const trimmed = text.trim();
+    if (trimmed.length < 80) {
+      toast.error("Paste at least 80 characters");
+      return;
+    }
+    if (trimmed.length > 12_000) {
+      toast.error("Text must be at most 12,000 characters");
+      return;
+    }
     setLoading(true);
     setCards(null);
+
+    const geminiKey = getKey("gemini");
+
+    // BYOK path — client calls Gemini directly, zero Vercel server cost
+    if (geminiKey) {
+      try {
+        const focusLine = (focus || "").trim().slice(0, 500);
+        const prompt = `You help medical students turn their own study notes into flashcards.
+
+RULES:
+- Use ONLY information that appears in the STUDY MATERIAL below. Do not add facts, doses, or protocols that are not supported by that text.
+- If the text is short, produce fewer cards (minimum 4 if there is enough content, otherwise as many as justified).
+- Maximum 20 cards.
+- Front: short question, prompt, or term (one line).
+- Back: concise answer (1–3 sentences).
+- Match the language of the study material (e.g. Arabic notes → Arabic cards).
+
+STUDY MATERIAL:
+${trimmed.slice(0, 12_000)}
+
+${focusLine ? `Student asked to emphasize: ${focusLine}\n` : ""}
+
+Return ONLY valid JSON:
+{"flashcards":[{"front":"...","back":"..."}]}`;
+
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+          }
+        );
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err?.error?.message || `Gemini error ${res.status}`);
+        }
+        const data = await res.json();
+        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!rawText) throw new Error("Empty response from AI");
+        const clean = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+        const parsed = JSON.parse(clean);
+        const rawCards = parsed.flashcards || [];
+        if (!Array.isArray(rawCards) || rawCards.length === 0) throw new Error("No cards in response");
+        const validated = rawCards
+          .filter((f: any) => f && String(f.front).trim() && String(f.back).trim())
+          .map((f: any) => ({
+            front: String(f.front).trim().slice(0, 500),
+            back: String(f.back).trim().slice(0, 1200),
+          }))
+          .slice(0, 20);
+        setCards(validated);
+        toast.success(`${validated.length} cards ready`);
+        setLoading(false);
+        return;
+      } catch (e: any) {
+        const msg = e.message || "AI generation failed";
+        toast.error(`Gemini failed: ${msg}. Falling back to server...`);
+        // fall through to server fallback
+      }
+    }
+
+    // Server fallback path (no BYOK, or BYOK failed)
     try {
       const res = await fetch("/api/v1/ai/flashcards-from-text", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, focus }),
+        body: JSON.stringify({ text: trimmed, focus }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {

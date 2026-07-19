@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Send, X, Bot, User, BrainCircuit, Activity, AlertCircle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useAIKey } from "@/hooks/useAIKey";
 
 type Message = {
   role: "user" | "ai";
@@ -20,12 +21,14 @@ type AtlasAIDrawerProps = {
 };
 
 export default function AtlasAIDrawer({ isOpen, onClose, structureId, structureName, systemId, systemLabel }: AtlasAIDrawerProps) {
+  const { getKey } = useAIKey();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [atlasContext, setAtlasContext] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Initialize welcome message when context changes
+  // Initialize welcome message and fetch atlas context when opened
   useEffect(() => {
     if (isOpen) {
       const target = structureName ? `the **${structureName}**` : systemLabel ? `the **${systemLabel} System**` : "Human Anatomy";
@@ -35,6 +38,13 @@ export default function AtlasAIDrawer({ isOpen, onClose, structureId, structureN
           content: `Hello! I am your AI Anatomy Tutor. 🎓\n\nI see you are studying ${target}. Ask me anything about its spatial relations, neurovascular supply, clinical importance, or ask for high-yield mnemonics to help you memorize it!`
         }
       ]);
+      fetch("/api/v1/atlas/context", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ systemId, structureId })
+      }).then(r => r.json()).then(ctx => {
+        if (ctx.targetContext) setAtlasContext(ctx.targetContext);
+      }).catch(() => {});
     }
   }, [isOpen, structureName, systemLabel]);
 
@@ -52,26 +62,39 @@ export default function AtlasAIDrawer({ isOpen, onClose, structureId, structureN
     setLoading(true);
 
     try {
-      // Build history for context
+      const geminiKey = getKey("gemini");
+      if (geminiKey && atlasContext) {
+        const history = messages.slice(1).map(m => ({
+          role: m.role === "user" ? "user" : "model",
+          parts: [{ text: m.content }]
+        }));
+        const systemInstruction = `You are an expert anatomy professor and AI clinical tutor at a prestigious medical school. Your goal is to explain anatomical structures, functional mechanisms, neurovascular relations, and clinical significance (such as surgical landmarks, trauma risks, or common pathologies) in a highly pedagogical, clear, and engaging manner. Use high-yield memory aids (mnemonics) where helpful. Always stay medically accurate and structured.\n\nUse the following atlas context to answer questions accurately:\n\n${atlasContext}`;
+        const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemInstruction }] },
+            contents: [...history, { role: "user", parts: [{ text: userMsg }] }],
+          }),
+        });
+        const gData = await gRes.json();
+        const reply = gData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (reply) {
+          setMessages(prev => [...prev, { role: "ai", content: reply }]);
+          return;
+        }
+      }
       const history = messages.slice(1).map(m => ({
         role: m.role === "user" ? "user" : "model",
         content: m.content
       }));
-
       const res = await fetch("/api/v1/bot-chat/atlas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: userMsg,
-          history,
-          structureId,
-          systemId
-        })
+        body: JSON.stringify({ message: userMsg, history, structureId, systemId })
       });
-
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
-
       setMessages(prev => [...prev, { role: "ai", content: data.reply || "No reply from AI." }]);
     } catch (e: any) {
       console.error("[ATLAS_CHAT_ERROR]", e);

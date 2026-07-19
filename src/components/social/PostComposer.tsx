@@ -32,6 +32,7 @@ import {
 import { useCommunityShareStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { VoiceRecorder } from "./VoiceRecorder";
+import { useAIKey } from "@/hooks/useAIKey";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProfessionalVideoPlayer } from "@/components/ui/ProfessionalVideoPlayer";
@@ -67,6 +68,7 @@ interface Props {
 const MAX_CHARS = 2000;
 
 export function PostComposer({ user, onPost, circles: forums, rooms, placeholder, defaultRoomId }: Props) {
+  const { getKey } = useAIKey();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [content, setContent] = useState("");
@@ -297,6 +299,24 @@ export function PostComposer({ user, onPost, circles: forums, rooms, placeholder
     if (!content.trim()) return;
     setIsEnhancing(true);
     try {
+      const siliconflowKey = getKey("siliconflow");
+      if (siliconflowKey) {
+        const systemPrompt = `You are a professional social media editor for a medical student community called MedOneX. The student wants to enhance their post to be more professional, engaging, and clear. - Maintain the original meaning and language. - If it's a question, make it sound inquisitive and smart. - If it's information, make it authoritative but friendly. - Add relevant emojis if appropriate (but don't overdo it). - Fix any grammar or spelling mistakes. - DO NOT add hashtags (the system adds them separately). - Return ONLY the enhanced content, with no introductory or concluding remarks.`;
+        const sfRes = await fetch("https://api.siliconflow.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${siliconflowKey}` },
+          body: JSON.stringify({
+            model: "deepseek-ai/DeepSeek-R1",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `Please enhance this post content:\n\n${content}` },
+            ],
+          }),
+        });
+        const sfData = await sfRes.json();
+        const enhanced = sfData?.choices?.[0]?.message?.content?.trim();
+        if (enhanced) { setContent(enhanced); return; }
+      }
       const res = await fetch("/api/v1/ai/enhance-post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

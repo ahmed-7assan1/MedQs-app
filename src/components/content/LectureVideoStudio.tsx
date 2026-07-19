@@ -13,6 +13,7 @@ import { VidStackPlayer } from "./VidStackPlayer";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
+import { useAIKey } from "@/hooks/useAIKey";
 
 type VideoItem = {
   id: string;
@@ -66,6 +67,7 @@ export function LectureVideoStudio({
   currentUserId,
   hubUrl
 }: LectureVideoStudioProps) {
+  const { getKey } = useAIKey();
   const [videos, setVideos] = useState<VideoItem[]>(initialVideos);
   const [activeId, setActiveId] = useState<string | null>(selectedVideoId || (videos.length > 0 ? videos[0].id : null));
   const [isSummarizing, setIsSummarizing] = useState(false);
@@ -156,9 +158,37 @@ export function LectureVideoStudio({
     if (!active) return;
     setIsSummarizing(true);
     try {
+      const geminiKey = getKey("gemini");
+      if (geminiKey) {
+        let notesContext = "";
+        try {
+          const ncRes = await fetch(`/api/v1/lectures/${lectureId}/content`);
+          if (ncRes.ok) {
+            const ncData = await ncRes.json();
+            if (ncData.content) notesContext = ncData.content.slice(0, 3000);
+          }
+        } catch {}
+        const prompt = [
+          `Summarize the video "${active.title}" in 3-5 clear bullet points in Arabic.`,
+          `Focus on medical key concepts, main takeaways, and study-relevant points.`,
+          `Keep each bullet under 80 characters. Format as a clean markdown list.`,
+          notesContext ? `Use the lecture notes below for accuracy:\n\n${notesContext}` : "",
+        ].filter(Boolean).join("\n");
+        const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: "You summarize medical lecture videos concisely in Arabic." }] },
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
+        });
+        const gData = await gRes.json();
+        const summary = gData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (summary) { setAiSummary(summary); toast.success("AI Summary generated!"); return; }
+      }
       const res = await fetch("/api/v1/ai/summary", {
         method: "POST",
-        body: JSON.stringify({ url: active.url, title: active.title }),
+        body: JSON.stringify({ url: active.url, title: active.title, lectureId }),
       });
       const data = await res.json();
       if (data.summary) {

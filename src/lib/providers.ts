@@ -87,7 +87,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
     supportsTools: false,
     supportsEmbeddings: false,
     defaultModel: "openrouter/free",
-    keyField: "personalOpenrouterKey",
+    keyField: "personalOpenRouterKey",
   },
   xai: {
     id: "xai",
@@ -99,7 +99,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
     supportsTools: true,
     supportsEmbeddings: false,
     defaultModel: "grok-2",
-    keyField: "personalXaiKey",
+    keyField: "personalXAIKey",
   },
   mistral: {
     id: "mistral",

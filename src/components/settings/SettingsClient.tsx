@@ -23,6 +23,7 @@ import {
   Loader2,
   AlertTriangle,
   Trash2,
+  Key,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/lib/store";
@@ -168,6 +169,19 @@ export function SettingsClient({ user }: SettingsClientProps) {
           icon: Bell,
           color: "text-rose-500 bg-rose-50 dark:bg-rose-500/10",
           href: "/notifications/settings",
+        },
+      ],
+    },
+    {
+      title: "AI & Keys",
+      items: [
+        {
+          id: "ai-keys",
+          title: "AI Provider Keys",
+          desc: "Add your own API keys for Gemini, OpenAI, Groq, and more.",
+          icon: Key,
+          color: "text-amber-500 bg-amber-50 dark:bg-amber-500/10",
+          href: "/settings/ai",
         },
       ],
     },

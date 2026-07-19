@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { encryptKey } from "@/lib/encryption";
 
-// GET: fetch current personal key (masked)
+// GET: fetch whether a personal key exists (no plaintext leak)
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
@@ -14,16 +15,11 @@ export async function GET() {
     select: { personalGeminiKey: true },
   });
 
-  const key = user?.personalGeminiKey;
-  // Mask everything except the last 6 chars for display
-  const masked = key
-    ? `${"•".repeat(Math.max(0, key.length - 6))}${key.slice(-6)}`
-    : null;
-
-  return NextResponse.json({ hasKey: !!key, maskedKey: masked });
+  const hasKey = !!user?.personalGeminiKey;
+  return NextResponse.json({ hasKey, maskedKey: hasKey ? "••••••••••" : null });
 }
 
-// POST: save or clear personal key
+// POST: save (encrypted) or clear personal key
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
@@ -32,18 +28,19 @@ export async function POST(req: NextRequest) {
 
   const { key } = await req.json();
 
-  // Validate key format (starts with AIza or empty string to clear)
-  if (key && key.trim() && !key.trim().startsWith("AIza")) {
-    return NextResponse.json(
-      { error: "Invalid Gemini API key format. It should start with 'AIza'." },
-      { status: 400 }
-    );
+  if (!key || !key.trim()) {
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { personalGeminiKey: null },
+    });
+    return NextResponse.json({ ok: true, cleared: true });
   }
 
+  const trimmed = key.trim();
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { personalGeminiKey: key?.trim() || null },
+    data: { personalGeminiKey: encryptKey(trimmed) },
   });
 
-  return NextResponse.json({ ok: true, cleared: !key?.trim() });
+  return NextResponse.json({ ok: true });
 }

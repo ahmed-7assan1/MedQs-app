@@ -5,7 +5,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { callGeminiWithRetry } from "@/lib/gemini-keys";
 
 export async function POST(req: NextRequest) {
-  const { videoUrl, lectureId } = await req.json();
+  const { videoUrl, lectureId, personalKey } = await req.json();
 
   if (!videoUrl) {
     return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
@@ -50,10 +50,10 @@ export async function POST(req: NextRequest) {
     `;
 
     const result = await callGeminiWithRetry(async (key) => {
-      const genAI = new GoogleGenerativeAI(key);
+      const genAI = new GoogleGenerativeAI(personalKey || key);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       return await model.generateContent(prompt);
-    });
+    }, personalKey || undefined);
     const summary = result.response.text();
 
     if (lectureId) {

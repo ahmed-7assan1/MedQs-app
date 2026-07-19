@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } from "@/lib/email";
+import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail, sendSecurityNoticeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -72,6 +72,11 @@ export async function POST(req: NextRequest) {
       const displayName = name || email.split("@")[0];
       await sendWelcomeEmail(email, displayName);
       return NextResponse.json({ success: true, type: "welcome_sent" });
+    }
+
+    if (type === "security_notice") {
+      await sendSecurityNoticeEmail(email);
+      return NextResponse.json({ success: true, type: "security_notice_sent" });
     }
 
     return NextResponse.json({ error: "Unknown email type" }, { status: 400 });

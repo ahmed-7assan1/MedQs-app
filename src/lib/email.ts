@@ -117,7 +117,29 @@ export async function sendMagicLinkEmail(to: string, magicUrl: string) {
   });
 }
 
-// ─── 4. Welcome Email (after confirmation) ────────────────────────────────────
+  // ─── 4. Security Notice (AI key encryption) ────────────────────────────────────
+export async function sendSecurityNoticeEmail(to: string) {
+  return transporter.sendMail({
+    from: FROM,
+    to,
+    subject: `Security Notice: Your AI API keys are now encrypted`,
+    html: wrapTemplate(`
+      <h1 style="font-size:24px;font-weight:900;margin:0 0 8px;color:#fff;">Security Update</h1>
+      <p style="color:rgba(255,255,255,0.4);font-size:14px;margin:0 0 24px;line-height:1.6;">
+        During a routine security audit, we discovered that AI provider API keys saved through your profile settings were being stored unencrypted in our database. There is no evidence that any keys were accessed, leaked, or used by unauthorized parties — the exposure was limited to data at rest only.
+      </p>
+      <p style="color:rgba(255,255,255,0.4);font-size:14px;margin:0 0 24px;line-height:1.6;">
+        We have fixed the issue: all keys are now encrypted before storage, including yours. As a precaution, we recommend rotating any AI API keys you may have saved on the platform.
+      </p>
+      ${ctaButton("Update My Keys", `${APP_URL}/profile/edit`)}
+      <p style="color:rgba(255,255,255,0.2);font-size:11px;text-align:center;margin-top:16px;">
+        If you have any questions, reply to this email or contact support.
+      </p>
+    `),
+  });
+}
+
+// ─── 5. Welcome Email (after confirmation) ────────────────────────────────────
 export async function sendWelcomeEmail(to: string, name: string) {
   return transporter.sendMail({
     from: FROM,

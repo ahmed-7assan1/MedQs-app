@@ -14,7 +14,6 @@ import {
   Play,
   Video,
   Loader2,
-  X,
   ChevronLeft,
   GraduationCap,
   BookOpen,
@@ -22,9 +21,9 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { VidStackPlayer } from "./VidStackPlayer";
+import { useAIKey } from "@/hooks/useAIKey";
 import { AmbientVideoWrapper } from "./AmbientVideoWrapper";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import TopBar from "@/components/modules/TopBar";
 
@@ -62,10 +61,6 @@ function extractYouTubeId(url: string): string | null {
   return m?.[1] ?? null;
 }
 
-function stripLinks(text: string) {
-  return text.replace(/https?:\/\/[^\s]+/g, "[Link Removed]");
-}
-
 /* ─── Chip labels (sidebar filter) ─── */
 const CHIPS = ["All", "This Lecture", "New", "Popular"];
 
@@ -97,6 +92,7 @@ export function YouTubeStyleVideoPage({
   userImage,
   hubUrl,
 }: YouTubeStyleVideoPageProps) {
+  const { getKey } = useAIKey();
   /* ── State ── */
   const [videos, setVideos] = useState<VideoItem[]>(initialVideos);
   const [activeId, setActiveId] = useState<string | null>(
@@ -106,6 +102,7 @@ export function YouTubeStyleVideoPage({
   const [descExpanded, setDescExpanded] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summaryError, setSummaryError] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [channelMeta, setChannelMeta] = useState<any>(null);
   const [loadingMeta, setLoadingMeta] = useState(false);
@@ -149,6 +146,60 @@ export function YouTubeStyleVideoPage({
       .catch(() => {})
       .finally(() => setLoadingMeta(false));
   }, [ytId]);
+
+  /* ── Auto-fetch AI summary when active video changes ── */
+  useEffect(() => {
+    if (!active) return;
+    setAiSummary(null);
+    setSummaryError(false);
+    setIsSummarizing(true);
+    const geminiKey = getKey("gemini");
+    if (geminiKey) {
+      (async () => {
+        let notesContext = "";
+        try {
+          const ncRes = await fetch(`/api/v1/lectures/${lectureId}/content`);
+          if (ncRes.ok) {
+            const ncData = await ncRes.json();
+            if (ncData.content) notesContext = ncData.content.slice(0, 3000);
+          }
+        } catch {}
+        const prompt = [
+          `Summarize the video "${active.title}" in 3-5 clear bullet points in Arabic.`,
+          `Focus on medical key concepts, main takeaways, and study-relevant points.`,
+          `Keep each bullet under 80 characters. Format as a clean markdown list.`,
+          notesContext ? `Use the lecture notes below for accuracy:\n\n${notesContext}` : "",
+        ].filter(Boolean).join("\n");
+        try {
+          const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: "You summarize medical lecture videos concisely in Arabic." }] },
+              contents: [{ parts: [{ text: prompt }] }],
+            }),
+          });
+          const gData = await gRes.json();
+          const summary = gData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+          if (summary) setAiSummary(summary);
+          else setSummaryError(true);
+        } catch { setSummaryError(true); }
+        setIsSummarizing(false);
+      })();
+    } else {
+      fetch("/api/v1/ai/summary", {
+        method: "POST",
+        body: JSON.stringify({ url: active.url, title: active.title, lectureId }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.summary) setAiSummary(data.summary);
+          else setSummaryError(true);
+        })
+        .catch(() => setSummaryError(true))
+        .finally(() => setIsSummarizing(false));
+    }
+  }, [activeId]);
 
   /* ── Actions ── */
   const toggleLike = async () => {
@@ -208,17 +259,51 @@ export function YouTubeStyleVideoPage({
   const generateSummary = async () => {
     if (!active) return;
     setIsSummarizing(true);
+    setSummaryError(false);
     try {
+      const geminiKey = getKey("gemini");
+      if (geminiKey) {
+        let notesContext = "";
+        try {
+          const ncRes = await fetch(`/api/v1/lectures/${lectureId}/content`);
+          if (ncRes.ok) {
+            const ncData = await ncRes.json();
+            if (ncData.content) notesContext = ncData.content.slice(0, 3000);
+          }
+        } catch {}
+        const prompt = [
+          `Summarize the video "${active.title}" in 3-5 clear bullet points in Arabic.`,
+          `Focus on medical key concepts, main takeaways, and study-relevant points.`,
+          `Keep each bullet under 80 characters. Format as a clean markdown list.`,
+          notesContext ? `Use the lecture notes below for accuracy:\n\n${notesContext}` : "",
+        ].filter(Boolean).join("\n");
+        const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: "You summarize medical lecture videos concisely in Arabic." }] },
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
+        });
+        const gData = await gRes.json();
+        const summary = gData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (summary) { setAiSummary(summary); toast.success("AI Summary generated!"); return; }
+      }
       const res = await fetch("/api/v1/ai/summary", {
         method: "POST",
-        body: JSON.stringify({ url: active.url, title: active.title }),
+        headers: { "Cache-Control": "no-cache" },
+        body: JSON.stringify({ url: active.url, title: active.title, lectureId }),
       });
       const data = await res.json();
       if (data.summary) {
         setAiSummary(data.summary);
         toast.success("AI Summary generated!");
+      } else {
+        setSummaryError(true);
+        toast.error("Failed to generate summary");
       }
     } catch {
+      setSummaryError(true);
       toast.error("Failed to generate summary");
     } finally {
       setIsSummarizing(false);
@@ -418,73 +503,86 @@ export function YouTubeStyleVideoPage({
             </div>
           </div>
 
-          {/* ── DESCRIPTION BOX ── */}
+          {/* ── AI SUMMARY DESCRIPTION BOX ── */}
           <div
             className={cn(
               "mt-4 rounded-xl bg-[var(--yt-surface)] p-3 text-sm cursor-pointer hover:bg-[var(--yt-surface-hover)] transition-colors",
               descExpanded && "cursor-auto hover:bg-[var(--yt-surface)]"
             )}
-            onClick={() => !descExpanded && setDescExpanded(true)}
+            onClick={() => !descExpanded && !isSummarizing && setDescExpanded(true)}
           >
-            <div className="flex items-center gap-2 text-xs text-[var(--yt-muted)]">
-              <span className="font-medium text-[var(--yt-fg)]">
-                {channelMeta?.viewCount
-                  ? `${Number(channelMeta.viewCount).toLocaleString()} views`
-                  : `${active?.likesCount || 0} likes`}
-              </span>
-              <span>•</span>
-              <span>MedOneX Lecture</span>
-              {ytId && <span>• #medicine #medicalstudent</span>}
-            </div>
-            <p
-              className={cn(
-                "mt-2 leading-relaxed text-[var(--yt-fg)]",
-                !descExpanded && "line-clamp-2"
-              )}
-            >
-              {channelMeta?.description
-                ? stripLinks(channelMeta.description)
-                : "This is a MedOneX verified lecture video. Tap to expand for more details about this content."}
-            </p>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setDescExpanded((v) => !v);
-              }}
-              className="mt-2 text-xs font-medium text-[var(--yt-fg)] hover:text-[var(--yt-hover-fg)]"
-            >
-              {descExpanded ? "Show less" : "...more"}
-            </button>
-          </div>
-
-          {/* ── AI SUMMARY PANEL ── */}
-          <AnimatePresence>
-            {aiSummary && (
-              <motion.div
-                key="ai-summary"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="mt-4 rounded-xl border border-indigo-500/30 bg-indigo-950/40 p-5 space-y-3 relative overflow-hidden shadow-2xl backdrop-blur-md"
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs text-[var(--yt-muted)]">
+                <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+                <span className="font-medium text-[var(--yt-fg)]">AI Summary</span>
+                <span>•</span>
+                <span className="text-[var(--yt-muted)]">
+                  {channelMeta?.viewCount
+                    ? `${Number(channelMeta.viewCount).toLocaleString()} views`
+                    : `${active?.likesCount || 0} likes`}
+                </span>
+                {ytId && <span>• #medicine #medicalstudent</span>}
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void generateSummary();
+                }}
+                disabled={isSummarizing}
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 transition-colors disabled:opacity-50"
               >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold flex items-center gap-2 text-indigo-300">
-                    <Sparkles className="h-4 w-4" />
-                    AI Lecture Summary
-                  </h3>
-                  <button
-                    onClick={() => setAiSummary(null)}
-                    className="text-[var(--yt-muted)] hover:text-[var(--yt-hover-fg)] transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+                {isSummarizing ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3 w-3" />
+                )}
+                {isSummarizing ? "Summarizing..." : "Regenerate"}
+              </button>
+            </div>
+            <div className="mt-2 leading-relaxed text-[var(--yt-fg)]">
+              {isSummarizing ? (
+                <div className="flex items-center gap-2 text-[var(--yt-muted)]">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Generating AI summary...</span>
                 </div>
-                <div className="prose prose-sm prose-invert max-w-none text-[13px] text-indigo-100/80">
+              ) : summaryError ? (
+                <p className="text-[var(--yt-muted)]">
+                  Could not generate summary.{" "}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void generateSummary();
+                    }}
+                    className="text-indigo-400 hover:underline"
+                  >
+                    Try again
+                  </button>
+                </p>
+              ) : aiSummary ? (
+                <div
+                  className={cn(
+                    "prose prose-sm prose-invert max-w-none text-[13px] leading-relaxed",
+                    !descExpanded && "line-clamp-3"
+                  )}
+                >
                   <ReactMarkdown>{aiSummary}</ReactMarkdown>
                 </div>
-              </motion.div>
+              ) : (
+                <p className="text-[var(--yt-muted)]">No summary available.</p>
+              )}
+            </div>
+            {aiSummary && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDescExpanded((v) => !v);
+                }}
+                className="mt-2 text-xs font-medium text-[var(--yt-fg)] hover:text-[var(--yt-hover-fg)]"
+              >
+                {descExpanded ? "Show less" : "...more"}
+              </button>
             )}
-          </AnimatePresence>
+          </div>
 
           {/* ── COMMENTS SECTION ── */}
           <div className="mt-6">

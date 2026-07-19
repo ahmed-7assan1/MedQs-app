@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireAdminWriter } from "@/lib/admin-scope";
 import { generateJsonWithFallback } from "@/lib/ai-router";
+import { unifiedResolveKey } from "@/lib/unified-key-resolver";
 import pdf from "pdf-parse";
 
 export const maxDuration = 300; // Extend duration for large PDF processing
@@ -88,7 +89,20 @@ export async function POST(req: NextRequest) {
     `;
 
     const fallback = { title: file.name, author: "Unknown", subjects: [] };
-    const aiResult = await generateJsonWithFallback<any>(prompt, fallback);
+
+    // Resolve admin's personal/org key for the AI call
+    const userWithKeys = await prisma.user.findUnique({
+      where: { id: session!.user.id },
+      include: { adminAiKeys: true },
+    });
+    const unifiedKey = userWithKeys ? unifiedResolveKey(userWithKeys as any, "gemini", { preferAdmin: true }) : null;
+
+    const aiResult = await generateJsonWithFallback<any>(prompt, fallback, unifiedKey ? {
+      personalKey: unifiedKey.key,
+      useCustomKey: true,
+      customProvider: "gemini",
+      preferredProvider: "gemini",
+    } : {});
 
     // 4. Save to Database
     const sourceBook = await (prisma as any).sourceBook.create({

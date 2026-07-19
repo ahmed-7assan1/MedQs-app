@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "AI features are disabled on this site" }, { status: 403 });
   }
 
-  let body: { text?: string; focus?: string; preferredProvider?: string };
+  let body: { text?: string; focus?: string; preferredProvider?: string; personalKey?: string };
   try {
     body = await req.json();
   } catch {
@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
 
   const text = typeof body.text === "string" ? body.text : "";
   const focus = typeof body.focus === "string" ? body.focus : "";
+  const personalKey = typeof body.personalKey === "string" ? body.personalKey : "";
   const preferredProvider = typeof body.preferredProvider === "string" ? body.preferredProvider : "";
   const effectiveProvider =
     normalizePreferredProvider(preferredProvider) ?? normalizePreferredProvider(site?.aiPreferredProvider);
@@ -50,15 +51,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const userWithKeys = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: { adminAiKeys: true },
-    });
-    const resolved = effectiveProvider ? resolveBestKey(userWithKeys, effectiveProvider) : null;
+    let apiKey: string | undefined = personalKey || undefined;
+    if (!apiKey && effectiveProvider) {
+      const userWithKeys = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        include: { adminAiKeys: true },
+      });
+      const resolved = resolveBestKey(userWithKeys, effectiveProvider);
+      apiKey = resolved?.key ?? undefined;
+    }
 
     const out = await generateFlashcardsFromPastedTextWithMeta(text, focus, {
       preferredProvider: effectiveProvider,
-      customApiKey: resolved?.key,
+      customApiKey: apiKey,
     });
     const flashcards = out.data;
     if (flashcards.length === 0) {

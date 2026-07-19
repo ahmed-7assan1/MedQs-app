@@ -10,18 +10,23 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const { content } = await req.json();
+    const { content, personalKey } = await req.json();
     if (!content?.trim()) return NextResponse.json({ error: "Content required" }, { status: 400 });
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: { adminAiKeys: true },
-    });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
     const provider = "siliconflow";
-    const resolved = resolveBestKey(user, provider);
-    if (!resolved) {
+
+    let apiKey = personalKey?.trim() || null;
+    if (!apiKey) {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        include: { adminAiKeys: true },
+      });
+      if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+      const resolved = resolveBestKey(user, provider);
+      apiKey = resolved?.key ?? null;
+    }
+
+    if (!apiKey) {
       return NextResponse.json(
         { error: `No API key found for ${provider}. Add one in Settings → AI` },
         { status: 400 }
@@ -49,7 +54,7 @@ export async function POST(req: NextRequest) {
         { role: "system", content: systemPrompt },
         { role: "user", content: `Please enhance this post content:\n\n${content}` },
       ],
-      resolved.key
+      apiKey
     );
 
     return NextResponse.json({ enhanced: text.trim() });

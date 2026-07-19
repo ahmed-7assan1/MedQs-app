@@ -53,6 +53,12 @@ const ProfileSchema = z.object({
   personalSiliconFlowKey: z.string().nullable().optional(),
   personalSiliconFlowModel: z.string().nullable().optional(),
   personalSiliconFlowUrl: z.string().nullable().optional(),
+  personalCloudflareKey: z.string().nullable().optional(),
+  personalHuggingfaceKey: z.string().nullable().optional(),
+  personalGithubKey: z.string().nullable().optional(),
+  personalCerebrasKey: z.string().nullable().optional(),
+  personalMistralKey: z.string().nullable().optional(),
+  personalTogetherKey: z.string().nullable().optional(),
 });
 
 async function generateStudentId(): Promise<string> {
@@ -117,6 +123,12 @@ export async function PUT(req: NextRequest) {
       personalXAIKey: true,
       personalAnthropicKey: true,
       personalSiliconFlowKey: true,
+      personalCloudflareKey: true,
+      personalHuggingfaceKey: true,
+      personalGithubKey: true,
+      personalCerebrasKey: true,
+      personalMistralKey: true,
+      personalTogetherKey: true,
     } as any,
   });
 
@@ -162,6 +174,12 @@ export async function PUT(req: NextRequest) {
   const xaiKey = maybeEncrypt(parsed.data.personalXAIKey, current?.personalXAIKey);
   const anthropicKey = maybeEncrypt(parsed.data.personalAnthropicKey, current?.personalAnthropicKey);
   const siliconflowKey = maybeEncrypt(parsed.data.personalSiliconFlowKey, current?.personalSiliconFlowKey);
+  const cloudflareKey = maybeEncrypt(parsed.data.personalCloudflareKey, current?.personalCloudflareKey);
+  const huggingfaceKey = maybeEncrypt(parsed.data.personalHuggingfaceKey, current?.personalHuggingfaceKey);
+  const githubKey = maybeEncrypt(parsed.data.personalGithubKey, current?.personalGithubKey);
+  const cerebrasKey = maybeEncrypt(parsed.data.personalCerebrasKey, current?.personalCerebrasKey);
+  const mistralKey = maybeEncrypt(parsed.data.personalMistralKey, current?.personalMistralKey);
+  const togetherKey = maybeEncrypt(parsed.data.personalTogetherKey, current?.personalTogetherKey);
 
   // Remove verificationCode from data before passing to update
   const { verificationCode: _, ...updateData } = parsed.data;
@@ -176,6 +194,12 @@ export async function PUT(req: NextRequest) {
     personalXAIKey: xaiKey,
     personalAnthropicKey: anthropicKey,
     personalSiliconFlowKey: siliconflowKey,
+    personalCloudflareKey: cloudflareKey,
+    personalHuggingfaceKey: huggingfaceKey,
+    personalGithubKey: githubKey,
+    personalCerebrasKey: cerebrasKey,
+    personalMistralKey: mistralKey,
+    personalTogetherKey: togetherKey,
   };
 
   const user = await prisma.user.upsert({

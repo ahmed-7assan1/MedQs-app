@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import * as cheerio from "cheerio";
 import { prisma } from "@/lib/prisma";
 import { generateJsonWithFallback } from "@/lib/ai-router";
+import { unifiedResolveKey } from "@/lib/unified-key-resolver";
 
 export const dynamic = "force-dynamic";
 
@@ -131,8 +132,20 @@ For each resource, determine:
 Respond ONLY with a valid JSON array of objects representing the resources. Do not include markdown formatting or extra text.
 `;
 
+    // Resolve admin's personal/org key for the AI call
+    const userWithKeys = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { adminAiKeys: true },
+    });
+    const unifiedKey = userWithKeys ? unifiedResolveKey(userWithKeys as any, "gemini", { preferAdmin: true }) : null;
+
     // Now call AI Router with Fallback (MANUS -> Gemini -> Others)
-    const { data: items, provider } = await generateJsonWithFallback(prompt, [] as any[]);
+    const { data: items, provider } = await generateJsonWithFallback(prompt, [] as any[], unifiedKey ? {
+      personalKey: unifiedKey.key,
+      useCustomKey: true,
+      customProvider: "gemini",
+      preferredProvider: "gemini",
+    } : {});
 
     if (!items || !Array.isArray(items)) {
       console.log("Failed to get items from AI Router", provider);

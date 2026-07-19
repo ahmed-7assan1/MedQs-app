@@ -13,6 +13,7 @@ import {
   Trophy,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useAIKey } from "@/hooks/useAIKey";
 import type { WeeklyStudyPlanPayload } from "@/lib/gemini";
 
 type ProgressMap = Record<string, { completion: number; note?: string }>;
@@ -23,6 +24,14 @@ type RecentAttempt = {
   createdAt: string;
   pastPaper: { title: string; module: { name: string } | null };
 };
+
+function mondayIso(d = new Date()) {
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const n = new Date(d);
+  n.setDate(n.getDate() + diff);
+  return n.toISOString().slice(0, 10);
+}
 
 function planFromProfile(raw: unknown): WeeklyStudyPlanPayload | null {
   if (!raw || typeof raw !== "object") return null;
@@ -51,6 +60,7 @@ export function PersonalStudyCoach() {
   } | null>(null);
   const [recentQuizAttempts, setRecentQuizAttempts] = useState<RecentAttempt[]>([]);
   const [scheduleFileBusy, setScheduleFileBusy] = useState(false);
+  const { getKey } = useAIKey();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -158,6 +168,104 @@ export function PersonalStudyCoach() {
     setReview(null);
     try {
       await saveProfile();
+
+      const geminiKey = getKey("gemini");
+      if (geminiKey) {
+        const schedule = scheduleText.trim().slice(0, 12_000);
+        const prompt = [
+          `You are a professional academic coach for medical/university students.`,
+          ``,
+          `The student pasted their timetable / course schedule (classes, labs, clinics). Build a realistic 7-day weekly study plan that fits around fixed commitments.`,
+          ``,
+          `Constraints:`,
+          `- Target about ${dailyStudyMinutes} minutes of focused study per day on average (can vary slightly by day).`,
+          `- Reserve at least ${worshipMinutes} minutes daily for worship / spiritual routine as its own block (label clearly).`,
+          `- Include short breaks between long blocks.`,
+          `- Hobbies / sport / social: ${hobbies.trim() || "(none specified)"} — protect time for these if mentioned.`,
+          `- Other fixed routines the student mentioned: ${otherRoutines.trim() || "(none)"}`,
+          ``,
+          `Return ONLY valid JSON:`,
+          `{`,
+          `  "days": [`,
+          `    {`,
+          `      "dayName": "Saturday",`,
+          `      "blocks": [`,
+          `        {"start":"07:00","end":"07:30","label":"Worship / quiet time","detail":"optional"},`,
+          `        {"start":"09:00","end":"11:00","label":"Topic — active recall","detail":"optional"}`,
+          `      ],`,
+          `      "focusTip": "One line tip"`,
+          `    }`,
+          `  ],`,
+          `  "weeklyGoals": ["3 short bullets for the week"],`,
+          `  "balanceSummary": "2-3 sentences on balance (study, rest, worship, hobbies)"`,
+          `}`,
+          ``,
+          `Rules:`,
+          `- Provide exactly 7 consecutive days starting from the first day name that makes sense for the student's schedule (use Arabic or English day names matching the schedule language if obvious, else English).`,
+          `- Blocks must be plausible times (24h HH:MM).`,
+          `- Do not invent exam dates not implied by the schedule text.`,
+          ``,
+          `STUDENT SCHEDULE / NOTES:`,
+          `${schedule || "(empty — create a balanced generic medical-student week template)"}`,
+        ].join("\n");
+
+        const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: "You are a precise assistant. Return only valid JSON matching the requested schema." }] },
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
+        });
+        const gData = await gRes.json();
+        const raw = gData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (!raw) throw new Error("Empty response");
+
+        const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+        const parsed = JSON.parse(cleaned);
+
+        const days = Array.isArray(parsed.days)
+          ? parsed.days
+              .filter((d: any) => d && String(d.dayName).trim())
+              .map((d: any) => ({
+                dayName: String(d.dayName).trim().slice(0, 40),
+                focusTip: typeof d.focusTip === "string" ? d.focusTip.trim().slice(0, 300) : undefined,
+                blocks: Array.isArray(d.blocks)
+                  ? d.blocks
+                      .filter((b: any) => b && String(b.label).trim())
+                      .map((b: any) => ({
+                        start: String(b.start ?? "").trim().slice(0, 8),
+                        end: String(b.end ?? "").trim().slice(0, 8),
+                        label: String(b.label).trim().slice(0, 200),
+                        detail: typeof b.detail === "string" ? b.detail.trim().slice(0, 400) : undefined,
+                      }))
+                      .slice(0, 16)
+                  : [],
+              }))
+              .slice(0, 7)
+          : [];
+
+        const plan: WeeklyStudyPlanPayload = {
+          days,
+          weeklyGoals: Array.isArray(parsed.weeklyGoals)
+            ? parsed.weeklyGoals.map((g: any) => String(g).trim()).filter(Boolean).slice(0, 8)
+            : [],
+          balanceSummary: String(parsed.balanceSummary ?? "").trim().slice(0, 1200),
+        };
+
+        const weekStart = mondayIso();
+        await fetch("/api/v1/study-assistant", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentPlanJson: plan, weekStartIso: weekStart, progressJson: {} }),
+        });
+        setPlan(plan);
+        setWeekStartIso(weekStart);
+        setProgress({});
+        toast.success("Weekly plan generated");
+        return;
+      }
+
       const res = await fetch("/api/v1/study-assistant/generate-plan", { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -178,6 +286,51 @@ export function PersonalStudyCoach() {
   async function weekReview() {
     setReviewing(true);
     try {
+      const geminiKey = getKey("gemini");
+      if (geminiKey) {
+        const planJson = JSON.stringify(plan);
+        const progressJson = JSON.stringify(progress);
+        const prompt = [
+          `You are a supportive study coach. The student had a weekly plan and logged daily completion (0-1 scale per day).`,
+          ``,
+          `Plan (JSON excerpt):`,
+          `${planJson.slice(0, 8000)}`,
+          ``,
+          `Progress log (JSON: date -> completion 0-1 and optional notes):`,
+          `${progressJson.slice(0, 4000)}`,
+          ``,
+          `Return ONLY JSON:`,
+          `{`,
+          `  "feedback": "2-4 sentences encouraging, specific",`,
+          `  "gaps": ["2-5 short bullets what was weak or missing"],`,
+          `  "nextWeekFocus": ["2-5 actionable priorities for next week"]`,
+          `}`,
+        ].join("\n");
+
+        const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: "You are a precise assistant. Return only valid JSON matching the requested schema." }] },
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
+        });
+        const gData = await gRes.json();
+        const raw = gData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (!raw) throw new Error("Empty response");
+
+        const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+        const parsed = JSON.parse(cleaned);
+
+        setReview({
+          feedback: String(parsed.feedback ?? "").trim().slice(0, 2000),
+          gaps: Array.isArray(parsed.gaps) ? parsed.gaps.map((x: any) => String(x).trim()).filter(Boolean).slice(0, 8) : [],
+          nextWeekFocus: Array.isArray(parsed.nextWeekFocus) ? parsed.nextWeekFocus.map((x: any) => String(x).trim()).filter(Boolean).slice(0, 8) : [],
+        });
+        toast.success("Weekly review ready");
+        return;
+      }
+
       const res = await fetch("/api/v1/study-assistant/week-review", { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, CheckCircle, AlertCircle, ArrowRight, Award, BrainCircuit, RefreshCw, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useAIKey } from "@/hooks/useAIKey";
 
 type Question = {
   question: string;
@@ -21,6 +22,7 @@ type AtlasQuizModalProps = {
 };
 
 export default function AtlasQuizModal({ isOpen, onClose, systemId, structureId, targetName = "Human Anatomy" }: AtlasQuizModalProps) {
+  const { getKey } = useAIKey();
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -41,6 +43,52 @@ export default function AtlasQuizModal({ isOpen, onClose, systemId, structureId,
     setQuizFinished(false);
 
     try {
+      const geminiKey = getKey("gemini");
+      if (geminiKey) {
+        const ctxRes = await fetch("/api/v1/atlas/context", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ systemId, structureId })
+        });
+        if (!ctxRes.ok) throw new Error(await ctxRes.text());
+        const ctx = await ctxRes.json();
+        const prompt = `You are a professional medical school professor.
+Generate 5 high-yield clinical multiple-choice questions (MCQs) for a medical student about: ${ctx.targetName}.
+
+Context details to incorporate:
+${ctx.targetContext}
+
+Requirements:
+- Each question must have exactly 4 choices (A, B, C, D).
+- One correct answer (0, 1, 2, or 3 representing the index).
+- Include a medically detailed explanation for why the answer is correct and why other choices are wrong.
+- Return ONLY a valid JSON array matching this format (no markdown code blocks, just raw JSON text):
+[
+  {
+    "question": "A 45-year-old male presents with...",
+    "choices": ["Option A", "Option B", "Option C", "Option D"],
+    "answerIndex": 1,
+    "explanation": "Option B is correct because..."
+  }
+]`;
+        const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
+        });
+        const gData = await gRes.json();
+        let text = gData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+        if (text.startsWith("\`\`\`json")) text = text.substring(7);
+        if (text.endsWith("\`\`\`")) text = text.substring(0, text.length - 3);
+        text = text.trim();
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setQuestions(parsed);
+          return;
+        }
+      }
       const res = await fetch("/api/v1/atlas/quiz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

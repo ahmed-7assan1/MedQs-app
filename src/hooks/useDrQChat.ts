@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "react-hot-toast";
 
 import { useAuth } from "@/components/providers/SupabaseAuthProvider";
+import { useAIKey } from "@/hooks/useAIKey";
 import { saveThreadToFirestore, subscribeToThreads, deleteThreadFromFirestore } from "@/lib/firebase/firestore";
 import { getAIEndpoint } from "@/lib/api-config";
 import { getCachedResponse, setCachedResponse, getDirectReply } from "@/lib/chat-cache";
@@ -689,6 +690,8 @@ export function useDrQChat() {
   const [syllabusContext, setSyllabusContext] = useState<string>("");
   const [superExpertStatus, setSuperExpertStatus] = useState<SuperExpertProgress | null>(null);
 
+  const { getKey, keys: aiKeys, ready: aiKeysReady } = useAIKey();
+
   const threadsRef = useRef<Thread[]>(threads);
   threadsRef.current = threads;
   const abortRef = useRef<boolean>(false);
@@ -776,6 +779,23 @@ export function useDrQChat() {
     } catch {}
     fetchLimits();
   }, []);
+
+  // Sync keys from unified useAIKey() into Dr. Q's byokKeys
+  useEffect(() => {
+    if (!aiKeysReady || !aiKeys) return;
+    setSettings(prev => {
+      const mergedByok: BYOKKeys = { ...prev.byokKeys };
+      for (const [provider, key] of Object.entries(aiKeys)) {
+        const p = provider as AIProvider;
+        if (!mergedByok[p]) {
+          mergedByok[p] = [key];
+        }
+      }
+      const next = { ...prev, byokKeys: mergedByok };
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, [aiKeys, aiKeysReady]);
 
   // Fetch settings from server (key previews for UI, no plaintext keys)
   useEffect(() => {
