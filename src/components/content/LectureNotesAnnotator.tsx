@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 import {
   Highlighter, Pen, Eraser, StickyNote, Download, Trash2,
   FileText, Sparkles, Undo2, Palette, Plus, Minus,
-  ChevronDown, Type, X, RotateCcw, FileEdit, Loader2
+  ChevronDown, Type, X, RotateCcw, FileEdit, Loader2,
+  ZoomIn, ZoomOut
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
@@ -26,6 +27,8 @@ const HIGHLIGHT_COLORS = [
 const PEN_COLORS = [
   "#1e293b", "#dc2626", "#ea580c", "#ca8a04", "#16a34a", "#0d9488", "#7c3aed", "#db2777",
 ];
+
+const ZOOM_LEVELS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
 
 type Mode = "view" | "highlight" | "pen" | "note" | "eraser";
 
@@ -70,6 +73,7 @@ export function LectureNotesAnnotator({
   const [showSourceEditor, setShowSourceEditor] = useState(false);
   const [draftSourceMarkdown, setDraftSourceMarkdown] = useState("");
   const [savingSource, setSavingSource] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
@@ -313,6 +317,7 @@ export function LectureNotesAnnotator({
     clone.style.top = "0";
     clone.style.width = pageRef.current.offsetWidth + "px";
     clone.style.background = "white";
+    clone.style.zoom = "1";
     document.body.appendChild(clone);
 
     // Composite drawing onto the clone
@@ -516,6 +521,33 @@ export function LectureNotesAnnotator({
           )}
 
           <div className="ml-auto flex items-center gap-1.5">
+            {/* Zoom controls */}
+            <button
+              onClick={() => {
+                const idx = ZOOM_LEVELS.indexOf(zoomLevel);
+                if (idx > 0) setZoomLevel(ZOOM_LEVELS[idx - 1]);
+              }}
+              disabled={zoomLevel === ZOOM_LEVELS[0]}
+              className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all disabled:opacity-30"
+            >
+              <ZoomOut className="h-3.5 w-3.5" />
+            </button>
+            <span className="text-[11px] font-bold tabular-nums text-muted-foreground min-w-[2.5rem] text-center select-none">
+              {Math.round(zoomLevel * 100)}%
+            </span>
+            <button
+              onClick={() => {
+                const idx = ZOOM_LEVELS.indexOf(zoomLevel);
+                if (idx < ZOOM_LEVELS.length - 1) setZoomLevel(ZOOM_LEVELS[idx + 1]);
+              }}
+              disabled={zoomLevel === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]}
+              className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all disabled:opacity-30"
+            >
+              <ZoomIn className="h-3.5 w-3.5" />
+            </button>
+
+            <span className="mx-1 h-6 w-px bg-border/50" />
+
             {isAdmin && (
               <button
                 onClick={() => {
@@ -550,16 +582,16 @@ export function LectureNotesAnnotator({
       </div>
 
       {/* ── White Page ── */}
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="w-full overflow-x-auto">
         <div
           ref={pageRef}
           onClick={onPageClick}
           className={cn(
-            "notes-white-page relative overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/5 transition-all",
+            "notes-white-page mx-auto max-w-4xl relative overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/5 transition-all",
             mode === "note" && "cursor-cell",
             mode === "pen" && "cursor-crosshair",
           )}
-          style={{ minHeight: "600px" }}
+          style={{ minHeight: "600px", zoom: zoomLevel }}
         >
           {/* TipTap content */}
           {editor && (

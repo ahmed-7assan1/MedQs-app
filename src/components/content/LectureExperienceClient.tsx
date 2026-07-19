@@ -244,6 +244,12 @@ export function LectureExperienceClient({
     setActiveSection(active);
   }, [active, setActiveSection]);
 
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   const recordCount   = lecture?.records?.length || 0;
   const fileCount     = lecture?.files?.length || 0;
   const flashcardCount = lecture?.flashcards?.length || 0;
