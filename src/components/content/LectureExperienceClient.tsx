@@ -271,8 +271,9 @@ export function LectureExperienceClient({
     <div className="flex flex-col bg-background text-foreground h-screen overflow-hidden">
       <TopBar userName={userName} userImage={userImage} isCompact />
 
-      {/* ── Mobile: back + badge + title ── */}
-      <div className="shrink-0 md:hidden px-4 pb-2 pt-6 space-y-3">
+      <div className="flex-1 overflow-y-auto pt-14">
+        {/* ── Mobile: back + badge + title ── */}
+        <div className="md:hidden px-4 pb-2 pt-6 space-y-3">
         <Link
           href={`/modules/${moduleId}`}
           className="inline-flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
@@ -298,8 +299,8 @@ export function LectureExperienceClient({
       </div>
 
       {/* ── Desktop: hero ── */}
-      <div className="shrink-0 hidden md:block">
-        <div className="relative mx-auto max-w-7xl px-4 pb-6 md:px-8 pt-6">
+      <div className="hidden md:block">
+          <div className="relative mx-auto max-w-7xl px-4 pb-6 md:px-8 pt-6">
           <Link
             href={`/modules/${moduleId}`}
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5 text-[11px] font-bold text-muted-foreground backdrop-blur-sm transition-all hover:border-primary/30 hover:text-primary hover:bg-primary/5"
@@ -357,7 +358,7 @@ export function LectureExperienceClient({
       </div>
 
       {/* ══════════════ TAB BAR ══════════════ */}
-      <div className="shrink-0 border-b border-border bg-background/90 backdrop-blur-xl">
+      <div className="shrink-0 sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="flex items-center gap-2">
             <div className="flex flex-1 gap-1 overflow-x-auto scrollbar-hide">
@@ -414,11 +415,8 @@ export function LectureExperienceClient({
         </div>
       </div>
 
-      {/* ══════════════ SCROLLABLE AREA ══════════════ */}
-      <div className="flex-1 overflow-y-auto" style={sidebarOpen ? { marginRight: sidebar.sidebarWidth } : undefined}>
-
         {/* ══════════════ TAB CONTENT ══════════════ */}
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-8">
+        <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-8" style={sidebarOpen ? { marginRight: sidebar.sidebarWidth } : undefined}>
           <div className="animate-in fade-in slide-in-from-bottom-1 duration-150">
 
             {/* Overview */}

@@ -436,7 +436,7 @@ export function LectureNotesAnnotator({
     `}</style>
     <div className="space-y-4">
       {/* ── Toolbar ── */}
-      <div className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-xl">
+      <div className="sticky top-[40px] z-20 border-b border-border bg-background/90 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="flex flex-wrap items-center gap-1.5 py-2">
           {/* Mode toggles */}
