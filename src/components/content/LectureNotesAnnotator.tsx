@@ -13,7 +13,8 @@ import {
   Highlighter, Pen, Eraser, StickyNote, Download, Trash2,
   FileText, Sparkles, Undo2, Palette, Plus, Minus,
   ChevronDown, Type, X, RotateCcw, FileEdit, Loader2,
-  ZoomIn, ZoomOut
+  ZoomIn, ZoomOut, Maximize, Search, Image as ImageIcon, Printer,
+  EyeOff, Eye, Copy, Check
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
@@ -29,6 +30,13 @@ const PEN_COLORS = [
 ];
 
 const ZOOM_LEVELS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+
+const PAPER_COLORS = [
+  { label: "White", value: "#ffffff" },
+  { label: "Cream", value: "#FFF8E7" },
+  { label: "Gray", value: "#F3F4F6" },
+  { label: "Slate", value: "#1E293B" },
+];
 
 type Mode = "view" | "highlight" | "pen" | "note" | "eraser";
 
@@ -74,6 +82,11 @@ export function LectureNotesAnnotator({
   const [draftSourceMarkdown, setDraftSourceMarkdown] = useState("");
   const [savingSource, setSavingSource] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [viewOnly, setViewOnly] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [paperColor, setPaperColor] = useState("#ffffff");
+  const [showPaperPicker, setShowPaperPicker] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
@@ -84,6 +97,23 @@ export function LectureNotesAnnotator({
   const touchStartRef = useRef<{ dist: number; zoom: number } | null>(null);
   const currentZoomRef = useRef(1);
   const zoomDisplayRef = useRef<HTMLSpanElement>(null);
+  const annotatorRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isFullscreen, setFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      annotatorRef.current?.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }, []);
 
   const hasContent = !!markdown?.trim();
 
@@ -458,6 +488,99 @@ export function LectureNotesAnnotator({
     }
   }, [draftSourceMarkdown, lectureId, editor, clearCanvas]);
 
+  // ── Export PNG ──
+  const exportPNG = useCallback(async () => {
+    if (!pageRef.current) return;
+    const clone = pageRef.current.cloneNode(true) as HTMLElement;
+    clone.style.position = "fixed";
+    clone.style.left = "-9999px";
+    clone.style.top = "0";
+    clone.style.width = pageRef.current.offsetWidth + "px";
+    clone.style.background = paperColor;
+    clone.style.zoom = "1";
+    document.body.appendChild(clone);
+
+    if (drawingDataUrl) {
+      const img = document.createElement("img");
+      img.src = drawingDataUrl;
+      img.style.position = "absolute";
+      img.style.top = "0";
+      img.style.left = "0";
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.pointerEvents = "none";
+      clone.appendChild(img);
+    }
+
+    try {
+      const { default: html2canvas } = await import("html2canvas");
+      const canvas = await html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: paperColor });
+      const link = document.createElement("a");
+      link.download = `lecture-notes-${lectureId.slice(0, 8)}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      console.error("PNG export failed:", err);
+    } finally {
+      document.body.removeChild(clone);
+    }
+  }, [drawingDataUrl, lectureId, paperColor]);
+
+  // ── Print ──
+  const printNotes = useCallback(() => {
+    window.print();
+  }, []);
+
+  // ── Copy as text ──
+  const copyText = useCallback(async () => {
+    if (!editor) return;
+    const text = editor.getText();
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Notes copied to clipboard");
+    } catch {
+      toast.error("Failed to copy text");
+    }
+  }, [editor]);
+
+  // ── Search in notes ──
+  const searchInNotes = useCallback(() => {
+    if (!searchQuery.trim() || !pageRef.current || !editor) return;
+    const html = editor.getHTML();
+    if (html.toLowerCase().includes(searchQuery.toLowerCase())) {
+      const result = (window as any).find(searchQuery);
+      if (!result) toast(`No more results for "${searchQuery}"`);
+    } else {
+      toast(`No results for "${searchQuery}"`);
+    }
+  }, [searchQuery, editor]);
+
+  // ── Open search and focus input ──
+  const toggleSearch = useCallback(() => {
+    setShowSearch(prev => {
+      const next = !prev;
+      if (next) {
+        setTimeout(() => searchInputRef.current?.focus(), 100);
+      }
+      return next;
+    });
+  }, []);
+
+  // ── Sync paperColor to page background ──
+  useEffect(() => {
+    if (pageRef.current) {
+      pageRef.current.style.background = paperColor;
+    }
+  }, [paperColor]);
+
+  // ── When viewOnly toggles on, reset mode to view ──
+  useEffect(() => {
+    if (viewOnly) {
+      setMode("view");
+      editor?.commands.blur();
+    }
+  }, [viewOnly, editor]);
+
   // ── Toolbar buttons ──
   const tools: { id: Mode; icon: any; label: string }[] = [
     { id: "highlight", icon: Highlighter, label: "Highlight" },
@@ -505,158 +628,256 @@ export function LectureNotesAnnotator({
         color: #1f2937 !important;
         background: #f3f4f6 !important;
       }
+      .notes-white-page[data-dark="true"] .prose,
+      .notes-white-page[data-dark="true"] .prose * {
+        color: #e5e7eb !important;
+      }
+      .notes-white-page[data-dark="true"] .prose h1,
+      .notes-white-page[data-dark="true"] .prose h2,
+      .notes-white-page[data-dark="true"] .prose h3,
+      .notes-white-page[data-dark="true"] .prose h4,
+      .notes-white-page[data-dark="true"] .prose h5,
+      .notes-white-page[data-dark="true"] .prose h6,
+      .notes-white-page[data-dark="true"] .prose strong,
+      .notes-white-page[data-dark="true"] .prose th {
+        color: #f3f4f6 !important;
+      }
+      .notes-white-page[data-dark="true"] .prose a {
+        color: #60a5fa !important;
+      }
+      .notes-white-page[data-dark="true"] .prose code,
+      .notes-white-page[data-dark="true"] .prose pre {
+        color: #d1d5db !important;
+        background: #374151 !important;
+      }
+      .notes-annotator:fullscreen {
+        padding: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        background: hsl(var(--background)) !important;
+        margin: 0 !important;
+      }
+      .notes-annotator:fullscreen .notes-scroll-area {
+        flex: 1 !important;
+        overflow-y: auto !important;
+      }
     `}</style>
-    <div className="space-y-4">
+    <div ref={annotatorRef} className="space-y-4 notes-annotator">
       {/* ── Toolbar ── */}
       <div className="sticky top-[40px] z-20 border-b border-border bg-background/90 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <div className="flex flex-wrap items-center gap-1.5 py-2">
-          {/* Mode toggles */}
-          {tools.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setMode(mode === t.id ? "view" : t.id)}
-              className={cn(
-                "flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest transition-all",
-                mode === t.id
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-              )}
-            >
-              <t.icon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{t.label}</span>
-            </button>
-          ))}
+        <div className="w-full px-4 md:px-8">
+          <div className="flex items-center gap-1 py-2 overflow-x-auto scrollbar-none">
 
-          <span className="mx-1 h-6 w-px bg-border/50" />
-
-          {/* Highlight / Pen colors */}
-          {(mode === "highlight" || mode === "pen") && (
-            <div className="flex items-center gap-1">
-              {(mode === "highlight" ? HIGHLIGHT_COLORS : PEN_COLORS).map(c => (
+            {/* 1. TOOLS */}
+            {!viewOnly && <div className="flex items-center gap-0.5 shrink-0">
+              {tools.map(t => (
                 <button
-                  key={c}
-                  onClick={() => setActiveColor(c)}
+                  key={t.id}
+                  onClick={() => setMode(mode === t.id ? "view" : t.id)}
                   className={cn(
-                    "h-5 w-5 rounded-full border-2 transition-all",
-                    activeColor === c ? "border-foreground scale-110" : "border-transparent"
+                    "flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all",
+                    mode === t.id
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                   )}
-                  style={{ background: c }}
-                />
+                >
+                  <t.icon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{t.label}</span>
+                </button>
               ))}
-            </div>
-          )}
+            </div>}
 
-          {/* Pen size */}
-          {mode === "pen" && (
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Minus className="h-3 w-3" />
-              <input
-                type="range"
-                min={1}
-                max={12}
-                value={penSize}
-                onChange={e => setPenSize(Number(e.target.value))}
-                className="w-16 h-1"
-              />
-              <Plus className="h-3 w-3" />
-            </div>
-          )}
+            <span className="mx-1 h-5 w-px bg-border/30 shrink-0" />
 
-          <span className="mx-1 h-6 w-px bg-border/50" />
+            {/* 2. STYLE (context) */}
+            {!viewOnly && <>
+              {(mode === "highlight" || mode === "pen") && (
+                <div className="flex items-center gap-0.5 shrink-0">
+                  {(mode === "highlight" ? HIGHLIGHT_COLORS : PEN_COLORS).map(c => (
+                    <button
+                      key={c}
+                      onClick={() => setActiveColor(c)}
+                      className={cn(
+                        "h-4 w-4 rounded-full border-2 transition-all shrink-0",
+                        activeColor === c ? "border-foreground scale-110" : "border-transparent"
+                      )}
+                      style={{ background: c }}
+                    />
+                  ))}
+                </div>
+              )}
+              {mode === "pen" && (
+                <div className="flex items-center gap-1 text-muted-foreground shrink-0 ml-1">
+                  <Minus className="h-2.5 w-2.5" />
+                  <input type="range" min={1} max={12} value={penSize} onChange={e => setPenSize(Number(e.target.value))} className="w-12 h-1" />
+                  <Plus className="h-2.5 w-2.5" />
+                </div>
+              )}
+              {mode === "highlight" && (
+                <button onClick={() => applyHighlight()} className="shrink-0 flex items-center gap-1 rounded-lg bg-indigo-500/20 px-2 py-1 text-[9px] font-bold text-indigo-300 uppercase tracking-widest hover:bg-indigo-500/30 transition-all">
+                  <Highlighter className="h-2.5 w-2.5" />
+                  Apply
+                </button>
+              )}
+              {mode === "pen" && (
+                <button onClick={clearCanvas} className="shrink-0 flex items-center gap-1 rounded-lg bg-red-500/10 px-2 py-1 text-[9px] font-bold text-red-400 uppercase tracking-widest hover:bg-red-500/20 transition-all">
+                  <Trash2 className="h-2.5 w-2.5" />
+                  Clear
+                </button>
+              )}
+            </>}
 
-          {/* Apply Highlight (visible in highlight mode) */}
-          {mode === "highlight" && (
-            <button
-              onClick={() => applyHighlight()}
-              className="flex items-center gap-1.5 rounded-xl bg-indigo-500/20 px-3 py-1.5 text-[10px] font-bold text-indigo-300 uppercase tracking-widest hover:bg-indigo-500/30 transition-all"
-            >
-              <Highlighter className="h-3 w-3" />
-              Apply
-            </button>
-          )}
+            <span className="mx-1 h-5 w-px bg-border/30 shrink-0" />
 
-          {/* Clear drawing */}
-          {mode === "pen" && (
-            <button
-              onClick={clearCanvas}
-              className="flex items-center gap-1.5 rounded-xl bg-red-500/10 px-3 py-1.5 text-[10px] font-bold text-red-400 uppercase tracking-widest hover:bg-red-500/20 transition-all"
-            >
-              <Trash2 className="h-3 w-3" />
-              Clear
-            </button>
-          )}
-
-          <div className="ml-auto flex items-center gap-1.5">
-            {/* Zoom controls */}
-            <button
-              onClick={() => {
-                const z = currentZoomRef.current;
-                const prev = [...ZOOM_LEVELS].reverse().find(v => v < z - 0.01);
-                if (prev) setZoomLevel(prev);
-              }}
-              disabled={currentZoomRef.current <= ZOOM_LEVELS[0] + 0.01}
-              className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all disabled:opacity-30"
-            >
-              <ZoomOut className="h-3.5 w-3.5" />
-            </button>
-            <span
-              ref={zoomDisplayRef}
-              className="text-[11px] font-bold tabular-nums text-muted-foreground min-w-[2.5rem] text-center select-none"
-            >
-              {Math.round(zoomLevel * 100)}%
-            </span>
-            <button
-              onClick={() => {
-                const z = currentZoomRef.current;
-                const next = ZOOM_LEVELS.find(v => v > z + 0.01);
-                if (next) setZoomLevel(next);
-              }}
-              disabled={currentZoomRef.current >= ZOOM_LEVELS[ZOOM_LEVELS.length - 1] - 0.01}
-              className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all disabled:opacity-30"
-            >
-              <ZoomIn className="h-3.5 w-3.5" />
-            </button>
-
-            <span className="mx-1 h-6 w-px bg-border/50" />
-
-            {isAdmin && (
+            {/* 3. VIEW */}
+            <div className="flex items-center gap-0.5 shrink-0">
               <button
                 onClick={() => {
-                  setDraftSourceMarkdown(markdown ?? "");
-                  setShowSourceEditor(true);
+                  const z = currentZoomRef.current;
+                  const prev = [...ZOOM_LEVELS].reverse().find(v => v < z - 0.01);
+                  if (prev) setZoomLevel(prev);
                 }}
-                className="flex items-center gap-1.5 rounded-xl bg-amber-500/10 px-3 py-1.5 text-[10px] font-bold text-amber-400 uppercase tracking-widest hover:bg-amber-500/20 transition-all"
+                disabled={currentZoomRef.current <= ZOOM_LEVELS[0] + 0.01}
+                className="flex items-center gap-1 rounded-lg px-1.5 py-1 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all disabled:opacity-30"
               >
-                <FileEdit className="h-3 w-3" />
-                <span className="hidden sm:inline">Edit Source</span>
+                <ZoomOut className="h-3.5 w-3.5" />
               </button>
-            )}
+              <span ref={zoomDisplayRef} className="text-[10px] font-bold tabular-nums text-muted-foreground min-w-[2.2rem] text-center select-none">
+                {Math.round(zoomLevel * 100)}%
+              </span>
+              <button
+                onClick={() => {
+                  const z = currentZoomRef.current;
+                  const next = ZOOM_LEVELS.find(v => v > z + 0.01);
+                  if (next) setZoomLevel(next);
+                }}
+                disabled={currentZoomRef.current >= ZOOM_LEVELS[ZOOM_LEVELS.length - 1] - 0.01}
+                className="flex items-center gap-1 rounded-lg px-1.5 py-1 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all disabled:opacity-30"
+              >
+                <ZoomIn className="h-3.5 w-3.5" />
+              </button>
+              <button onClick={toggleFullscreen} className="flex items-center gap-1 rounded-lg px-1.5 py-1 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all">
+                <Maximize className="h-3.5 w-3.5" />
+              </button>
+              <button onClick={() => setViewOnly(v => !v)} className={cn(
+                "flex items-center gap-1 rounded-lg px-1.5 py-1 transition-all",
+                viewOnly ? "bg-red-500/20 text-red-400" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+              )}>
+                {viewOnly ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              </button>
+            </div>
 
-            <button
-              onClick={clearAll}
-              className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground hover:bg-white/5 transition-all"
-            >
-              <RotateCcw className="h-3 w-3" />
-              <span className="hidden sm:inline">Reset</span>
-            </button>
+            <span className="mx-1 h-5 w-px bg-border/30 shrink-0" />
 
-            <button
-              onClick={exportPDF}
-              className="flex items-center gap-1.5 rounded-xl bg-primary/10 px-3 py-1.5 text-[10px] font-bold text-primary uppercase tracking-widest hover:bg-primary/20 transition-all"
-            >
-              <Download className="h-3 w-3" />
-              <span className="hidden sm:inline">PDF</span>
-            </button>
+            {/* 4. SEARCH */}
+            <div className="flex items-center gap-0.5 shrink-0">
+              <button onClick={toggleSearch} className={cn(
+                "flex items-center gap-1 rounded-lg px-1.5 py-1 transition-all",
+                showSearch ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+              )}>
+                <Search className="h-3.5 w-3.5" />
+              </button>
+              {showSearch && (
+                <div className="flex items-center gap-0.5">
+                  <input
+                    ref={searchInputRef}
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") searchInNotes(); }}
+                    placeholder="Search..."
+                    className="w-24 h-6 rounded-md border border-border bg-background px-1.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                  <button onClick={searchInNotes} className="flex items-center justify-center rounded-lg px-1 py-1 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all">
+                    <Check className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <span className="mx-1 h-5 w-px bg-border/30 shrink-0" />
+
+            {/* 5. EXPORT */}
+            <div className="flex items-center gap-0.5 shrink-0">
+              <button onClick={exportPDF} className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1 text-[9px] font-bold text-primary uppercase tracking-widest hover:bg-primary/20 transition-all">
+                <Download className="h-2.5 w-2.5" />
+                <span className="hidden sm:inline">PDF</span>
+              </button>
+              <button onClick={exportPNG} className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1 text-[9px] font-bold text-primary uppercase tracking-widest hover:bg-primary/20 transition-all">
+                <ImageIcon className="h-2.5 w-2.5" />
+                <span className="hidden sm:inline">PNG</span>
+              </button>
+              <button onClick={printNotes} className="flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground hover:bg-white/5 transition-all">
+                <Printer className="h-2.5 w-2.5" />
+                <span className="hidden sm:inline">Print</span>
+              </button>
+              <button onClick={copyText} className="flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground hover:bg-white/5 transition-all">
+                <Copy className="h-2.5 w-2.5" />
+                <span className="hidden sm:inline">Copy</span>
+              </button>
+            </div>
+
+            <span className="mx-1 h-5 w-px bg-border/30 shrink-0" />
+
+            {/* 6. PAPER COLOR */}
+            <div className="relative flex items-center shrink-0">
+              <button
+                onClick={() => setShowPaperPicker(p => !p)}
+                className="flex items-center gap-1 rounded-lg px-1.5 py-1 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+              >
+                <Palette className="h-3.5 w-3.5" />
+              </button>
+              {showPaperPicker && (
+                <div className="absolute top-full left-0 mt-1 z-50 flex items-center gap-1 rounded-xl border border-border bg-background p-1.5 shadow-xl"
+                  onMouseLeave={() => setShowPaperPicker(false)}
+                >
+                  {PAPER_COLORS.map(c => (
+                    <button
+                      key={c.value}
+                      onClick={() => { setPaperColor(c.value); setShowPaperPicker(false); }}
+                      className={cn(
+                        "h-6 w-6 rounded-lg border-2 transition-all",
+                        paperColor === c.value ? "border-primary scale-110" : "border-transparent"
+                      )}
+                      style={{ background: c.value }}
+                      title={c.label}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ml-auto: push remaining items to the right */}
+            <div className="ml-auto flex items-center gap-0.5 shrink-0">
+
+              {/* 7. ADMIN */}
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    setDraftSourceMarkdown(markdown ?? "");
+                    setShowSourceEditor(true);
+                  }}
+                  className="flex items-center gap-1 rounded-lg bg-amber-500/10 px-2 py-1 text-[9px] font-bold text-amber-400 uppercase tracking-widest hover:bg-amber-500/20 transition-all"
+                >
+                  <FileEdit className="h-2.5 w-2.5" />
+                  <span className="hidden sm:inline">Source</span>
+                </button>
+              )}
+
+              {/* 8. RESET */}
+              <button onClick={clearAll} className="flex items-center gap-1 rounded-lg px-2 py-1 text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground hover:bg-white/5 transition-all">
+                <RotateCcw className="h-2.5 w-2.5" />
+                <span className="hidden sm:inline">Reset</span>
+              </button>
+            </div>
+
           </div>
         </div>
-      </div>
       </div>
 
       {/* ── White Page ── */}
       <div
         ref={zoomContainerRef}
-        className="w-full overflow-x-auto px-4 md:px-8"
+        className="w-full overflow-x-auto px-4 md:px-8 notes-scroll-area"
         style={{ touchAction: "pan-x pan-y" }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -665,18 +886,19 @@ export function LectureNotesAnnotator({
         <div
           ref={pageRef}
           onClick={onPageClick}
+          data-dark={paperColor === "#1E293B" ? "true" : undefined}
           className={cn(
-            "notes-white-page relative overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/5 transition-shadow",
+            "notes-white-page relative overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/5 transition-shadow",
             mode === "note" && "cursor-cell",
             mode === "pen" && "cursor-crosshair",
           )}
-          style={{ minHeight: "600px" }}
+          style={{ minHeight: "600px", background: paperColor }}
         >
           {/* TipTap content */}
           {editor && (
-            <div className={cn(mode === "highlight" ? "select-text" : "select-none")}
+            <div className={cn(mode === "highlight" && !viewOnly ? "select-text" : "select-none")}
               onMouseUp={() => {
-                if (mode === "highlight") {
+                if (mode === "highlight" && !viewOnly) {
                   const sel = window.getSelection();
                   if (sel && !sel.isCollapsed) applyHighlight();
                 }
@@ -691,7 +913,7 @@ export function LectureNotesAnnotator({
             ref={canvasRef}
             className={cn(
               "pointer-events-none absolute inset-0 h-full w-full",
-              (mode === "pen" || mode === "eraser") && "pointer-events-auto",
+              (mode === "pen" || mode === "eraser") && !viewOnly && "pointer-events-auto",
             )}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
@@ -700,7 +922,7 @@ export function LectureNotesAnnotator({
           />
 
           {/* Sticky notes */}
-          {stickyNotes.map(note => (
+          {!viewOnly && stickyNotes.map(note => (
             <div
               key={note.id}
               id={note.id}
