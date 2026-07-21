@@ -92,6 +92,7 @@ export function LectureNotesAnnotator({
   const pageRef = useRef<HTMLDivElement>(null);
   const drawing = useRef(false);
   const last = useRef({ x: 0, y: 0 });
+  const lastPressureRef = useRef(0.5);
   const prevModeRef = useRef<Mode>("view");
   const zoomContainerRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef<{ dist: number; zoom: number } | null>(null);
@@ -219,6 +220,10 @@ export function LectureNotesAnnotator({
     };
   }, []);
 
+  const getStrokeSize = useCallback((pressure: number) => {
+    return penSize * Math.max(0.3, pressure * 1.5);
+  }, [penSize]);
+
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     if (mode === "pen") {
       const canvas = canvasRef.current;
@@ -228,9 +233,11 @@ export function LectureNotesAnnotator({
       drawing.current = true;
       const pos = getCanvasPos(e);
       last.current = pos;
+      lastPressureRef.current = e.pressure || 0.5;
+      const size = getStrokeSize(lastPressureRef.current);
       const ctx = canvas.getContext("2d")!;
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, penSize / 2, 0, Math.PI * 2);
+      ctx.arc(pos.x, pos.y, size / 2, 0, Math.PI * 2);
       ctx.fillStyle = activeColor;
       ctx.fill();
     } else if (mode === "eraser") {
@@ -244,7 +251,7 @@ export function LectureNotesAnnotator({
       const ctx = canvas.getContext("2d")!;
       ctx.clearRect(pos.x - 10, pos.y - 10, 20, 20);
     }
-  }, [mode, penSize, activeColor, getCanvasPos]);
+  }, [mode, penSize, activeColor, getCanvasPos, getStrokeSize]);
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
     if (!drawing.current || (mode !== "pen" && mode !== "eraser")) return;
@@ -254,11 +261,13 @@ export function LectureNotesAnnotator({
     const pos = getCanvasPos(e);
 
     if (mode === "pen") {
+      lastPressureRef.current = e.pressure || 0.5;
+      const size = getStrokeSize(lastPressureRef.current);
       ctx.beginPath();
       ctx.moveTo(last.current.x, last.current.y);
       ctx.lineTo(pos.x, pos.y);
       ctx.strokeStyle = activeColor;
-      ctx.lineWidth = penSize;
+      ctx.lineWidth = size;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.stroke();
@@ -266,7 +275,7 @@ export function LectureNotesAnnotator({
       ctx.clearRect(pos.x - 10, pos.y - 10, 20, 20);
     }
     last.current = pos;
-  }, [mode, penSize, activeColor, getCanvasPos]);
+  }, [mode, penSize, activeColor, getCanvasPos, getStrokeSize]);
 
   const onPointerUp = useCallback((e: React.PointerEvent) => {
     if (mode === "pen" || mode === "eraser") {
@@ -402,23 +411,29 @@ export function LectureNotesAnnotator({
 
   // ── Export PDF ──
   const exportPDF = useCallback(async () => {
-    if (!pageRef.current) return;
+    if (!editor) return;
     const canvas = canvasRef.current;
-    // Save canvas state temporarily to show it in PDF
     const canvasData = canvas?.toDataURL();
 
-    // Prepare the export container — clone the page and composite canvas as image
-    const clone = pageRef.current.cloneNode(true) as HTMLElement;
-    clone.style.position = "fixed";
-    clone.style.left = "-9999px";
-    clone.style.top = "0";
-    clone.style.width = pageRef.current.offsetWidth + "px";
-    clone.style.background = "white";
-    clone.style.zoom = "1";
-    document.body.appendChild(clone);
+    const temp = document.createElement("div");
+    temp.style.background = "white";
+    temp.style.padding = "40px";
+    temp.style.fontSize = "16px";
+    temp.style.fontFamily = "Inter, system-ui, sans-serif";
+    temp.style.lineHeight = "1.6";
+    temp.style.color = "#000";
+    temp.style.maxWidth = "800px";
+    temp.style.position = "fixed";
+    temp.style.left = "0";
+    temp.style.top = "0";
+    temp.style.zIndex = "99999";
+    temp.style.pointerEvents = "none";
+    document.body.appendChild(temp);
 
-    // Composite drawing onto the clone
-    if (canvasData && canvasData !== drawingDataUrl) {
+    temp.innerHTML = editor.getHTML();
+
+    // Canvas drawing overlay
+    if (canvasData) {
       const img = document.createElement("img");
       img.src = canvasData;
       img.style.position = "absolute";
@@ -427,36 +442,37 @@ export function LectureNotesAnnotator({
       img.style.width = "100%";
       img.style.height = "100%";
       img.style.pointerEvents = "none";
-      clone.appendChild(img);
-    } else if (drawingDataUrl) {
-      const img = document.createElement("img");
-      img.src = drawingDataUrl;
-      img.style.position = "absolute";
-      img.style.top = "0";
-      img.style.left = "0";
-      img.style.width = "100%";
-      img.style.height = "100%";
-      img.style.pointerEvents = "none";
-      clone.appendChild(img);
+      temp.appendChild(img);
     }
 
-    const opt = {
-      margin: 10,
-      filename: `lecture-notes-${lectureId.slice(0, 8)}.pdf`,
-      image: { type: "jpeg" as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-      jsPDF: { unit: "mm" as const, format: "a4" as const, orientation: "portrait" as const },
-      pagebreak: { mode: ["avoid-all", "css", "legacy"] as any },
-    };
+    // Sticky notes
+    stickyNotes.forEach(note => {
+      const noteEl = document.createElement("div");
+      noteEl.style.position = "absolute";
+      noteEl.style.left = note.x + "px";
+      noteEl.style.top = note.y + "px";
+      noteEl.style.background = "#FFF9C4";
+      noteEl.style.padding = "12px";
+      noteEl.style.borderRadius = "8px";
+      noteEl.style.maxWidth = "220px";
+      noteEl.textContent = note.content;
+      temp.appendChild(noteEl);
+    });
 
     try {
-      await html2pdf().set(opt).from(clone).save();
+      await html2pdf().set({
+        margin: 10,
+        filename: `lecture-notes-${lectureId.slice(0, 8)}.pdf`,
+        image: { type: "jpeg" as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm" as const, format: "a4" as const, orientation: "portrait" as const },
+      }).from(temp).save();
     } catch (err) {
       console.error("PDF export failed:", err);
     } finally {
-      document.body.removeChild(clone);
+      document.body.removeChild(temp);
     }
-  }, [drawingDataUrl, lectureId]);
+  }, [editor, drawingDataUrl, lectureId, stickyNotes]);
 
   // ── Save source notes (admin) ──
   const saveSourceNotes = useCallback(async () => {
@@ -661,12 +677,21 @@ export function LectureNotesAnnotator({
         flex: 1 !important;
         overflow-y: auto !important;
       }
+      .notes-white-page[data-highlighting] .ProseMirror::selection,
+      .notes-white-page[data-highlighting] .ProseMirror *::selection {
+        background: var(--hl-color) !important;
+        color: #000 !important;
+      }
+      .notes-white-page[data-highlighting] .ProseMirror ::-moz-selection {
+        background: var(--hl-color) !important;
+        color: #000 !important;
+      }
     `}</style>
     <div ref={annotatorRef} className="space-y-4 notes-annotator">
       {/* ── Toolbar ── */}
       <div className="sticky top-[40px] z-20 border-b border-border bg-background/90 backdrop-blur-xl">
         <div className="w-full px-4 md:px-8">
-          <div className="flex items-center gap-1 py-2 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-1 py-2 flex-wrap overflow-visible">
 
             {/* 1. TOOLS */}
             {!viewOnly && <div className="flex items-center gap-0.5 shrink-0">
@@ -883,17 +908,18 @@ export function LectureNotesAnnotator({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        <div
-          ref={pageRef}
-          onClick={onPageClick}
-          data-dark={paperColor === "#1E293B" ? "true" : undefined}
-          className={cn(
-            "notes-white-page relative overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/5 transition-shadow",
-            mode === "note" && "cursor-cell",
-            mode === "pen" && "cursor-crosshair",
-          )}
-          style={{ minHeight: "600px", background: paperColor }}
-        >
+          <div
+            ref={pageRef}
+            onClick={onPageClick}
+            data-dark={paperColor === "#1E293B" ? "true" : undefined}
+            data-highlighting={mode === "highlight" && !viewOnly ? "true" : undefined}
+            className={cn(
+              "notes-white-page relative overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/5 transition-shadow",
+              mode === "note" && "cursor-cell",
+              mode === "pen" && "cursor-crosshair",
+            )}
+            style={{ minHeight: "600px", background: paperColor, "--hl-color": activeColor } as React.CSSProperties}
+          >
           {/* TipTap content */}
           {editor && (
             <div className={cn(mode === "highlight" && !viewOnly ? "select-text" : "select-none")}
@@ -915,6 +941,9 @@ export function LectureNotesAnnotator({
               "pointer-events-none absolute inset-0 h-full w-full",
               (mode === "pen" || mode === "eraser") && !viewOnly && "pointer-events-auto",
             )}
+            style={{
+              touchAction: (mode === "pen" || mode === "eraser") && !viewOnly ? "none" : "auto",
+            }}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
