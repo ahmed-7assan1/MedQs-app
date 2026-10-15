@@ -188,35 +188,35 @@ export function SettingsClient({ user }: SettingsClientProps) {
   ];
 
   return (
-    <div className="space-y-6 max-w-md mx-auto pb-12">
+    <div className="space-y-3 md:space-y-6 max-w-md mx-auto pb-12">
       {/* ── User Profile Header Card (Mockup Right Side) ── */}
-      <div className="p-6 rounded-[28px] border border-border bg-card shadow-sm space-y-5">
+      <div className="p-3.5 md:p-6 rounded-[28px] border border-border bg-card shadow-sm space-y-4 md:space-y-5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
             {/* User Avatar */}
             {user?.image ? (
               <img 
                 src={user.image} 
                 alt={user.name} 
-                className="h-12 w-12 rounded-full object-cover border border-slate-200 dark:border-white/10" 
+                className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover border border-slate-200 dark:border-white/10" 
               />
             ) : (
-              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center text-white font-black text-sm uppercase shadow-sm">
+              <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center text-white font-black text-xs md:text-sm uppercase shadow-sm">
                 {(user?.name || "Student").charAt(0)}
               </div>
             )}
             <div>
-              <h3 className="text-[16px] font-black text-slate-800 dark:text-white leading-tight">
+              <h3 className="text-[15px] md:text-[16px] font-black text-slate-800 dark:text-white leading-tight">
                 {user?.name || "Guest Student"}
               </h3>
-              <p className="text-[11px] font-semibold text-slate-400 dark:text-white/30 mt-0.5 truncate max-w-[180px]">
+              <p className="text-[12px] md:text-[11px] font-semibold text-slate-400 dark:text-white/30 mt-0.5 truncate max-w-[180px]">
                 {user?.email || "guest@medonex.com"}
               </p>
             </div>
           </div>
 
           {/* Premium Plan Badge */}
-          <div className="px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider">
+          <div className="px-2.5 py-0.5 md:px-3 md:py-1 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 text-[9px] md:text-[10px] font-black uppercase tracking-wider">
             Premium Plan
           </div>
         </div>
@@ -225,7 +225,7 @@ export function SettingsClient({ user }: SettingsClientProps) {
         <Link href="/profile/edit?tab=billing" className="block">
           <motion.button 
             whileTap={{ scale: 0.97 }}
-            className="w-full py-3 rounded-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs font-black transition-all shadow-md dark:shadow-none uppercase tracking-widest"
+            className="w-full h-9 py-0 md:h-auto md:py-3 rounded-full flex items-center justify-center bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-[11px] md:text-xs font-black transition-all shadow-md dark:shadow-none uppercase tracking-widest"
           >
             Manage Subscription
           </motion.button>
@@ -233,13 +233,13 @@ export function SettingsClient({ user }: SettingsClientProps) {
       </div>
 
       {/* ── Password Change Card ── */}
-      <div className="p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-4">
+      <div className="p-4 md:p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-3.5 md:space-y-4">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl flex items-center justify-center bg-rose-50 dark:bg-rose-500/10 text-rose-500 shrink-0">
-            <Lock className="h-5 w-5" />
+          <div className="h-8 w-8 md:h-9 md:w-9 rounded-xl flex items-center justify-center bg-rose-50 dark:bg-rose-500/10 text-rose-500 shrink-0">
+            <Lock className="h-[18px] w-[18px] md:h-5 md:w-5" />
           </div>
           <div>
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30">
+            <h4 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30">
               Password & Security
             </h4>
             <p className="text-[9px] font-semibold text-slate-400 dark:text-white/20 mt-0.5">
@@ -248,61 +248,61 @@ export function SettingsClient({ user }: SettingsClientProps) {
           </div>
         </div>
 
-        <form onSubmit={handlePasswordChange} className="space-y-3">
+        <form onSubmit={handlePasswordChange} className="space-y-2.5 md:space-y-3">
           <div className="relative">
             <input type={pwShow.current ? "text" : "password"} value={pwCurrent} onChange={e => setPwCurrent(e.target.value)} placeholder="Current Password" autoComplete="current-password"
-              className="w-full rounded-xl border border-white/[0.06] bg-black/20 dark:bg-white/5 px-4 py-3 pr-10 text-xs font-bold text-foreground outline-none focus:border-primary/40 transition-all placeholder:text-muted-foreground/30" />
-            <button type="button" onClick={() => setPwShow(p => ({ ...p, current: !p.current }))} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground">
+              className="w-full rounded-xl border border-white/[0.06] bg-black/20 dark:bg-white/5 px-3 py-2.5 md:px-4 md:py-3 pr-10 text-[12px] md:text-xs font-bold text-foreground outline-none focus:border-primary/40 transition-all placeholder:text-muted-foreground/30" />
+            <button type="button" onClick={() => setPwShow(p => ({ ...p, current: !p.current }))} className="absolute right-2.5 md:right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground">
               {pwShow.current ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
           </div>
           <div className="relative">
             <input type={pwShow.new ? "text" : "password"} value={pwNew} onChange={e => setPwNew(e.target.value)} placeholder="New Password" autoComplete="new-password"
-              className="w-full rounded-xl border border-white/[0.06] bg-black/20 dark:bg-white/5 px-4 py-3 pr-10 text-xs font-bold text-foreground outline-none focus:border-primary/40 transition-all placeholder:text-muted-foreground/30" />
-            <button type="button" onClick={() => setPwShow(p => ({ ...p, new: !p.new }))} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground">
+              className="w-full rounded-xl border border-white/[0.06] bg-black/20 dark:bg-white/5 px-3 py-2.5 md:px-4 md:py-3 pr-10 text-[12px] md:text-xs font-bold text-foreground outline-none focus:border-primary/40 transition-all placeholder:text-muted-foreground/30" />
+            <button type="button" onClick={() => setPwShow(p => ({ ...p, new: !p.new }))} className="absolute right-2.5 md:right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground">
               {pwShow.new ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
           </div>
           <div className="relative">
             <input type={pwShow.confirm ? "text" : "password"} value={pwConfirm} onChange={e => setPwConfirm(e.target.value)} placeholder="Confirm New Password" autoComplete="new-password"
-              className="w-full rounded-xl border border-white/[0.06] bg-black/20 dark:bg-white/5 px-4 py-3 pr-10 text-xs font-bold text-foreground outline-none focus:border-primary/40 transition-all placeholder:text-muted-foreground/30" />
-            <button type="button" onClick={() => setPwShow(p => ({ ...p, confirm: !p.confirm }))} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground">
+              className="w-full rounded-xl border border-white/[0.06] bg-black/20 dark:bg-white/5 px-3 py-2.5 md:px-4 md:py-3 pr-10 text-[12px] md:text-xs font-bold text-foreground outline-none focus:border-primary/40 transition-all placeholder:text-muted-foreground/30" />
+            <button type="button" onClick={() => setPwShow(p => ({ ...p, confirm: !p.confirm }))} className="absolute right-2.5 md:right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground">
               {pwShow.confirm ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
           </div>
 
           {pwError && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold">
+            <div className="flex items-center gap-2 px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-[9px] md:text-[10px] font-bold">
               <AlertTriangle className="h-3 w-3 shrink-0" /> {pwError}
             </div>
           )}
 
           {pwSuccess && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20 text-green-500 text-[10px] font-bold">
+            <div className="flex items-center gap-2 px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg bg-green-500/10 border border-green-500/20 text-green-500 text-[9px] md:text-[10px] font-bold">
               <CheckCircle2 className="h-3 w-3 shrink-0" /> Password updated successfully!
             </div>
           )}
 
           <button type="submit" disabled={pwLoading}
-            className="w-full py-3 rounded-xl bg-primary hover:bg-primary/90 text-white text-[10px] font-black uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
+            className="w-full h-9 py-0 md:h-auto md:py-3 rounded-xl bg-primary hover:bg-primary/90 text-white text-[10px] font-black uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
             {pwLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Update Password"}
           </button>
         </form>
       </div>
 
       {/* ── Interactive Theme Mode Preferences Card ── */}
-      <div className="p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-4">
-        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30 px-1">
+      <div className="p-4 md:p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-3.5 md:space-y-4">
+        <h4 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30 px-1">
           App Customization
         </h4>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl flex items-center justify-center bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500">
-              {theme === "dark" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            <div className="h-8 w-8 md:h-9 md:w-9 rounded-xl flex items-center justify-center bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500">
+              {theme === "dark" ? <Moon className="h-[18px] w-[18px] md:h-5 md:w-5" /> : <Sun className="h-[18px] w-[18px] md:h-5 md:w-5" />}
             </div>
             <div>
-              <h5 className="text-[13px] font-extrabold text-slate-800 dark:text-white">Dark Theme Mode</h5>
-              <p className="text-[10px] font-semibold text-slate-400 dark:text-white/30 mt-0.5">Toggle dark/light workspace</p>
+              <h5 className="text-[15px] md:text-[13px] font-extrabold text-slate-800 dark:text-white">Dark Theme Mode</h5>
+              <p className="text-[13px] md:text-[10px] font-semibold text-slate-400 dark:text-white/30 mt-0.5">Toggle dark/light workspace</p>
             </div>
           </div>
 
@@ -327,31 +327,31 @@ export function SettingsClient({ user }: SettingsClientProps) {
 
       {/* ── Settings Groups ── */}
       {SETTINGS_GROUPS.map((group) => (
-        <div key={group.title} className="p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-4">
-          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30 px-1">
+        <div key={group.title} className="p-4 md:p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-3 md:space-y-4">
+          <h4 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/30 px-1">
             {group.title}
           </h4>
-          <div className="space-y-4">
+          <div className="space-y-1 md:space-y-4">
             {group.items.map((item) => (
               <Link 
                 key={item.id} 
                 href={item.href}
-                className="flex items-center justify-between group active:scale-[0.98] transition-transform"
+                className="flex items-center justify-between group active:scale-[0.98] transition-transform min-h-[48px] md:min-h-0"
               >
                 <div className="flex items-center gap-3">
-                  <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm", item.color)}>
-                    <item.icon className="h-5 w-5" />
+                  <div className={cn("h-8 w-8 md:h-9 md:w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm", item.color)}>
+                    <item.icon className="h-[18px] w-[18px] md:h-5 md:w-5" />
                   </div>
                   <div>
-                    <h5 className="text-[13px] font-extrabold text-slate-800 dark:text-white group-hover:text-primary transition-colors">
+                    <h5 className="text-[15px] md:text-[13px] font-extrabold text-slate-800 dark:text-white group-hover:text-primary transition-colors">
                       {item.title}
                     </h5>
-                    <p className="text-[10px] font-semibold text-slate-400 dark:text-white/30 mt-0.5 line-clamp-1 max-w-[220px]">
+                    <p className="text-[13px] md:text-[10px] font-semibold text-slate-400 dark:text-white/30 mt-0.5 line-clamp-1 max-w-[220px]">
                       {item.desc}
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-300 dark:text-white/20 transition-transform group-hover:translate-x-1" />
+                <ChevronRight className="h-3.5 w-3.5 md:h-4 md:w-4 text-slate-300 dark:text-white/20 transition-transform group-hover:translate-x-1" />
               </Link>
             ))}
           </div>
@@ -359,7 +359,7 @@ export function SettingsClient({ user }: SettingsClientProps) {
       ))}
 
       {/* ── Clear App Cache ── */}
-      <div className="p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-4">
+      <div className="p-4 md:p-5 rounded-[28px] border border-border bg-card shadow-sm space-y-3 md:space-y-4">
         <button
           onClick={async () => {
             if (!("caches" in window)) {
@@ -371,22 +371,22 @@ export function SettingsClient({ user }: SettingsClientProps) {
             toast.success("App cache cleared! Reloading…");
             setTimeout(() => window.location.reload(), 1200);
           }}
-          className="flex items-center justify-between w-full group active:scale-[0.98] transition-transform"
+          className="flex items-center justify-between w-full group active:scale-[0.98] transition-transform min-h-[48px] md:min-h-0"
         >
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-red-50 dark:bg-red-500/10 text-red-500">
-              <Trash2 className="h-5 w-5" />
+            <div className="h-8 w-8 md:h-9 md:w-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-red-50 dark:bg-red-500/10 text-red-500">
+              <Trash2 className="h-[18px] w-[18px] md:h-5 md:w-5" />
             </div>
             <div className="text-left">
-              <h5 className="text-[13px] font-extrabold text-red-500 group-hover:text-red-400 transition-colors">
+              <h5 className="text-[15px] md:text-[13px] font-extrabold text-red-500 group-hover:text-red-400 transition-colors">
                 Clear App Cache
               </h5>
-              <p className="text-[10px] font-semibold text-slate-400 dark:text-white/30 mt-0.5">
+              <p className="text-[13px] md:text-[10px] font-semibold text-slate-400 dark:text-white/30 mt-0.5">
                 Free up storage &amp; reset cached pages
               </p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 text-red-300 dark:text-red-500/30 transition-transform group-hover:translate-x-1" />
+          <ChevronRight className="h-3.5 w-3.5 md:h-4 md:w-4 text-red-300 dark:text-red-500/30 transition-transform group-hover:translate-x-1" />
         </button>
       </div>
     </div>
