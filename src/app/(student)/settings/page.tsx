@@ -30,7 +30,7 @@ export default async function SettingsPage() {
   return (
     <>
       {/* Mobile */}
-      <div className="md:hidden min-h-screen cinematic-bg">
+      <div className="md:hidden">
         <div className="px-4 pt-4 pb-12">
           <SettingsClient user={userProfile} />
         </div>

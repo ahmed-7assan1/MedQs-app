@@ -36,7 +36,7 @@ export default async function AISettingsPage() {
   return (
     <>
       {/* Mobile */}
-      <div className="md:hidden min-h-screen cinematic-bg">
+      <div className="md:hidden">
         <div className="px-4 pt-6 pb-12">
           <AIKeysClient />
         </div>
