@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [feat/mobile-profile-new-design]
+    branches: [feat/mobile-profile-new-design, main]
 
 jobs:
   build:
