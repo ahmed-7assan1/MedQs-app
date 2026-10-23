@@ -84,7 +84,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
          {user.coverImage ? (
            <img src={user.coverImage} className="absolute inset-0 w-full h-full object-cover" alt="Cover" />
          ) : (
-           <div className="absolute inset-0 bg-gradient-to-br dark:from-[#131220] dark:to-[#1a182b] from-blue-100 to-indigo-50">
+           <div className="absolute inset-0 bg-gradient-to-br from-muted to-card md:dark:from-[#131220] md:dark:to-[#1a182b] md:from-blue-100 md:to-indigo-50">
              <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
            </div>
          )}
@@ -130,7 +130,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
                {!isOwn && !isPrivateForViewer && (
                  <Link
                    href={`/messages/${targetId}`}
-                   className="h-10 w-10 flex items-center justify-center rounded-full dark:bg-white/5 bg-slate-100 dark:text-white/70 text-slate-600 dark:border-white/10 border-slate-200 hover:bg-slate-200 transition-all shadow-sm"
+                   className="h-10 w-10 flex items-center justify-center rounded-full bg-muted text-foreground border-border hover:bg-accent md:dark:bg-white/5 md:bg-slate-100 md:dark:text-white/70 md:text-slate-600 md:dark:border-white/10 md:border-slate-200 md:hover:bg-slate-200 transition-all shadow-sm"
                  >
                    <Mail className="h-4 w-4" />
                  </Link>
@@ -141,7 +141,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
                 {isOwn && (
                   <Link
                     href="/profile/edit"
-                    className="px-4 md:px-6 py-2 md:py-2.5 flex items-center justify-center gap-1.5 md:gap-2 rounded-full dark:bg-white/5 bg-slate-100 text-[11px] md:text-sm font-bold dark:text-white text-slate-800 dark:border-white/10 border-slate-200 hover:bg-slate-200 transition-all shadow-sm"
+                    className="px-4 md:px-6 py-2 md:py-2.5 flex items-center justify-center gap-1.5 md:gap-2 rounded-full bg-muted text-[11px] md:text-sm font-bold text-foreground border-border hover:bg-accent md:dark:bg-white/5 md:bg-slate-100 md:dark:text-white md:text-slate-800 md:dark:border-white/10 md:border-slate-200 md:hover:bg-slate-200 transition-all shadow-sm"
                   >
                     <Pencil className="h-3.5 w-3.5 md:h-4 md:w-4 opacity-50" />
                     <span className="hidden md:inline">Edit Profile</span>
@@ -189,7 +189,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
              )}
 
              {isPrivateForViewer && (
-               <div className="rounded-[24px] border border-orange-500/20 bg-orange-500/5 p-8 text-center text-orange-500 font-bold">
+               <div className="rounded-[20px] md:rounded-[24px] border border-orange-500/20 bg-orange-500/5 p-5 md:p-8 text-center text-orange-500 font-bold">
                  This profile is private
                </div>
              )}
@@ -255,7 +255,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
 
                     {rankInfo.nextRank ? (
                        <div>
-                          <div className="mb-2 flex justify-between text-[11px] font-bold dark:text-white/40 text-slate-500 uppercase tracking-widest">
+                          <div className="mb-2 flex justify-between text-[11px] font-bold text-muted-foreground md:dark:text-white/40 md:text-slate-500 uppercase tracking-widest">
                              <span>Next: {rankInfo.nextRank.label}</span>
                              <span className="text-primary">{rankInfo.progress}%</span>
                           </div>
@@ -265,7 +265,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
                                 style={{ width: `${rankInfo.progress}%` }}
                              />
                           </div>
-                          <p className="mt-2 text-[10px] dark:text-white/30 text-slate-400 font-bold uppercase tracking-wider text-center">
+                          <p className="mt-2 text-[10px] text-muted-foreground md:dark:text-white/30 md:text-slate-400 font-bold uppercase tracking-wider text-center">
                              {rankInfo.nextRank.minPoints - rankInfo.points} pts left
                           </p>
                        </div>
