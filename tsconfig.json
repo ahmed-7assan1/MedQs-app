@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,21 +15,14 @@
     "incremental": true,
     "baseUrl": ".",
     "forceConsistentCasingInFileNames": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    }
+    "plugins": [{ "name": "next" }],
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "middleware.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     ".next/types/**/*.ts"
   ],
   "exclude": [
@@ -41,6 +30,11 @@
     ".next",
     "scratch",
     "scripts",
-    "medqs-mobile"
+    "medqs-mobile",
+    "grok",
+    "modules page",
+    "youtube preview",
+    "telegram-worker",
+    "temp-proxy"
   ]
 }
