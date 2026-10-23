@@ -92,7 +92,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
          <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-background md:from-[#f8fafc] md:dark:from-[#07080f] to-transparent pointer-events-none" />
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 md:px-8 relative -mt-14 md:-mt-20 mb-8 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
+      <div className="mx-auto max-w-5xl px-4 md:px-8 relative -mt-14 md:-mt-20 mb-8 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] md:pb-0">
         
         {/* Profile Header (Avatar + Info) — smaller on mobile */}
         <div className="flex flex-col md:flex-row gap-3 md:gap-6 md:items-end relative z-10 min-w-0">
