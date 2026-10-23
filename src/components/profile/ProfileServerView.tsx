@@ -80,7 +80,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
     <div className="min-h-screen bg-background text-foreground">
       
       {/* Cover Photo — shorter on mobile */}
-      <div className="h-36 md:h-64 lg:h-80 w-full relative border-b dark:border-white/5 border-black/5 overflow-hidden">
+      <div className="h-32 md:h-64 lg:h-80 w-full relative border-b border-border/60 overflow-hidden">
          {user.coverImage ? (
            <img src={user.coverImage} className="absolute inset-0 w-full h-full object-cover" alt="Cover" />
          ) : (
@@ -89,15 +89,15 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
            </div>
          )}
          {/* Seamless fade into background to ensure name readability */}
-         <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-[#f8fafc] dark:from-[#07080f] to-transparent pointer-events-none" />
+         <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-background to-transparent pointer-events-none" />
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 md:px-8 relative -mt-16 md:-mt-20 mb-8">
+      <div className="mx-auto max-w-5xl px-4 md:px-8 relative -mt-14 md:-mt-20 mb-8 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
         
         {/* Profile Header (Avatar + Info) — smaller on mobile */}
-        <div className="flex flex-col md:flex-row gap-4 md:gap-6 md:items-end relative z-10">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-6 md:items-end relative z-10 min-w-0">
           {/* Avatar */}
-          <div className="h-24 w-24 md:h-40 md:w-40 rounded-2xl md:rounded-3xl dark:bg-black bg-white border-4 dark:border-[#07080f] border-slate-50 shadow-2xl overflow-hidden shrink-0">
+          <div className="h-24 w-24 md:h-40 md:w-40 rounded-[22px] md:rounded-3xl bg-card border-[3px] md:border-4 border-background shadow-lg md:shadow-2xl overflow-hidden shrink-0">
              <img
                src={avatarUrl}
                alt={user.name}
@@ -107,13 +107,13 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
           </div>
 
           {/* Info & Actions */}
-          <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2 md:mt-0 md:pb-4">
+          <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 mt-1 md:mt-0 md:pb-4">
              <div>
-                 <h1 className="text-xl md:text-4xl font-black tracking-tight dark:text-white text-slate-800 flex items-center gap-2">
+                 <h1 className="text-2xl md:text-4xl font-black tracking-tight text-foreground flex items-center gap-2 min-w-0 break-words">
                   {user.name ?? "Member"}
                 </h1>
                  <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-0.5 md:mt-1">
-                  <span className="dark:text-white/50 text-slate-500 font-bold tracking-widest text-[10px] md:text-[13px] uppercase">
+                  <span className="text-muted-foreground font-semibold tracking-wide text-[11px] md:text-[13px] uppercase break-all">
                     @{user.handle || user.nickname || user.studentId || "user"}
                   </span>
                   {user.rank && (
@@ -126,7 +126,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
              </div>
              
              {/* Actions */}
-             <div className="flex items-center gap-3">
+             <div className="flex items-center gap-2.5">
                {!isOwn && !isPrivateForViewer && (
                  <Link
                    href={`/messages/${targetId}`}
@@ -153,14 +153,14 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
         </div>
 
         {/* Layout Grid (Main Content + Sidebar) */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 md:gap-8 mt-6 md:mt-8">
            
            {/* Left Column (Main Content) */}
-           <div className="space-y-8">
+           <div className="space-y-4 md:space-y-8 min-w-0">
              
              {/* Bio Section */}
              {(!isPrivateForViewer && (user.bio || user.university || user.semester)) && (
-               <div className="rounded-[24px] border border-border bg-card p-6 shadow-xl">
+               <div className="rounded-[22px] border border-border/70 bg-card p-4 md:p-6 shadow-sm md:shadow-xl">
                  <h3 className="text-lg font-black dark:text-white text-slate-800 mb-3">About</h3>
                  {user.bio && (
                    <p className="dark:text-white/60 text-slate-600 font-medium leading-relaxed mb-6">
@@ -196,7 +196,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
 
              {/* Recent Activity */}
              {!isPrivateForViewer && (
-               <div className="rounded-[24px] border border-border bg-card p-6 lg:p-8 shadow-xl">
+               <div className="rounded-[22px] border border-border/70 bg-card p-4 md:p-6 lg:p-8 shadow-sm md:shadow-xl">
                  <h2 className="mb-6 font-display text-lg font-black dark:text-white text-slate-800">Recent Activity</h2>
                  <UserPosts posts={posts} isOwn={isOwn} />
                </div>
@@ -212,11 +212,11 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
            </div>
 
             {/* Right Column (Sidebar) */}
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
                
                {/* Stats Card — compact 3-col on mobile (Img 7), vertical list on desktop */}
                {!isPrivateForViewer && (
-                  <div className="rounded-[24px] border border-border bg-card p-4 md:p-6 shadow-xl">
+                  <div className="rounded-[22px] border border-border/70 bg-card p-4 md:p-6 shadow-sm md:shadow-xl">
                      <h3 className="text-[10px] md:text-base font-black uppercase tracking-widest dark:text-white/40 text-slate-400 mb-3 md:mb-4">User Stats</h3>
                      
                      <div className="grid grid-cols-3 md:grid-cols-1 gap-2 md:gap-4">
@@ -241,7 +241,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
 
               {/* Rank Progress */}
               {!isPrivateForViewer && rankInfo && (
-                 <div className="rounded-[24px] border border-border bg-card p-6 shadow-xl">
+                 <div className="rounded-[22px] border border-border/70 bg-card p-4 md:p-6 shadow-sm md:shadow-xl">
                     <h3 className="text-base font-black uppercase tracking-widest dark:text-white/40 text-slate-400 mb-4">Rank</h3>
                     <div className="flex items-center gap-4 mb-5">
                        <div className="flex h-12 w-12 items-center justify-center rounded-[16px] dark:bg-white/5 bg-slate-100 text-2xl border dark:border-white/10 border-slate-200 shadow-inner">
