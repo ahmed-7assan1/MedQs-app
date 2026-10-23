@@ -80,24 +80,24 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
     <div className="min-h-screen bg-background text-foreground">
       
       {/* Cover Photo — shorter on mobile */}
-      <div className="h-36 md:h-64 lg:h-80 w-full relative border-b dark:border-white/5 border-black/5 overflow-hidden">
+      <div className="h-32 md:h-64 lg:h-80 w-full relative border-b border-border/60 md:dark:border-white/5 md:border-black/5 overflow-hidden">
          {user.coverImage ? (
            <img src={user.coverImage} className="absolute inset-0 w-full h-full object-cover" alt="Cover" />
          ) : (
-           <div className="absolute inset-0 bg-gradient-to-br dark:from-[#131220] dark:to-[#1a182b] from-blue-100 to-indigo-50">
+           <div className="absolute inset-0 bg-gradient-to-br from-muted to-card md:dark:from-[#131220] md:dark:to-[#1a182b] md:from-blue-100 md:to-indigo-50">
              <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
            </div>
          )}
          {/* Seamless fade into background to ensure name readability */}
-         <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-[#f8fafc] dark:from-[#07080f] to-transparent pointer-events-none" />
+         <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-background md:from-[#f8fafc] md:dark:from-[#07080f] to-transparent pointer-events-none" />
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 md:px-8 relative -mt-16 md:-mt-20 mb-8">
+      <div className="mx-auto max-w-5xl px-4 md:px-8 relative -mt-14 md:-mt-20 mb-8 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] md:pb-0">
         
         {/* Profile Header (Avatar + Info) — smaller on mobile */}
-        <div className="flex flex-col md:flex-row gap-4 md:gap-6 md:items-end relative z-10">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-6 md:items-end relative z-10 min-w-0">
           {/* Avatar */}
-          <div className="h-24 w-24 md:h-40 md:w-40 rounded-2xl md:rounded-3xl dark:bg-black bg-white border-4 dark:border-[#07080f] border-slate-50 shadow-2xl overflow-hidden shrink-0">
+          <div className="h-24 w-24 md:h-40 md:w-40 rounded-[22px] md:rounded-3xl bg-card md:dark:bg-black md:bg-white border-[3px] md:border-4 border-background md:dark:border-[#07080f] md:border-slate-50 shadow-lg md:shadow-2xl overflow-hidden shrink-0">
              <img
                src={avatarUrl}
                alt={user.name}
@@ -107,13 +107,13 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
           </div>
 
           {/* Info & Actions */}
-          <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2 md:mt-0 md:pb-4">
+          <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 mt-1 md:mt-0 md:pb-4">
              <div>
-                 <h1 className="text-xl md:text-4xl font-black tracking-tight dark:text-white text-slate-800 flex items-center gap-2">
+                 <h1 className="text-2xl md:text-4xl font-black tracking-tight text-foreground md:dark:text-white md:text-slate-800 flex items-center gap-2 min-w-0 break-words">
                   {user.name ?? "Member"}
                 </h1>
                  <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-0.5 md:mt-1">
-                  <span className="dark:text-white/50 text-slate-500 font-bold tracking-widest text-[10px] md:text-[13px] uppercase">
+                  <span className="text-muted-foreground md:dark:text-white/50 md:text-slate-500 font-semibold md:font-bold tracking-wide md:tracking-widest text-[11px] md:text-[13px] uppercase break-all">
                     @{user.handle || user.nickname || user.studentId || "user"}
                   </span>
                   {user.rank && (
@@ -126,11 +126,11 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
              </div>
              
              {/* Actions */}
-             <div className="flex items-center gap-3">
+             <div className="flex items-center gap-2.5 md:gap-3">
                {!isOwn && !isPrivateForViewer && (
                  <Link
                    href={`/messages/${targetId}`}
-                   className="h-10 w-10 flex items-center justify-center rounded-full dark:bg-white/5 bg-slate-100 dark:text-white/70 text-slate-600 dark:border-white/10 border-slate-200 hover:bg-slate-200 transition-all shadow-sm"
+                   className="h-10 w-10 flex items-center justify-center rounded-full bg-muted text-foreground border-border hover:bg-accent md:dark:bg-white/5 md:bg-slate-100 md:dark:text-white/70 md:text-slate-600 md:dark:border-white/10 md:border-slate-200 md:hover:bg-slate-200 transition-all shadow-sm"
                  >
                    <Mail className="h-4 w-4" />
                  </Link>
@@ -141,7 +141,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
                 {isOwn && (
                   <Link
                     href="/profile/edit"
-                    className="px-4 md:px-6 py-2 md:py-2.5 flex items-center justify-center gap-1.5 md:gap-2 rounded-full dark:bg-white/5 bg-slate-100 text-[11px] md:text-sm font-bold dark:text-white text-slate-800 dark:border-white/10 border-slate-200 hover:bg-slate-200 transition-all shadow-sm"
+                    className="px-4 md:px-6 py-2 md:py-2.5 flex items-center justify-center gap-1.5 md:gap-2 rounded-full bg-muted text-[11px] md:text-sm font-bold text-foreground border-border hover:bg-accent md:dark:bg-white/5 md:bg-slate-100 md:dark:text-white md:text-slate-800 md:dark:border-white/10 md:border-slate-200 md:hover:bg-slate-200 transition-all shadow-sm"
                   >
                     <Pencil className="h-3.5 w-3.5 md:h-4 md:w-4 opacity-50" />
                     <span className="hidden md:inline">Edit Profile</span>
@@ -153,35 +153,35 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
         </div>
 
         {/* Layout Grid (Main Content + Sidebar) */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 md:gap-8 mt-6 md:mt-8">
            
            {/* Left Column (Main Content) */}
-           <div className="space-y-8">
+           <div className="space-y-4 md:space-y-8 min-w-0">
              
              {/* Bio Section */}
              {(!isPrivateForViewer && (user.bio || user.university || user.semester)) && (
-               <div className="rounded-[24px] border border-border bg-card p-6 shadow-xl">
-                 <h3 className="text-lg font-black dark:text-white text-slate-800 mb-3">About</h3>
+               <div className="rounded-[22px] md:rounded-[24px] border border-border/70 md:border-border bg-card p-4 md:p-6 shadow-sm md:shadow-xl">
+                 <h3 className="text-lg font-black text-foreground md:dark:text-white md:text-slate-800 mb-3">About</h3>
                  {user.bio && (
-                   <p className="dark:text-white/60 text-slate-600 font-medium leading-relaxed mb-6">
+                   <p className="text-muted-foreground md:dark:text-white/60 md:text-slate-600 font-medium leading-relaxed mb-4 md:mb-6">
                      {user.bio}
                    </p>
                  )}
-                 <div className="flex flex-wrap gap-5 text-[13px] font-bold dark:text-white/40 text-slate-500">
+                 <div className="flex flex-wrap gap-3 md:gap-5 text-[12px] md:text-[13px] font-bold text-muted-foreground md:dark:text-white/40 md:text-slate-500">
                    {user.university && (
                      <span className="flex items-center gap-2">
-                       <BookOpen className="h-4 w-4 dark:text-white/30 text-slate-400" />
+                       <BookOpen className="h-4 w-4 text-muted-foreground md:dark:text-white/30 md:text-slate-400" />
                        {user.university.name}
                      </span>
                    )}
                    {user.semester && (
                      <span className="flex items-center gap-2">
-                       <MapPin className="h-4 w-4 dark:text-white/30 text-slate-400" />
+                       <MapPin className="h-4 w-4 text-muted-foreground md:dark:text-white/30 md:text-slate-400" />
                        {user.semester.name}
                      </span>
                    )}
                    <span className="flex items-center gap-2">
-                     <Calendar className="h-4 w-4 dark:text-white/30 text-slate-400" />
+                     <Calendar className="h-4 w-4 text-muted-foreground md:dark:text-white/30 md:text-slate-400" />
                      Joined {new Date(user.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
                    </span>
                  </div>
@@ -189,35 +189,35 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
              )}
 
              {isPrivateForViewer && (
-               <div className="rounded-[24px] border border-orange-500/20 bg-orange-500/5 p-8 text-center text-orange-500 font-bold">
+               <div className="rounded-[20px] md:rounded-[24px] border border-orange-500/20 bg-orange-500/5 p-5 md:p-8 text-center text-orange-500 font-bold">
                  This profile is private
                </div>
              )}
 
              {/* Recent Activity */}
              {!isPrivateForViewer && (
-               <div className="rounded-[24px] border border-border bg-card p-6 lg:p-8 shadow-xl">
-                 <h2 className="mb-6 font-display text-lg font-black dark:text-white text-slate-800">Recent Activity</h2>
+               <div className="rounded-[22px] md:rounded-[24px] border border-border/70 md:border-border bg-card p-4 md:p-6 lg:p-8 shadow-sm md:shadow-xl">
+                 <h2 className="mb-4 md:mb-6 font-display text-lg font-black text-foreground md:dark:text-white md:text-slate-800">Recent Activity</h2>
                  <UserPosts posts={posts} isOwn={isOwn} />
                </div>
              )}
 
              {/* Saved Posts (Only visible to owner) */}
              {isOwn && (
-               <div className="rounded-[24px] border border-border bg-card p-6 lg:p-8 shadow-xl">
-                 <h2 className="mb-6 font-display text-lg font-black dark:text-white text-slate-800">Saved Posts</h2>
+               <div className="rounded-[22px] md:rounded-[24px] border border-border bg-card p-4 md:p-6 lg:p-8 shadow-sm md:shadow-xl">
+                 <h2 className="mb-4 md:mb-6 font-display text-lg font-black text-foreground md:dark:text-white md:text-slate-800">Saved Posts</h2>
                  <SavedPostsSection />
                </div>
              )}
            </div>
 
             {/* Right Column (Sidebar) */}
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
                
                {/* Stats Card — compact 3-col on mobile (Img 7), vertical list on desktop */}
                {!isPrivateForViewer && (
-                  <div className="rounded-[24px] border border-border bg-card p-4 md:p-6 shadow-xl">
-                     <h3 className="text-[10px] md:text-base font-black uppercase tracking-widest dark:text-white/40 text-slate-400 mb-3 md:mb-4">User Stats</h3>
+                  <div className="rounded-[22px] md:rounded-[24px] border border-border/70 md:border-border bg-card p-4 md:p-6 shadow-sm md:shadow-xl">
+                     <h3 className="text-[10px] md:text-base font-black uppercase tracking-widest text-muted-foreground md:dark:text-white/40 md:text-slate-400 mb-3 md:mb-4">User Stats</h3>
                      
                      <div className="grid grid-cols-3 md:grid-cols-1 gap-2 md:gap-4">
                      {[
@@ -230,9 +230,9 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
                              <div className={cn("h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center", bg)}>
                                 <Icon className={cn("h-4 w-4 md:h-5 md:w-5", color)} />
                              </div>
-                             <span className="text-[9px] md:text-sm font-bold dark:text-white/80 text-slate-700">{label}</span>
+                             <span className="text-[10px] md:text-sm font-bold text-foreground md:dark:text-white/80 md:text-slate-700">{label}</span>
                           </div>
-                          <span className="text-sm md:text-base font-black dark:text-white text-slate-800">{value}</span>
+                          <span className="text-sm md:text-base font-black text-foreground md:dark:text-white md:text-slate-800">{value}</span>
                        </div>
                      ))}
                      </div>
@@ -241,21 +241,21 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
 
               {/* Rank Progress */}
               {!isPrivateForViewer && rankInfo && (
-                 <div className="rounded-[24px] border border-border bg-card p-6 shadow-xl">
-                    <h3 className="text-base font-black uppercase tracking-widest dark:text-white/40 text-slate-400 mb-4">Rank</h3>
+                 <div className="rounded-[22px] md:rounded-[24px] border border-border/70 md:border-border bg-card p-4 md:p-6 shadow-sm md:shadow-xl">
+                    <h3 className="text-base font-black uppercase tracking-widest text-muted-foreground md:dark:text-white/40 md:text-slate-400 mb-4">Rank</h3>
                     <div className="flex items-center gap-4 mb-5">
-                       <div className="flex h-12 w-12 items-center justify-center rounded-[16px] dark:bg-white/5 bg-slate-100 text-2xl border dark:border-white/10 border-slate-200 shadow-inner">
+                       <div className="flex h-12 w-12 items-center justify-center rounded-[16px] bg-muted md:dark:bg-white/5 md:bg-slate-100 text-2xl border border-border md:dark:border-white/10 md:border-slate-200 shadow-inner">
                           {rankInfo.rank?.badge ?? "🎓"}
                        </div>
                        <div>
-                          <p className="font-black text-lg dark:text-white text-slate-800">{rankInfo.rank?.label ?? "Newbie"}</p>
-                          <p className="text-[12px] font-medium dark:text-white/50 text-slate-500">{rankInfo.points} points</p>
+                          <p className="font-black text-lg text-foreground md:dark:text-white md:text-slate-800">{rankInfo.rank?.label ?? "Newbie"}</p>
+                          <p className="text-[12px] font-medium text-muted-foreground md:dark:text-white/50 md:text-slate-500">{rankInfo.points} points</p>
                        </div>
                     </div>
 
                     {rankInfo.nextRank ? (
                        <div>
-                          <div className="mb-2 flex justify-between text-[11px] font-bold dark:text-white/40 text-slate-500 uppercase tracking-widest">
+                          <div className="mb-2 flex justify-between text-[11px] font-bold text-muted-foreground md:dark:text-white/40 md:text-slate-500 uppercase tracking-widest">
                              <span>Next: {rankInfo.nextRank.label}</span>
                              <span className="text-primary">{rankInfo.progress}%</span>
                           </div>
@@ -265,7 +265,7 @@ export async function ProfileServerView({ userIdSegment }: { userIdSegment: stri
                                 style={{ width: `${rankInfo.progress}%` }}
                              />
                           </div>
-                          <p className="mt-2 text-[10px] dark:text-white/30 text-slate-400 font-bold uppercase tracking-wider text-center">
+                          <p className="mt-2 text-[10px] text-muted-foreground md:dark:text-white/30 md:text-slate-400 font-bold uppercase tracking-wider text-center">
                              {rankInfo.nextRank.minPoints - rankInfo.points} pts left
                           </p>
                        </div>

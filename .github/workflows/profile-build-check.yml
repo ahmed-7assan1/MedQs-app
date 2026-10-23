@@ -1,0 +1,35 @@
+name: Profile redesign build check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feat/mobile-profile-new-design, main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      - name: Run TypeScript check
+        run: npx tsc --noEmit
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/medqs
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/medqs
+          NEXTAUTH_SECRET: ci-build-secret-not-for-production
+          NEXTAUTH_URL: http://localhost:3000
+          AUTH_SECRET: ci-build-secret-not-for-production
